@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:build": "vitest run --config vitest.config.build.ts",
-    "check": "astro check"
+    "check": "astro check",
+    "prepare": "husky"
   },
   "dependencies": {
     "astro": "^5.17.1",
@@ -22,6 +23,7 @@
     "@playwright/test": "^1.58.0",
     "@types/node": "^25.1.0",
     "@vitest/ui": "^4.0.18",
+    "husky": "^9.1.7",
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
