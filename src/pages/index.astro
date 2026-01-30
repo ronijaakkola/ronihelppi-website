@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts');
+const work = await getCollection('work');
+
+// Sort by date descending
+posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Helper to derive title from id (preserves original filename casing)
+function getTitle(id: string): string {
+  return id.replace(/\.md$/, '');
+}
+---
+
+<BaseLayout title="Roni Helppi">
+  <main>
+    <h1>Roni Helppi</h1>
+
+    <section>
+      <h2>Posts</h2>
+      <ul>
+        {posts.map((post) => (
+          <li>
+            <a href={`/posts/${post.slug}`}>{getTitle(post.id)}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2>Work</h2>
+      <ul>
+        {work.map((item) => (
+          <li>
+            <a href={`/work/${item.slug}`}>{getTitle(item.id)}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</BaseLayout>
