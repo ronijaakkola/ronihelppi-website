@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "figma": {
+      "transport": "http",
+      "url": "https://mcp.figma.com/mcp",
+      "description": "Official Figma MCP server for design-to-code workflows"
+    }
+  }
+}
