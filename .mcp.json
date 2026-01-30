@@ -4,6 +4,11 @@
       "transport": "http",
       "url": "https://mcp.figma.com/mcp",
       "description": "Official Figma MCP server for design-to-code workflows"
+    },
+    "claude-in-chrome": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/claude-in-chrome"],
+      "description": "Chrome browser automation for testing, screenshots, and interactions"
     }
   }
 }
