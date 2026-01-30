@@ -2,8 +2,8 @@
   "mcpServers": {
     "figma": {
       "transport": "http",
-      "url": "https://mcp.figma.com/mcp",
-      "description": "Official Figma MCP server for design-to-code workflows"
+      "url": "http://127.0.0.1:3845/mcp",
+      "description": "Figma MCP server running locally"
     },
     "claude-in-chrome": {
       "command": "npx",
