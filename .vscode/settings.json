@@ -1,0 +1,28 @@
+{
+  // File associations for better editor support
+  "files.associations": {
+    ".mcp.json": "jsonc"
+  },
+
+  // JSON schema validation for MCP configuration
+  "json.schemas": [
+    {
+      "fileMatch": [".mcp.json"],
+      "url": "https://modelcontextprotocol.io/schemas/mcp-config.schema.json"
+    }
+  ],
+
+  // Exclude generated files from search
+  "search.exclude": {
+    "**/.astro": true,
+    "**/dist": true,
+    "**/node_modules": true
+  },
+
+  // File watcher exclusions for better performance
+  "files.watcherExclude": {
+    "**/.astro/**": true,
+    "**/dist/**": true,
+    "**/node_modules/**": true
+  }
+}
