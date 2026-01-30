@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const work = await getCollection('work');
+  return work.map((item) => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await item.render();
+
+// Derive title from id (preserves original filename)
+const title = item.id.replace(/\.md$/, '');
+---
+
+<BaseLayout title={title}>
+  <article>
+    <a href="/">&larr; Back</a>
+    <h1>{title}</h1>
+    <time datetime={item.data.date.toISOString()}>
+      {item.data.date.toLocaleDateString()}
+    </time>
+    {item.data.team && <p>Team: {item.data.team}</p>}
+    {item.data.tags && (
+      <ul>
+        {item.data.tags.map((tag) => (
+          <li>{tag.replace('#', '')}</li>
+        ))}
+      </ul>
+    )}
+    <Content />
+  </article>
+</BaseLayout>
