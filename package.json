@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "test:build": "vitest run --config vitest.config.build.ts",
     "check": "astro check"
   },
   "dependencies": {

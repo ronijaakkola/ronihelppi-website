@@ -11,7 +11,7 @@ This project uses a comprehensive test setup to ensure code quality and reliabil
 ## Running Tests
 
 ```bash
-# Run all unit tests
+# Run unit tests (excludes build validation tests)
 npm test
 
 # Run unit tests in watch mode
@@ -20,18 +20,23 @@ npm run test:watch
 # Run unit tests with UI
 npm run test:ui
 
-# Run type checking
-npm run check
-
 # Build the project
 npm run build
+
+# Run build validation tests (requires build first)
+npm run test:build
 
 # Run E2E tests (requires build first)
 npx playwright test
 
 # Run E2E tests in UI mode
 npx playwright test --ui
+
+# Run type checking
+npm run check
 ```
+
+**Note:** Build validation tests are excluded from the main `npm test` command because they require the project to be built first. Run them separately after building with `npm run test:build`.
 
 ## Test Structure
 
