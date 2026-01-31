@@ -7,20 +7,20 @@ test.describe('Home Page', () => {
     await expect(page).toHaveTitle(/Roni Helppi/);
   });
 
-  test('should display posts section', async ({ page }) => {
+  test('should display writing section', async ({ page }) => {
     await page.goto('/');
 
-    // Check for posts heading
-    const postsHeading = page.locator('h2', { hasText: /posts?/i });
-    await expect(postsHeading).toBeVisible();
+    // Check for writing heading
+    const writingHeading = page.locator('h2', { hasText: /writing/i });
+    await expect(writingHeading).toBeVisible();
   });
 
-  test('should display work section', async ({ page }) => {
+  test('should display projects section', async ({ page }) => {
     await page.goto('/');
 
-    // Check for work heading
-    const workHeading = page.locator('h2', { hasText: /work/i });
-    await expect(workHeading).toBeVisible();
+    // Check for projects heading
+    const projectsHeading = page.locator('h2', { hasText: /projects/i });
+    await expect(projectsHeading).toBeVisible();
   });
 
   test('should have links to post pages', async ({ page }) => {
