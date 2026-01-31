@@ -3,6 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -24,6 +25,9 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
+
+// Calculate read time
+const readTime = formatReadTime(calculateReadTime(post.body));
 
 // Get all posts for related posts lookup
 const allPosts = await getCollection('posts');
@@ -47,7 +51,7 @@ function getPostTitle(p: CollectionEntry<'posts'>): string {
       <div class="prose">
         <header class="post-header">
           <h1 class="post-title">{title}</h1>
-          <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate}</time>
+<time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
         </header>
       </div>
 
@@ -104,8 +108,8 @@ function getPostTitle(p: CollectionEntry<'posts'>): string {
   }
 
   .post-meta {
-    font-size: var(--text-body);
-    letter-spacing: var(--tracking-body-tight);
+    font-size: 18px;
+    letter-spacing: -0.9px;
     color: var(--color-text-secondary);
   }
 
