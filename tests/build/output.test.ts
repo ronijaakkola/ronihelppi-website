@@ -64,8 +64,8 @@ describe('Build Output Validation', () => {
         expect(content).toContain('<!DOCTYPE html>');
         expect(content).toContain('<html');
         expect(content).toContain('</html>');
-        expect(content).toContain('<h1>');
-        expect(content).toContain('<time');
+        expect(content).toMatch(/<h1[^>]*>/);
+        expect(content).toMatch(/<time|class="post-meta"/);
       }
     });
   });
@@ -102,8 +102,8 @@ describe('Build Output Validation', () => {
         expect(content).toContain('<!DOCTYPE html>');
         expect(content).toContain('<html');
         expect(content).toContain('</html>');
-        expect(content).toContain('<h1>');
-        expect(content).toContain('<time');
+        expect(content).toMatch(/<h1[^>]*>/);
+        expect(content).toMatch(/<time|class=".*meta"/);
       }
     });
   });

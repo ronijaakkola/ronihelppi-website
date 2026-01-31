@@ -1,0 +1,26 @@
+---
+interface Props {
+  key: string;
+}
+
+const { key } = Astro.props;
+---
+
+<span class="keystroke">{key}</span>
+
+<style>
+  .keystroke {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-keystroke-bg);
+    border-radius: var(--radius-keystroke);
+    font-family: var(--font-mono);
+    font-size: var(--text-keystroke);
+    letter-spacing: var(--tracking-keystroke);
+    color: var(--color-button-text);
+    text-align: center;
+  }
+</style>

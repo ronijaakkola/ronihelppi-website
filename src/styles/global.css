@@ -1,0 +1,340 @@
+/* ==========================================================================
+   CSS Custom Properties (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* Colors */
+  --color-bg: #0b0b0b;
+  --color-text-primary: #e8e6e6;
+  --color-text-secondary: #aaa1a1;
+  --color-divider: #392e2e;
+  --color-button-bg: #e8e6e6;
+  --color-button-text: #0b0b0b;
+  --color-keystroke-bg: #c0b3b3;
+  --color-border: #aaa1a1;
+
+  /* Typography - Font Families */
+  --font-sans: 'Rethink Sans', system-ui, sans-serif;
+  --font-serif: 'Spectral', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Typography - Font Sizes */
+  --text-hero: 36px;
+  --text-section: 22px;
+  --text-nav: 16px;
+  --text-body: 16px;
+  --text-small: 14px;
+  --text-keystroke: 9px;
+
+  /* Typography - Letter Spacing */
+  --tracking-hero: -1.8px;
+  --tracking-section: -1px;
+  --tracking-nav: -0.48px;
+  --tracking-body: -0.64px;
+  --tracking-body-tight: -0.8px;
+  --tracking-small: -0.7px;
+  --tracking-keystroke: -0.27px;
+
+  /* Typography - Line Heights */
+  --leading-normal: normal;
+  --leading-body: 1.5;
+
+  /* Layout - Widths */
+  --layout-width: 920px;
+  --prose-width: 624px;
+
+  /* Layout - Header */
+  --header-height: 52px;
+
+  /* Spacing - Gaps */
+  --gap-section: 56px;
+  --gap-lg: 32px;
+  --gap-md: 24px;
+  --gap-sm: 20px;
+  --gap-xs: 16px;
+  --gap-2xs: 8px;
+  --gap-3xs: 6px;
+  --gap-4xs: 4px;
+
+  /* Spacing - Top Padding */
+  --spacing-top-desktop: 80px;
+  --spacing-top-tablet: 58px;
+  --spacing-top-phone: 32px;
+
+  /* Spacing - Bottom Padding */
+  --spacing-bottom-desktop: 124px;
+  --spacing-bottom-tablet: 58px;
+  --spacing-bottom-phone: 32px;
+
+  /* Spacing - Horizontal Padding */
+  --spacing-horizontal-desktop: 0px;
+  --spacing-horizontal-tablet: 12px;
+  --spacing-horizontal-phone: 8px;
+
+  /* Border Radius */
+  --radius-sm: 2px;
+  --radius-md: 8px;
+  --radius-keystroke: 1px;
+}
+
+/* ==========================================================================
+   Base Reset and Global Styles
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent layout shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: 400;
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   Links
+   ========================================================================== */
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Images
+   ========================================================================== */
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==========================================================================
+   Lists
+   ========================================================================== */
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ==========================================================================
+   Layout Utilities
+   ========================================================================== */
+
+.site-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: var(--spacing-top-desktop);
+  padding-bottom: var(--spacing-bottom-desktop);
+  width: 100%;
+}
+
+.layout {
+  width: 100%;
+  max-width: var(--layout-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prose {
+  width: 100%;
+  max-width: var(--prose-width);
+}
+
+/* ==========================================================================
+   Prose Styles (Article Content)
+   ========================================================================== */
+
+.prose-content {
+  font-size: var(--text-body);
+  letter-spacing: var(--tracking-body);
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+}
+
+.prose-content > * + * {
+  margin-top: 1em;
+}
+
+.prose-content h2 {
+  font-family: var(--font-serif);
+  font-size: var(--text-section);
+  letter-spacing: var(--tracking-section);
+  margin-top: 2em;
+}
+
+.prose-content h3 {
+  font-size: var(--text-nav);
+  letter-spacing: var(--tracking-nav);
+  margin-top: 1.5em;
+}
+
+.prose-content p {
+  margin-bottom: 0;
+}
+
+.prose-content a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.prose-content code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+.prose-content pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.prose-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-content blockquote {
+  border-left: 2px solid var(--color-divider);
+  padding-left: 1rem;
+  margin: 1.5em 0;
+  color: var(--color-text-secondary);
+}
+
+.prose-content ul,
+.prose-content ol {
+  padding-left: 1.5rem;
+}
+
+.prose-content ul {
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+.prose-content li {
+  margin-bottom: 0.5em;
+}
+
+.prose-content li::marker {
+  color: var(--color-text-secondary);
+}
+
+.prose-content img {
+  border-radius: var(--radius-md);
+  margin: 1.5em 0;
+}
+
+.prose-content hr {
+  border: none;
+  border-top: 1px solid var(--color-divider);
+  margin: 2em 0;
+}
+
+.prose-content strong {
+  font-weight: 600;
+}
+
+.prose-content em {
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Responsive Styles
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 960px) {
+  .main {
+    padding-top: var(--spacing-top-tablet);
+    padding-bottom: var(--spacing-bottom-tablet);
+  }
+
+  .layout {
+    padding-left: var(--spacing-horizontal-tablet);
+    padding-right: var(--spacing-horizontal-tablet);
+  }
+}
+
+/* Phone */
+@media (max-width: 600px) {
+  .main {
+    padding-top: var(--spacing-top-phone);
+    padding-bottom: var(--spacing-bottom-phone);
+  }
+
+  .layout {
+    padding-left: var(--spacing-horizontal-phone);
+    padding-right: var(--spacing-horizontal-phone);
+  }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

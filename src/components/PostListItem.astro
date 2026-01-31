@@ -1,0 +1,40 @@
+---
+interface Props {
+  title: string;
+  date: Date;
+  href: string;
+}
+
+const { title, date, href } = Astro.props;
+
+// Format date as YYYY-MM
+const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+---
+
+<div class="post-item">
+  <span class="post-date">{formattedDate}</span>
+  <a href={href} class="post-title">{title}</a>
+</div>
+
+<style>
+  .post-item {
+    display: flex;
+    gap: var(--gap-md);
+    align-items: flex-start;
+  }
+
+  .post-date {
+    flex-shrink: 0;
+    width: 62px;
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-secondary);
+  }
+
+  .post-title {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+    text-decoration: underline;
+  }
+</style>
