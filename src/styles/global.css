@@ -18,21 +18,21 @@
   --font-serif: 'Spectral', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Typography - Font Sizes */
-  --text-hero: 36px;
-  --text-section: 22px;
+  /* Typography - Font Sizes (Fluid between 600px and 960px viewports) */
+  --text-hero: clamp(28px, calc(28px + 8 * ((100vw - 600px) / 360)), 36px);
+  --text-section: clamp(20px, calc(20px + 4 * ((100vw - 600px) / 360)), 24px);
   --text-nav: 16px;
-  --text-body: 16px;
-  --text-small: 14px;
+  --text-body: clamp(16px, calc(16px + 2 * ((100vw - 600px) / 360)), 18px);
+  --text-small: clamp(14px, calc(14px + 2 * ((100vw - 600px) / 360)), 16px);
   --text-keystroke: 9px;
 
-  /* Typography - Letter Spacing */
-  --tracking-hero: -1.8px;
-  --tracking-section: -1px;
+  /* Typography - Letter Spacing (Fluid between 600px and 960px viewports) */
+  --tracking-hero: clamp(-1.8px, calc(-1.4px + -0.4 * ((100vw - 600px) / 360)), -1.4px);
+  --tracking-section: clamp(-1.2px, calc(-1px + -0.2 * ((100vw - 600px) / 360)), -1px);
   --tracking-nav: -0.48px;
-  --tracking-body: -0.64px;
-  --tracking-body-tight: -0.8px;
-  --tracking-small: -0.7px;
+  --tracking-body: clamp(-0.72px, calc(-0.64px + -0.08 * ((100vw - 600px) / 360)), -0.64px);
+  --tracking-body-tight: clamp(-0.9px, calc(-0.8px + -0.1 * ((100vw - 600px) / 360)), -0.8px);
+  --tracking-small: clamp(-0.8px, calc(-0.7px + -0.1 * ((100vw - 600px) / 360)), -0.7px);
   --tracking-keystroke: -0.27px;
 
   /* Typography - Line Heights */
