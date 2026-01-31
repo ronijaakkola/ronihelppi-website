@@ -1,0 +1,145 @@
+---
+import KeyboardShortcut from './KeyboardShortcut.astro';
+---
+
+<header class="header">
+  <nav class="nav">
+    <a href="/" class="logo">Roni Helppi</a>
+
+    <div class="nav-links">
+      <a href="/now" class="nav-link">Now</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/posts" class="nav-link">Posts</a>
+    </div>
+
+    <a href="/contact" class="contact-button">
+      <span>Contact</span>
+      <KeyboardShortcut key="C" />
+    </a>
+
+    <button class="menu-button" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+  </nav>
+</header>
+
+<style>
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: var(--header-height);
+    width: 100%;
+    padding: 0 355px;
+    overflow: hidden;
+  }
+
+  .nav {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    width: 976px;
+    min-height: 1px;
+    overflow: hidden;
+  }
+
+  .logo {
+    font-family: var(--font-sans);
+    font-size: var(--text-nav);
+    font-weight: 400;
+    letter-spacing: var(--tracking-nav);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .logo:hover {
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .nav-link {
+    font-family: var(--font-sans);
+    font-size: var(--text-nav);
+    font-weight: 400;
+    letter-spacing: var(--tracking-nav);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .nav-link:hover {
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  .contact-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    background-color: var(--color-button-bg);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-button-text);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .contact-button:hover {
+    text-decoration: none;
+  }
+
+  .menu-button {
+    display: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-primary);
+  }
+
+  /* Tablet */
+  @media (max-width: 960px) {
+    .header {
+      padding: 0 var(--spacing-horizontal-tablet);
+    }
+
+    .nav {
+      width: 100%;
+    }
+  }
+
+  /* Phone */
+  @media (max-width: 600px) {
+    .header {
+      padding: 0 var(--spacing-horizontal-phone);
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .contact-button {
+      display: none;
+    }
+
+    .menu-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+</style>

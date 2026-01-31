@@ -1,5 +1,6 @@
 ---
 date: 2025-12-01
+description: "A Retro Rhythm Shooter inspired by the PSX era."
 tags:
   - "#personal"
   - "#games"

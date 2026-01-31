@@ -29,17 +29,14 @@ export function remarkObsidianImages() {
             lastIndex = regex.lastIndex;
           }
 
-          // Add remaining text
-          if (lastIndex < child.value.length) {
+          // If no matches, keep original; otherwise add remaining text
+          if (lastIndex === 0) {
+            newChildren.push(child);
+          } else if (lastIndex < child.value.length) {
             newChildren.push({
               type: 'text',
               value: child.value.slice(lastIndex),
             } as Text);
-          }
-
-          // If no matches, keep original
-          if (lastIndex === 0) {
-            newChildren.push(child);
           }
         } else {
           newChildren.push(child);

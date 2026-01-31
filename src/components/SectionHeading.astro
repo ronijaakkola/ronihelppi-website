@@ -1,0 +1,20 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<h2 class="section-heading">{title}</h2>
+
+<style>
+  .section-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-section);
+    font-weight: 400;
+    letter-spacing: var(--tracking-section);
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+  }
+</style>

@@ -1,6 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Divider from '../../components/Divider.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -15,15 +17,152 @@ const { Content } = await post.render();
 
 // Derive title from id (preserves original filename)
 const title = post.id.replace(/\.md$/, '');
+
+// Format date
+const formattedDate = post.data.date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// Get all posts for related posts lookup
+const allPosts = await getCollection('posts');
+
+// Get related posts from frontmatter (properly typed)
+const relatedPostSlugs = post.data.relatedPosts || [];
+const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
+  .map((slug: string) => allPosts.find((p) => p.slug === slug))
+  .filter((p): p is CollectionEntry<'posts'> => p !== undefined);
+
+// Helper to get title from post
+function getPostTitle(p: CollectionEntry<'posts'>): string {
+  return p.id.replace(/\.md$/, '');
+}
 ---
 
 <BaseLayout title={title}>
-  <article>
-    <a href="/">&larr; Back</a>
-    <h1>{title}</h1>
-    <time datetime={post.data.date.toISOString()}>
-      {post.data.date.toLocaleDateString()}
-    </time>
-    <Content />
-  </article>
+  <main class="main">
+    <div class="layout">
+      <!-- Post Heading -->
+      <div class="prose">
+        <header class="post-header">
+          <h1 class="post-title">{title}</h1>
+          <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate}</time>
+        </header>
+      </div>
+
+      <!-- Hero Image Slot (full layout width) -->
+      <div class="hero-image-container">
+        <div class="hero-image-placeholder"></div>
+      </div>
+
+      <!-- Post Content -->
+      <div class="prose">
+        <article class="post-content">
+          <div class="prose-content">
+            <Content />
+          </div>
+        </article>
+
+        {relatedPosts.length > 0 && (
+          <>
+            <Divider />
+
+            <section class="related-posts">
+              <SectionHeading title="Related posts" />
+              <ul class="related-posts-list">
+                {relatedPosts.map((relatedPost) => (
+                  <li>
+                    <a href={`/posts/${relatedPost.slug}`}>
+                      {getPostTitle(relatedPost)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </>
+        )}
+      </div>
+    </div>
+  </main>
 </BaseLayout>
+
+<style>
+  .post-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+
+  .post-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-hero);
+    font-weight: 400;
+    letter-spacing: var(--tracking-hero);
+    color: var(--color-text-primary);
+    line-height: normal;
+  }
+
+  .post-meta {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-secondary);
+  }
+
+  .hero-image-container {
+    width: 100%;
+    margin-top: var(--gap-lg);
+  }
+
+  .hero-image-placeholder {
+    width: 100%;
+    height: 224px;
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.02) 0%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
+  }
+
+  .post-content {
+    margin-top: var(--gap-lg);
+  }
+
+  .related-posts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    margin-top: var(--gap-section);
+  }
+
+  .related-posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    list-style: disc;
+    padding-left: 21px;
+    line-height: var(--leading-body);
+  }
+
+  .related-posts-list li {
+    color: var(--color-text-primary);
+  }
+
+  .related-posts-list li::marker {
+    color: var(--color-text-primary);
+  }
+
+  .related-posts-list a {
+    color: var(--color-text-primary);
+    text-decoration: underline;
+  }
+
+  /* Add spacing between sections */
+  .prose > * + :global(.divider) {
+    margin-top: var(--gap-section);
+  }
+</style>
