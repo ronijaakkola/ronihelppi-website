@@ -18,7 +18,7 @@ test.describe('Work Pages', () => {
     await page.locator('a[href^="/work/"]').first().click();
 
     // Should have an h1 title
-    const title = page.locator('h1');
+    const title = page.locator('article h1');
     await expect(title).toBeVisible();
     await expect(title).not.toBeEmpty();
   });
@@ -48,8 +48,8 @@ test.describe('Work Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/work/"]').first().click();
 
-    // Should have a link back to home
-    const backLink = page.locator('a[href="/"]');
+    // Should have a link back to home (either header logo or explicit back link)
+    const backLink = page.locator('a[href="/"]').first();
     await expect(backLink).toBeVisible();
   });
 
@@ -57,8 +57,8 @@ test.describe('Work Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/work/"]').first().click();
 
-    // Click back link
-    const backLink = page.locator('a[href="/"]');
+    // Click back link (use first match - header logo)
+    const backLink = page.locator('a[href="/"]').first();
     await backLink.click();
 
     // Should be back on home page
@@ -147,8 +147,8 @@ test.describe('Work Pages', () => {
     await page.goto('/work/resokill/');
 
     // Should load successfully
-    await expect(page.locator('h1')).toBeVisible();
-    await expect(page.locator('time')).toBeVisible();
+    await expect(page.locator('article h1')).toBeVisible();
+    await expect(page.locator('article time')).toBeVisible();
   });
 
   test('should have proper meta tags', async ({ page }) => {
