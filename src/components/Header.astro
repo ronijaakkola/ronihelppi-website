@@ -44,10 +44,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   }
 
   .nav {
-    display: flex;
-    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     width: 976px;
     min-height: 1px;
     overflow: hidden;
@@ -71,7 +70,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     display: flex;
     align-items: center;
     gap: 5px;
-    flex-shrink: 0;
+    justify-self: start;
   }
 
   .breadcrumb {
@@ -118,7 +117,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: -0.6px;
     color: var(--color-button-text);
     text-decoration: none;
-    flex-shrink: 0;
+    grid-column: 3;
+    justify-self: end;
   }
 
   .contact-button:hover {
@@ -132,6 +132,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     padding: 0;
     cursor: pointer;
     color: var(--color-text-primary);
+    grid-column: 3;
+    justify-self: end;
   }
 
   /* Tablet */
