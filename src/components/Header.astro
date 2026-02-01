@@ -146,16 +146,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
 <script>
   document.addEventListener('keydown', (e) => {
-    // Don't trigger if user is typing in an input or textarea
-    const activeElement = document.activeElement as HTMLElement | null;
-    const isTyping = activeElement?.tagName === 'INPUT' ||
-                     activeElement?.tagName === 'TEXTAREA' ||
-                     activeElement?.isContentEditable;
-
-    // Don't trigger if modifier keys are pressed
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
-    if (!isTyping && (e.key === 'c' || e.key === 'C')) {
+    const activeElement = document.activeElement as HTMLElement | null;
+    if (activeElement?.tagName === 'INPUT') return;
+    if (activeElement?.tagName === 'TEXTAREA') return;
+    if (activeElement?.isContentEditable) return;
+
+    if (e.key === 'c' || e.key === 'C') {
       window.location.href = '/contact';
     }
   });

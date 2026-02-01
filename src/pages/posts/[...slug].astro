@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
+import { getTitle } from '../../utils/title';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -17,7 +18,7 @@ const { post } = Astro.props;
 const { Content } = await post.render();
 
 // Derive title from id (preserves original filename)
-const title = post.id.replace(/\.md$/, '');
+const title = getTitle(post.id);
 
 // Format date
 const formattedDate = post.data.date.toLocaleDateString('en-US', {
@@ -38,10 +39,6 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
   .map((slug: string) => allPosts.find((p) => p.slug === slug))
   .filter((p): p is CollectionEntry<'posts'> => p !== undefined);
 
-// Helper to get title from post
-function getPostTitle(p: CollectionEntry<'posts'>): string {
-  return p.id.replace(/\.md$/, '');
-}
 
 // Get hero image from frontmatter
 const heroImage = post.data.heroImage;
@@ -82,7 +79,7 @@ const heroImage = post.data.heroImage;
                 {relatedPosts.map((relatedPost) => (
                   <li>
                     <a href={`/posts/${relatedPost.slug}`}>
-                      {getPostTitle(relatedPost)}
+                      {getTitle(relatedPost.id)}
                     </a>
                   </li>
                 ))}
