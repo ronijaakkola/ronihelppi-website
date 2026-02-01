@@ -4,7 +4,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
 <header class="header">
   <nav class="nav">
-    <a href="/" class="logo">Roni Helppi</a>
+    <div class="logo-breadcrumb">
+      <a href="/" class="logo">Roni Helppi</a>
+      <span class="breadcrumb" id="breadcrumb"></span>
+    </div>
 
     <div class="nav-links">
       <a href="/now" class="nav-link">Now</a>
@@ -61,6 +64,25 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   .logo:hover {
     text-decoration: none;
+  }
+
+  .logo-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .breadcrumb {
+    font-family: var(--font-sans);
+    font-size: var(--text-nav);
+    font-weight: 400;
+    letter-spacing: var(--tracking-nav);
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumb:empty {
+    display: none;
   }
 
   .nav-links {
@@ -159,4 +181,36 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       window.location.href = '/contact';
     }
   });
+
+  function updateBreadcrumb() {
+    const breadcrumb = document.getElementById('breadcrumb');
+    if (!breadcrumb) return;
+
+    const pathname = window.location.pathname;
+
+    // No breadcrumb on home page
+    if (pathname === '/') {
+      breadcrumb.textContent = '';
+      return;
+    }
+
+    // Get the first segment of the path
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length === 0) {
+      breadcrumb.textContent = '';
+      return;
+    }
+
+    // Capitalize first letter of the section
+    const section = segments[0];
+    const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
+
+    breadcrumb.textContent = `/ ${sectionName}`;
+  }
+
+  // Update on initial load
+  updateBreadcrumb();
+
+  // Update on view transitions (for Astro's view transitions)
+  document.addEventListener('astro:page-load', updateBreadcrumb);
 </script>
