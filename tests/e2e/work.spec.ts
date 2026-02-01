@@ -81,18 +81,15 @@ test.describe('Work Pages', () => {
   });
 
   test('should display tags if present', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    // Navigate directly to resokill which has tags
+    await page.goto('/work/resokill');
 
-    // Check if tags are displayed
-    // The RESOKILL work item has tags
-    const bodyText = await page.locator('body').textContent();
+    // Wait for page to load
+    await page.waitForLoadState('domcontentloaded');
 
-    // If tags are present, they should be visible
-    if (bodyText?.toLowerCase().includes('tag')) {
-      const tagsSection = page.locator('text=/tag/i');
-      await expect(tagsSection).toBeVisible();
-    }
+    // Verify specific tags are visible
+    await expect(page.getByText('personal')).toBeVisible();
+    await expect(page.getByText('games')).toBeVisible();
   });
 
   test('should render markdown content as HTML', async ({ page }) => {

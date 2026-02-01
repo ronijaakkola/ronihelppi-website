@@ -91,8 +91,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     background-color: var(--color-button-bg);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
-    font-size: var(--text-small);
-    letter-spacing: var(--tracking-small);
+    font-size: 12px;
+    letter-spacing: -0.6px;
     color: var(--color-button-text);
     text-decoration: none;
     flex-shrink: 0;
@@ -143,3 +143,20 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
   }
 </style>
+
+<script>
+  document.addEventListener('keydown', (e) => {
+    // Don't trigger if user is typing in an input or textarea
+    const activeElement = document.activeElement as HTMLElement | null;
+    const isTyping = activeElement?.tagName === 'INPUT' ||
+                     activeElement?.tagName === 'TEXTAREA' ||
+                     activeElement?.isContentEditable;
+
+    // Don't trigger if modifier keys are pressed
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    if (!isTyping && (e.key === 'c' || e.key === 'C')) {
+      window.location.href = '/contact';
+    }
+  });
+</script>
