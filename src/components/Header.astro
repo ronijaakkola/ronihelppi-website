@@ -147,7 +147,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 <script>
   document.addEventListener('keydown', (e) => {
     // Don't trigger if user is typing in an input or textarea
-    const activeElement = document.activeElement;
+    const activeElement = document.activeElement as HTMLElement | null;
     const isTyping = activeElement?.tagName === 'INPUT' ||
                      activeElement?.tagName === 'TEXTAREA' ||
                      activeElement?.isContentEditable;
