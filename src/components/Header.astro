@@ -6,7 +6,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   <nav class="nav">
     <div class="logo-breadcrumb">
       <a href="/" class="logo">Roni Helppi</a>
-      <span class="breadcrumb" id="breadcrumb"></span>
+      <span class="breadcrumb-separator" id="breadcrumb-separator"></span>
+      <a href="/" class="breadcrumb" id="breadcrumb"></a>
     </div>
 
     <div class="nav-links">
@@ -73,12 +74,30 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     justify-self: start;
   }
 
+  .breadcrumb-separator {
+    font-family: var(--font-sans);
+    font-size: var(--text-nav);
+    font-weight: 400;
+    letter-spacing: var(--tracking-nav);
+    color: var(--color-text-secondary);
+  }
+
+  .breadcrumb-separator:empty {
+    display: none;
+  }
+
   .breadcrumb {
     font-family: var(--font-sans);
     font-size: var(--text-nav);
     font-weight: 400;
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .breadcrumb:hover {
+    color: var(--color-text-primary);
+    text-decoration: underline;
   }
 
   .breadcrumb:empty {
@@ -102,7 +121,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   .nav-link:hover {
     color: var(--color-text-primary);
-    text-decoration: none;
+    text-decoration: underline;
   }
 
   .contact-button {
@@ -184,21 +203,26 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   });
 
   function updateBreadcrumb() {
-    const breadcrumb = document.getElementById('breadcrumb');
-    if (!breadcrumb) return;
+    const separator = document.getElementById('breadcrumb-separator');
+    const breadcrumb = document.getElementById('breadcrumb') as HTMLAnchorElement | null;
+    if (!separator || !breadcrumb) return;
 
     const pathname = window.location.pathname;
 
     // No breadcrumb on home page
     if (pathname === '/') {
+      separator.textContent = '';
       breadcrumb.textContent = '';
+      breadcrumb.removeAttribute('href');
       return;
     }
 
     // Get the first segment of the path
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) {
+      separator.textContent = '';
       breadcrumb.textContent = '';
+      breadcrumb.removeAttribute('href');
       return;
     }
 
@@ -206,7 +230,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const section = segments[0];
     const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
 
-    breadcrumb.textContent = `/ ${sectionName}`;
+    separator.textContent = '/';
+    breadcrumb.textContent = sectionName;
+    breadcrumb.href = `/${section}`;
   }
 
   // Update on initial load
