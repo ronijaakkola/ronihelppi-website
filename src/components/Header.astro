@@ -80,6 +80,12 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     font-weight: 400;
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+
+  .breadcrumb-separator.visible {
+    opacity: 1;
   }
 
   .breadcrumb-separator:empty {
