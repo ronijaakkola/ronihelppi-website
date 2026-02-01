@@ -42,6 +42,9 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
 function getPostTitle(p: CollectionEntry<'posts'>): string {
   return p.id.replace(/\.md$/, '');
 }
+
+// Get hero image from frontmatter
+const heroImage = post.data.heroImage;
 ---
 
 <BaseLayout title={title}>
@@ -55,10 +58,11 @@ function getPostTitle(p: CollectionEntry<'posts'>): string {
         </header>
       </div>
 
-      <!-- Hero Image Slot (full layout width) -->
-      <div class="hero-image-container">
-        <div class="hero-image-placeholder"></div>
-      </div>
+      {heroImage && (
+        <div class="hero-image-container">
+          <img src={heroImage} alt="" class="hero-image" />
+        </div>
+      )}
 
       <!-- Post Content -->
       <div class="prose">
@@ -118,16 +122,11 @@ function getPostTitle(p: CollectionEntry<'posts'>): string {
     margin-top: var(--gap-lg);
   }
 
-  .hero-image-placeholder {
+  .hero-image {
     width: 100%;
-    height: 224px;
-    border: 0.5px solid var(--color-border);
+    height: auto;
     border-radius: var(--radius-md);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.02) 0%,
-      rgba(255, 255, 255, 0.01) 100%
-    );
+    display: block;
   }
 
   .post-content {

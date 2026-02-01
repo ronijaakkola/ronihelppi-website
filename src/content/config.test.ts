@@ -5,6 +5,8 @@ import { z } from 'zod';
 // These should match the schemas defined in src/content/config.ts
 const postsSchema = z.object({
   date: z.coerce.date(),
+  heroImage: z.string().optional(),
+  relatedPosts: z.array(z.string()).optional(),
 });
 
 const workSchema = z.object({
@@ -73,6 +75,64 @@ describe('Content Collection Schemas', () => {
         extraField: 'extra value',
       });
       expect(result.date).toBeInstanceOf(Date);
+    });
+
+    it('accepts optional heroImage string', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+        heroImage: '/images/hero.jpg',
+      });
+      expect(result.heroImage).toBe('/images/hero.jpg');
+    });
+
+    it('works without heroImage field', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+      });
+      expect(result.heroImage).toBeUndefined();
+    });
+
+    it('rejects invalid heroImage (not a string)', () => {
+      expect(() =>
+        postsSchema.parse({
+          date: '2026-01-30',
+          heroImage: 123,
+        })
+      ).toThrow();
+    });
+
+    it('accepts optional relatedPosts array', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+        relatedPosts: ['post-one', 'post-two'],
+      });
+      expect(result.relatedPosts).toEqual(['post-one', 'post-two']);
+    });
+
+    it('works without relatedPosts field', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+      });
+      expect(result.relatedPosts).toBeUndefined();
+    });
+
+    it('accepts empty relatedPosts array', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+        relatedPosts: [],
+      });
+      expect(result.relatedPosts).toEqual([]);
+    });
+
+    it('accepts all optional fields together', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+        heroImage: '/images/hero.jpg',
+        relatedPosts: ['related-post'],
+      });
+      expect(result.date).toBeInstanceOf(Date);
+      expect(result.heroImage).toBe('/images/hero.jpg');
+      expect(result.relatedPosts).toEqual(['related-post']);
     });
   });
 
