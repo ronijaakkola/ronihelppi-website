@@ -5,6 +5,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import PostListItem from '../components/PostListItem.astro';
 import { getCollection } from 'astro:content';
+import { getTitle } from '../utils/title';
 
 const posts = await getCollection('posts');
 const work = await getCollection('work');
@@ -12,11 +13,6 @@ const work = await getCollection('work');
 // Sort by date descending
 posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-
-// Helper to derive title from id (preserves original filename casing)
-function getTitle(id: string): string {
-  return id.replace(/\.md$/, '');
-}
 ---
 
 <BaseLayout title="Roni Helppi">
@@ -185,7 +181,7 @@ function getTitle(id: string): string {
 
   .arrow {
     text-decoration: none;
-    color: #AAA1A1;
+    color: var(--color-text-secondary);
   }
 
   /* Elsewhere */
