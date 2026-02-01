@@ -40,7 +40,8 @@ describe('Build Output Validation', () => {
 
     it('generates HTML for each post', async () => {
       const postsPath = join(distPath, 'posts');
-      const postDirs = await readdir(postsPath);
+      const entries = await readdir(postsPath, { withFileTypes: true });
+      const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Should have at least one post (Digital tangibleness)
       expect(postDirs.length).toBeGreaterThan(0);
@@ -54,7 +55,8 @@ describe('Build Output Validation', () => {
 
     it('post HTML contains proper structure', async () => {
       const postsPath = join(distPath, 'posts');
-      const postDirs = await readdir(postsPath);
+      const entries = await readdir(postsPath, { withFileTypes: true });
+      const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Check the first post
       if (postDirs.length > 0) {
@@ -124,7 +126,8 @@ describe('Build Output Validation', () => {
 
     it('post pages link back to home', async () => {
       const postsPath = join(distPath, 'posts');
-      const postDirs = await readdir(postsPath);
+      const entries = await readdir(postsPath, { withFileTypes: true });
+      const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       if (postDirs.length > 0) {
         const firstPostPath = join(postsPath, postDirs[0], 'index.html');
