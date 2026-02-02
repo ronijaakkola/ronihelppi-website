@@ -123,12 +123,14 @@ h1, h2, h3, h4, h5, h6 {
 
 a {
   color: inherit;
-  text-decoration: underline;
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-text-secondary);
   text-underline-offset: 2px;
+  transition: color 100ms, text-decoration-color 100ms;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration-color: var(--color-text-primary);
 }
 
 /* ==========================================================================
@@ -217,7 +219,7 @@ ol {
 
 .prose-content a {
   color: var(--color-text-primary);
-  text-decoration: underline;
+  text-decoration-line: underline;
 }
 
 .prose-content code {

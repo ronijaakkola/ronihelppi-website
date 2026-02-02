@@ -131,7 +131,12 @@ const work = sortByDateDesc(await getCollection('work'));
 
   .bio-secondary a {
     color: var(--color-text-secondary);
-    text-decoration: underline;
+    text-decoration-line: underline;
+  }
+
+  .bio-secondary a:hover {
+    color: var(--color-text-primary);
+    text-decoration-color: var(--color-text-primary);
   }
 
   .bio-primary {
@@ -172,7 +177,7 @@ const work = sortByDateDesc(await getCollection('work'));
   }
 
   .view-all-link a {
-    text-decoration: underline;
+    text-decoration-line: underline;
     color: inherit;
   }
 
@@ -193,7 +198,7 @@ const work = sortByDateDesc(await getCollection('work'));
   }
 
   .elsewhere-links a {
-    text-decoration: underline;
+    text-decoration-line: underline;
   }
 
   /* Cascade Animation - global to work with child components */
