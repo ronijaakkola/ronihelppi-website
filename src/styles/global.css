@@ -222,6 +222,23 @@ ol {
   text-decoration-line: underline;
 }
 
+.prose-content a[href^="http"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-4xs);
+}
+
+.prose-content a[href^="http"]::after {
+  content: '';
+  display: inline-block;
+  width: 0.75em;
+  height: 0.9em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 18' fill='none'%3E%3Cpath d='M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667' stroke='%23AAA1A1' stroke-width='1.33333' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+  flex-shrink: 0;
+}
+
 .prose-content code {
   font-family: var(--font-mono);
   font-size: 0.9em;
