@@ -81,6 +81,13 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     font-weight: 400;
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    view-transition-name: breadcrumb-separator;
+  }
+
+  .breadcrumb-separator.visible {
+    opacity: 1;
   }
 
   .breadcrumb-separator:empty {
@@ -94,6 +101,23 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
     text-decoration: none;
+    view-transition-name: breadcrumb-text;
+  }
+
+  /* View transition animations for breadcrumb fade-out */
+  ::view-transition-old(breadcrumb-text),
+  ::view-transition-old(breadcrumb-separator) {
+    animation: fade-out 0.3s ease-out forwards;
+  }
+
+  ::view-transition-new(breadcrumb-text),
+  ::view-transition-new(breadcrumb-separator) {
+    animation: none;
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   .breadcrumb:hover {
@@ -203,6 +227,87 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
   });
 
+  class TextScramble {
+    private el: HTMLElement;
+    private chars: string;
+    private queue: Array<{ from: string; to: string; start: number; end: number; char?: string }>;
+    private frameRequest: number | null;
+    private frame: number;
+    private resolve: (() => void) | null;
+
+    constructor(el: HTMLElement) {
+      this.el = el;
+      this.chars = '!<>-_\\/[]{}—=+*^?#';
+      this.queue = [];
+      this.frameRequest = null;
+      this.frame = 0;
+      this.resolve = null;
+    }
+
+    setText(newText: string): Promise<void> {
+      const oldText = this.el.textContent || '';
+      const length = Math.max(oldText.length, newText.length);
+      this.queue = [];
+
+      for (let i = 0; i < length; i++) {
+        const from = oldText[i] || '';
+        const to = newText[i] || '';
+        const start = Math.floor(Math.random() * 20);
+        const end = start + Math.floor(Math.random() * 20) + 20;
+        this.queue.push({ from, to, start, end });
+      }
+
+      if (this.frameRequest) {
+        cancelAnimationFrame(this.frameRequest);
+      }
+      this.frame = 0;
+
+      return new Promise((resolve) => {
+        this.resolve = resolve;
+        this.update();
+      });
+    }
+
+    private update(): void {
+      let output = '';
+      let complete = 0;
+
+      for (let i = 0; i < this.queue.length; i++) {
+        const { from, to, start, end } = this.queue[i];
+        let { char } = this.queue[i];
+
+        if (this.frame >= end) {
+          complete++;
+          output += to;
+        } else if (this.frame >= start) {
+          if (!char || Math.random() < 0.28) {
+            char = this.chars[Math.floor(Math.random() * this.chars.length)];
+            this.queue[i].char = char;
+          }
+          output += char;
+        } else {
+          output += from;
+        }
+      }
+
+      this.el.textContent = output;
+
+      if (complete === this.queue.length) {
+        if (this.resolve) this.resolve();
+      } else {
+        this.frameRequest = requestAnimationFrame(() => this.update());
+        this.frame++;
+      }
+    }
+  }
+
+  let textScramble: TextScramble | null = null;
+  let currentBreadcrumbText = '';
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   function updateBreadcrumb() {
     const separator = document.getElementById('breadcrumb-separator');
     const breadcrumb = document.getElementById('breadcrumb') as HTMLAnchorElement | null;
@@ -210,11 +315,15 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     const pathname = window.location.pathname;
 
-    // No breadcrumb on home page
+    // No breadcrumb on home page - view transitions handle the fade-out
     if (pathname === '/') {
-      separator.textContent = '';
-      breadcrumb.textContent = '';
-      breadcrumb.removeAttribute('href');
+      if (currentBreadcrumbText !== '') {
+        separator.textContent = '';
+        separator.classList.remove('visible');
+        breadcrumb.textContent = '';
+        breadcrumb.removeAttribute('href');
+        currentBreadcrumbText = '';
+      }
       return;
     }
 
@@ -222,8 +331,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) {
       separator.textContent = '';
+      separator.classList.remove('visible');
       breadcrumb.textContent = '';
       breadcrumb.removeAttribute('href');
+      currentBreadcrumbText = '';
       return;
     }
 
@@ -231,14 +342,32 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const section = segments[0];
     const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
 
-    separator.textContent = '/';
-    breadcrumb.textContent = sectionName;
-    breadcrumb.href = `/${section}`;
+    // Only animate if text is changing
+    if (sectionName !== currentBreadcrumbText) {
+      separator.textContent = '/';
+      breadcrumb.href = `/${section}`;
+
+      if (prefersReducedMotion()) {
+        separator.classList.add('visible');
+        breadcrumb.textContent = sectionName;
+      } else {
+        // Always create fresh scramble instance to avoid stale state
+        textScramble = new TextScramble(breadcrumb);
+        // Force browser to render opacity:0 before transitioning
+        void separator.offsetWidth;
+        requestAnimationFrame(() => {
+          separator.classList.add('visible');
+        });
+        textScramble.setText(sectionName);
+      }
+      currentBreadcrumbText = sectionName;
+    }
   }
 
   // Update on initial load
   updateBreadcrumb();
 
   // Update on view transitions (for Astro's view transitions)
+  document.addEventListener('astro:after-swap', updateBreadcrumb);
   document.addEventListener('astro:page-load', updateBreadcrumb);
 </script>

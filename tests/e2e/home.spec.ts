@@ -81,4 +81,46 @@ test.describe('Home Page', () => {
     const favicon = page.locator('link[rel="icon"]');
     await expect(favicon).toBeAttached();
   });
+
+  test('should show breadcrumb when navigating to section page', async ({ page }) => {
+    await page.goto('/');
+
+    // No breadcrumb on home
+    const breadcrumb = page.locator('#breadcrumb');
+    await expect(breadcrumb).toBeEmpty();
+
+    // Navigate to posts section
+    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    await firstPostLink.click();
+
+    // Wait for navigation and animation
+    await page.waitForURL(/\/posts\//);
+
+    // Breadcrumb should show "Posts" (allow time for scramble animation)
+    await expect(breadcrumb).toHaveText('Posts', { timeout: 2000 });
+
+    // Separator should be visible
+    const separator = page.locator('#breadcrumb-separator');
+    await expect(separator).toHaveText('/');
+  });
+
+  test('should hide breadcrumb when navigating back to home', async ({ page }) => {
+    // Start on home and navigate to a post first
+    await page.goto('/');
+
+    // Navigate to a post
+    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    await firstPostLink.click();
+    await page.waitForURL(/\/posts\//);
+
+    const breadcrumb = page.locator('#breadcrumb');
+    await expect(breadcrumb).toHaveText('Posts', { timeout: 2000 });
+
+    // Navigate home via logo
+    await page.locator('.logo').click();
+    await page.waitForURL('/');
+
+    // Breadcrumb should be empty (allow time for animation)
+    await expect(breadcrumb).toBeEmpty({ timeout: 2000 });
+  });
 });
