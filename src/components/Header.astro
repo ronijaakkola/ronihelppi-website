@@ -282,6 +282,13 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
   }
 
+  let textScramble: TextScramble | null = null;
+  let currentBreadcrumbText = '';
+
+  function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   function updateBreadcrumb() {
     const separator = document.getElementById('breadcrumb-separator');
     const breadcrumb = document.getElementById('breadcrumb') as HTMLAnchorElement | null;
@@ -291,9 +298,23 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     // No breadcrumb on home page
     if (pathname === '/') {
-      separator.textContent = '';
-      breadcrumb.textContent = '';
-      breadcrumb.removeAttribute('href');
+      if (currentBreadcrumbText !== '') {
+        if (prefersReducedMotion()) {
+          separator.textContent = '';
+          separator.classList.remove('visible');
+          breadcrumb.textContent = '';
+          breadcrumb.removeAttribute('href');
+        } else {
+          // Scramble out, then clear
+          separator.classList.remove('visible');
+          if (textScramble) {
+            textScramble.setText('').then(() => {
+              breadcrumb.removeAttribute('href');
+            });
+          }
+        }
+        currentBreadcrumbText = '';
+      }
       return;
     }
 
@@ -301,8 +322,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) {
       separator.textContent = '';
+      separator.classList.remove('visible');
       breadcrumb.textContent = '';
       breadcrumb.removeAttribute('href');
+      currentBreadcrumbText = '';
       return;
     }
 
@@ -310,9 +333,24 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const section = segments[0];
     const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
 
-    separator.textContent = '/';
-    breadcrumb.textContent = sectionName;
-    breadcrumb.href = `/${section}`;
+    // Only animate if text is changing
+    if (sectionName !== currentBreadcrumbText) {
+      separator.textContent = '/';
+      breadcrumb.href = `/${section}`;
+
+      if (prefersReducedMotion()) {
+        separator.classList.add('visible');
+        breadcrumb.textContent = sectionName;
+      } else {
+        // Initialize scramble if needed
+        if (!textScramble) {
+          textScramble = new TextScramble(breadcrumb);
+        }
+        separator.classList.add('visible');
+        textScramble.setText(sectionName);
+      }
+      currentBreadcrumbText = sectionName;
+    }
   }
 
   // Update on initial load
