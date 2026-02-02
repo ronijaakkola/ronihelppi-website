@@ -1,0 +1,293 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+const experience = [
+  { date: '2026-08–', company: 'Reaktor', role: 'Senior UX Designer' },
+  { date: '12/2017–08/2022', company: 'Gofore', role: 'UX Designer' },
+  { date: '02/2017–12/2017', company: 'Leadin', role: 'UX Developer' },
+  { date: '01/2016–02/2017', company: 'Atostek', role: 'Software Designer' },
+  { date: '01/2015–06/2015', company: 'Tampere University', role: 'Research Assistant' },
+];
+
+const caseStudies = [
+  {
+    title: 'Helsinki Design System',
+    description: '0 to 1 design system for the largest organization in Finland.',
+    href: '#',
+  },
+];
+
+const otherProjects = [
+  {
+    title: 'Game development',
+    description: 'Games which I have taken part of designing and developing.',
+    href: '#',
+  },
+  {
+    title: 'Modding',
+    description: 'Plugins and mods that I have released and maintained.',
+    href: '#',
+  },
+];
+---
+
+<BaseLayout title="About – Roni Helppi">
+  <main class="main">
+    <div class="layout">
+      <div class="prose">
+        <div class="content">
+          <!-- About Section -->
+          <section class="about-section">
+            <h1 class="page-title">About</h1>
+            <p class="intro">
+              I'm a designer at <a href="https://reaktor.com">Reaktor</a> helping their industrial customers to grow.
+              Previously I have worked at various design consultancies like Gofore and Leadin.
+            </p>
+          </section>
+
+          <!-- Experience Section -->
+          <section class="section">
+            <SectionHeading title="Experience" />
+            <div class="experience-table-wrapper">
+              <table class="experience-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Company</th>
+                    <th>Role</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {experience.map((item) => (
+                    <tr>
+                      <td class="date-cell">{item.date}</td>
+                      <td class="company-cell">{item.company}</td>
+                      <td class="role-cell">{item.role}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Case Studies Section -->
+          <section class="section">
+            <SectionHeading title="Case studies" />
+            <div class="project-list">
+              {caseStudies.map((study) => (
+                <div class="project-item">
+                  <a href={study.href} class="project-title">{study.title}</a>
+                  <p class="project-description">{study.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <!-- Other Projects Section -->
+          <section class="section">
+            <SectionHeading title="Other projects" />
+            <div class="project-list">
+              {otherProjects.map((project) => (
+                <div class="project-item">
+                  <a href={project.href} class="project-title">{project.title}</a>
+                  <p class="project-description">{project.description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <!-- How to Reach Me Section -->
+          <section class="section">
+            <SectionHeading title="How to reach me" />
+            <p class="contact-text">
+              Reach me out via <a href="mailto:hello@ronihelppi.com">email</a> or in{' '}
+              <a href="https://linkedin.com/in/ronihelppi">LinkedIn</a>.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-section);
+    overflow: hidden;
+  }
+
+  /* About Section */
+  .about-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    overflow: hidden;
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-hero);
+    font-weight: 400;
+    letter-spacing: var(--tracking-hero);
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+  }
+
+  .intro {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-primary);
+    max-width: 468px;
+  }
+
+  .intro a {
+    text-decoration: underline;
+  }
+
+  /* Sections */
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    overflow: hidden;
+  }
+
+  /* Experience Table */
+  .experience-table-wrapper {
+    padding-bottom: var(--gap-2xs);
+  }
+
+  .experience-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .experience-table th {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: -0.7px;
+    color: var(--color-text-secondary);
+    text-align: left;
+    padding-bottom: var(--gap-2xs);
+    border-bottom: 1px solid var(--color-divider);
+  }
+
+  .experience-table td {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    padding: var(--gap-2xs) 0;
+    border-bottom: 1px solid var(--color-divider);
+    vertical-align: top;
+  }
+
+  .experience-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .date-cell {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .company-cell {
+    color: var(--color-text-primary);
+  }
+
+  .role-cell {
+    color: var(--color-text-secondary);
+  }
+
+  /* Mobile: Stack table rows as cards */
+  @media (max-width: 400px) {
+    .experience-table thead {
+      display: none;
+    }
+
+    .experience-table,
+    .experience-table tbody,
+    .experience-table tr,
+    .experience-table td {
+      display: block;
+      width: 100%;
+    }
+
+    .experience-table tr {
+      display: flex;
+      flex-direction: column;
+      padding: var(--gap-2xs) 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .experience-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .experience-table td {
+      padding: 0;
+      border-bottom: none;
+    }
+
+    /* Reorder: Date first, Company second, Role third */
+    .date-cell {
+      order: 1;
+      font-size: var(--text-small);
+      margin-bottom: 2px;
+    }
+
+    .company-cell {
+      order: 2;
+      font-size: var(--text-body);
+    }
+
+    .role-cell {
+      order: 3;
+      font-size: var(--text-small);
+    }
+  }
+
+  /* Project Lists */
+  .project-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+  }
+
+  .project-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-3xs);
+  }
+
+  .project-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+    text-decoration: underline;
+  }
+
+  .project-description {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+  }
+
+  /* Contact Text */
+  .contact-text {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+  }
+
+  .contact-text a {
+    text-decoration: underline;
+  }
+</style>
