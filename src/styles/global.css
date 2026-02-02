@@ -68,8 +68,8 @@
 
   /* Spacing - Horizontal Padding */
   --spacing-horizontal-desktop: 0px;
-  --spacing-horizontal-tablet: 12px;
-  --spacing-horizontal-phone: 8px;
+  --spacing-horizontal-tablet: 20px;
+  --spacing-horizontal-phone: 20px;
 
   /* Border Radius */
   --radius-sm: 2px;
