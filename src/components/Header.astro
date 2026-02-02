@@ -82,6 +82,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     color: var(--color-text-secondary);
     opacity: 0;
     transition: opacity 0.4s ease-out;
+    view-transition-name: breadcrumb-separator;
   }
 
   .breadcrumb-separator.visible {
@@ -99,6 +100,23 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
     text-decoration: none;
+    view-transition-name: breadcrumb-text;
+  }
+
+  /* View transition animations for breadcrumb fade-out */
+  ::view-transition-old(breadcrumb-text),
+  ::view-transition-old(breadcrumb-separator) {
+    animation: fade-out 0.3s ease-out forwards;
+  }
+
+  ::view-transition-new(breadcrumb-text),
+  ::view-transition-new(breadcrumb-separator) {
+    animation: none;
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   .breadcrumb:hover {
@@ -296,23 +314,13 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     const pathname = window.location.pathname;
 
-    // No breadcrumb on home page
+    // No breadcrumb on home page - view transitions handle the fade-out
     if (pathname === '/') {
       if (currentBreadcrumbText !== '') {
-        if (prefersReducedMotion()) {
-          separator.textContent = '';
-          separator.classList.remove('visible');
-          breadcrumb.textContent = '';
-          breadcrumb.removeAttribute('href');
-        } else {
-          // Scramble out, then clear
-          separator.classList.remove('visible');
-          if (textScramble) {
-            textScramble.setText('').then(() => {
-              breadcrumb.removeAttribute('href');
-            });
-          }
-        }
+        separator.textContent = '';
+        separator.classList.remove('visible');
+        breadcrumb.textContent = '';
+        breadcrumb.removeAttribute('href');
         currentBreadcrumbText = '';
       }
       return;
@@ -342,11 +350,13 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         separator.classList.add('visible');
         breadcrumb.textContent = sectionName;
       } else {
-        // Initialize scramble if needed
-        if (!textScramble) {
-          textScramble = new TextScramble(breadcrumb);
-        }
-        separator.classList.add('visible');
+        // Always create fresh scramble instance to avoid stale state
+        textScramble = new TextScramble(breadcrumb);
+        // Force browser to render opacity:0 before transitioning
+        void separator.offsetWidth;
+        requestAnimationFrame(() => {
+          separator.classList.add('visible');
+        });
         textScramble.setText(sectionName);
       }
       currentBreadcrumbText = sectionName;
@@ -357,5 +367,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   updateBreadcrumb();
 
   // Update on view transitions (for Astro's view transitions)
+  document.addEventListener('astro:after-swap', updateBreadcrumb);
   document.addEventListener('astro:page-load', updateBreadcrumb);
 </script>
