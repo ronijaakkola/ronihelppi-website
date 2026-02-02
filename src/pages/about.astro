@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 
 const experience = [
   { date: '2026-08–', company: 'Reaktor', role: 'Senior UX Designer' },
@@ -76,10 +77,11 @@ const otherProjects = [
             <SectionHeading title="Case studies" />
             <div class="project-list">
               {caseStudies.map((study) => (
-                <div class="project-item">
-                  <a href={study.href} class="project-title">{study.title}</a>
-                  <p class="project-description">{study.description}</p>
-                </div>
+                <ProjectCard
+                  title={study.title}
+                  description={study.description}
+                  href={study.href}
+                />
               ))}
             </div>
           </section>
@@ -89,10 +91,11 @@ const otherProjects = [
             <SectionHeading title="Other projects" />
             <div class="project-list">
               {otherProjects.map((project) => (
-                <div class="project-item">
-                  <a href={project.href} class="project-title">{project.title}</a>
-                  <p class="project-description">{project.description}</p>
-                </div>
+                <ProjectCard
+                  title={project.title}
+                  description={project.description}
+                  href={project.href}
+                />
               ))}
             </div>
           </section>
@@ -125,15 +128,6 @@ const otherProjects = [
     flex-direction: column;
     gap: var(--gap-sm);
     overflow: hidden;
-  }
-
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: var(--text-hero);
-    font-weight: 400;
-    letter-spacing: var(--tracking-hero);
-    color: var(--color-text-primary);
-    line-height: var(--leading-normal);
   }
 
   .intro {
@@ -256,27 +250,6 @@ const otherProjects = [
     display: flex;
     flex-direction: column;
     gap: var(--gap-xs);
-  }
-
-  .project-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-3xs);
-  }
-
-  .project-title {
-    font-family: var(--font-sans);
-    font-size: var(--text-body);
-    letter-spacing: var(--tracking-body-tight);
-    color: var(--color-text-primary);
-    text-decoration: underline;
-  }
-
-  .project-description {
-    font-family: var(--font-sans);
-    font-size: var(--text-small);
-    letter-spacing: var(--tracking-small);
-    color: var(--color-text-secondary);
   }
 
   /* Contact Text */

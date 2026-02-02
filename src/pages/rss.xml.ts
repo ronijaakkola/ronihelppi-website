@@ -1,14 +1,11 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { getTitle } from '../utils/title';
+import { sortByDateDesc } from '../utils/sortByDate';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const posts = await getCollection('posts');
-
-  const sortedPosts = posts.sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-  );
+  const sortedPosts = sortByDateDesc(await getCollection('posts'));
 
   return rss({
     title: 'Roni Helppi',
