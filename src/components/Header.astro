@@ -314,6 +314,17 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     const pathname = window.location.pathname;
 
+    // No breadcrumb on 404 pages
+    const is404Page = document.querySelector('[data-page-type="404"]') !== null;
+    if (is404Page) {
+      separator.textContent = '';
+      separator.classList.remove('visible');
+      breadcrumb.textContent = '';
+      breadcrumb.removeAttribute('href');
+      currentBreadcrumbText = '';
+      return;
+    }
+
     // No breadcrumb on home page - view transitions handle the fade-out
     if (pathname === '/') {
       if (currentBreadcrumbText !== '') {
@@ -337,8 +348,21 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       return;
     }
 
-    // Capitalize first letter of the section
+    // Only show breadcrumb for known sections
+    const knownSections = ['about', 'posts', 'work'];
     const section = segments[0];
+
+    if (!knownSections.includes(section)) {
+      // Unknown section (like 404 pages) - hide breadcrumb
+      separator.textContent = '';
+      separator.classList.remove('visible');
+      breadcrumb.textContent = '';
+      breadcrumb.removeAttribute('href');
+      currentBreadcrumbText = '';
+      return;
+    }
+
+    // Capitalize first letter of the section
     const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
 
     // Check if DOM was cleared by view transitions

@@ -95,6 +95,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   /* Prevent layout shift when scrollbar appears/disappears */
   scrollbar-gutter: stable;
+  background-color: var(--color-bg);
 }
 
 body {
