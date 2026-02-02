@@ -48,8 +48,8 @@ test.describe('Post Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/posts/"]').first().click();
 
-    // Should have a link back to home
-    const backLink = page.locator('a[href="/"]');
+    // Should have the logo link back to home
+    const backLink = page.locator('.logo');
     await expect(backLink).toBeVisible();
   });
 
@@ -57,8 +57,8 @@ test.describe('Post Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/posts/"]').first().click();
 
-    // Click back link
-    const backLink = page.locator('a[href="/"]');
+    // Click logo to go back home
+    const backLink = page.locator('.logo');
     await backLink.click();
 
     // Should be back on home page
