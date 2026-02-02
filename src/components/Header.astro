@@ -342,7 +342,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const section = segments[0];
     const sectionName = section.charAt(0).toUpperCase() + section.slice(1);
 
-    // Only animate if text is changing
+    // Check if DOM was cleared by view transitions
+    const domWasCleared = !breadcrumb.textContent;
+
+    // Only animate if section is actually changing
     if (sectionName !== currentBreadcrumbText) {
       separator.textContent = '/';
       breadcrumb.href = `/${section}`;
@@ -361,6 +364,12 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         textScramble.setText(sectionName);
       }
       currentBreadcrumbText = sectionName;
+    } else if (domWasCleared) {
+      // Restore without animation if view transitions cleared the DOM
+      separator.textContent = '/';
+      separator.classList.add('visible');
+      breadcrumb.href = `/${section}`;
+      breadcrumb.textContent = sectionName;
     }
   }
 
