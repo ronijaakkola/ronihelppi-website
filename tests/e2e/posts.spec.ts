@@ -18,7 +18,7 @@ test.describe('Post Pages', () => {
     await page.locator('a[href^="/posts/"]').first().click();
 
     // Should have an h1 title
-    const title = page.locator('h1.post-title');
+    const title = page.locator('h1.page-title');
     await expect(title).toBeVisible();
     await expect(title).not.toBeEmpty();
   });
@@ -104,7 +104,7 @@ test.describe('Post Pages', () => {
     await page.goto('/posts/digital-tangibleness/');
 
     // Should load successfully
-    await expect(page.locator('h1.post-title')).toBeVisible();
+    await expect(page.locator('h1.page-title')).toBeVisible();
     await expect(page.locator('time.post-meta')).toBeVisible();
   });
 });
