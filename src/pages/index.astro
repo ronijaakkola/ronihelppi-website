@@ -21,7 +21,7 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
       <div class="prose">
         <div class="content">
           <!-- Hero Section -->
-          <section class="hero-section">
+          <section class="hero-section cascade-item">
             <h1 class="hero-title">
               Speaking all sides of digital<span class="hero-period">.</span>
             </h1>
@@ -34,10 +34,10 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
             </div>
           </section>
 
-          <Divider />
+          <Divider class="cascade-item" />
 
           <!-- Projects Section -->
-          <section class="section">
+          <section class="section cascade-item">
             <SectionHeading title="Projects" />
             <div class="projects-list">
               {work.map((item) => (
@@ -54,7 +54,7 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
           </section>
 
           <!-- Writing Section -->
-          <section class="section">
+          <section class="section cascade-item">
             <SectionHeading title="Writing" />
             <div class="posts-list">
               {posts.slice(0, 5).map((post) => (
@@ -71,7 +71,7 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
           </section>
 
           <!-- Elsewhere Section -->
-          <section class="section">
+          <section class="section cascade-item">
             <SectionHeading title="Elsewhere" />
             <div class="elsewhere-links">
               <p>
@@ -198,4 +198,53 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
   .elsewhere-links a {
     text-decoration: underline;
   }
+
+  /* Cascade Animation - global to work with child components */
+  @keyframes cascade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .cascade-animate :global(.cascade-item) {
+    opacity: 0;
+    animation: cascade-in 0.4s ease-out forwards;
+  }
+
+  .cascade-animate :global(.cascade-item:nth-child(1)) { animation-delay: 0ms; }
+  .cascade-animate :global(.cascade-item:nth-child(2)) { animation-delay: 60ms; }
+  .cascade-animate :global(.cascade-item:nth-child(3)) { animation-delay: 120ms; }
+  .cascade-animate :global(.cascade-item:nth-child(4)) { animation-delay: 180ms; }
+  .cascade-animate :global(.cascade-item:nth-child(5)) { animation-delay: 240ms; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cascade-animate :global(.cascade-item) {
+      opacity: 1;
+      animation: none;
+    }
+  }
 </style>
+
+<script is:inline>
+  // Only run cascade animation on direct page load, not SPA navigation
+  // The flag is set by astro:after-swap BEFORE this script runs on navigation
+
+  if (!window.__cascadeListenersAdded) {
+    window.__cascadeListenersAdded = true;
+
+    // Mark that we're doing SPA navigation (fires before new page script runs)
+    document.addEventListener('astro:after-swap', () => {
+      window.__wasNavigation = true;
+    });
+  }
+
+  // Check immediately - on SPA nav, __wasNavigation is already true from after-swap
+  // On direct load, it's undefined/false
+  if (!window.__wasNavigation) {
+    document.querySelector('.content')?.classList.add('cascade-animate');
+  }
+  window.__wasNavigation = false;
+</script>
