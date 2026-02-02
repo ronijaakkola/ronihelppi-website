@@ -6,13 +6,10 @@ import ProjectCard from '../components/ProjectCard.astro';
 import PostListItem from '../components/PostListItem.astro';
 import { getCollection } from 'astro:content';
 import { getTitle } from '../utils/title';
+import { sortByDateDesc } from '../utils/sortByDate';
 
-const posts = await getCollection('posts');
-const work = await getCollection('work');
-
-// Sort by date descending
-posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const posts = sortByDateDesc(await getCollection('posts'));
+const work = sortByDateDesc(await getCollection('work'));
 ---
 
 <BaseLayout title="Roni Helppi">
@@ -110,7 +107,7 @@ work.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
     font-weight: 400;
     letter-spacing: var(--tracking-hero);
     color: var(--color-text-primary);
-    line-height: normal;
+    line-height: var(--leading-normal);
     max-width: 259px;
   }
 

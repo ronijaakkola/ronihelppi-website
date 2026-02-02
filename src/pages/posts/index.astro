@@ -3,11 +3,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostListItem from '../../components/PostListItem.astro';
 import { getCollection } from 'astro:content';
 import { getTitle } from '../../utils/title';
+import { sortByDateDesc } from '../../utils/sortByDate';
 
-const posts = await getCollection('posts');
-
-// Sort by date descending
-posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const posts = sortByDateDesc(await getCollection('posts'));
 
 // Group posts by year
 const postsByYear = posts.reduce((acc, post) => {
@@ -59,15 +57,6 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
     overflow: hidden;
   }
 
-  .page-title {
-    font-family: var(--font-serif);
-    font-size: var(--text-hero);
-    font-weight: 400;
-    letter-spacing: var(--tracking-hero);
-    color: var(--color-text-primary);
-    line-height: normal;
-  }
-
   .years-list {
     display: flex;
     flex-direction: column;
@@ -86,7 +75,7 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
     font-weight: 400;
     letter-spacing: var(--tracking-section);
     color: var(--color-text-primary);
-    line-height: normal;
+    line-height: var(--leading-normal);
   }
 
   .posts-list {

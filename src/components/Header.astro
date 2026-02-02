@@ -307,6 +307,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  function clearBreadcrumb(separator: HTMLElement, breadcrumb: HTMLAnchorElement) {
+    separator.textContent = '';
+    separator.classList.remove('visible');
+    breadcrumb.textContent = '';
+    breadcrumb.removeAttribute('href');
+    currentBreadcrumbText = '';
+  }
+
   function updateBreadcrumb() {
     const separator = document.getElementById('breadcrumb-separator');
     const breadcrumb = document.getElementById('breadcrumb') as HTMLAnchorElement | null;
@@ -317,22 +325,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     // No breadcrumb on 404 pages
     const is404Page = document.querySelector('[data-page-type="404"]') !== null;
     if (is404Page) {
-      separator.textContent = '';
-      separator.classList.remove('visible');
-      breadcrumb.textContent = '';
-      breadcrumb.removeAttribute('href');
-      currentBreadcrumbText = '';
+      clearBreadcrumb(separator, breadcrumb);
       return;
     }
 
     // No breadcrumb on home page - view transitions handle the fade-out
     if (pathname === '/') {
       if (currentBreadcrumbText !== '') {
-        separator.textContent = '';
-        separator.classList.remove('visible');
-        breadcrumb.textContent = '';
-        breadcrumb.removeAttribute('href');
-        currentBreadcrumbText = '';
+        clearBreadcrumb(separator, breadcrumb);
       }
       return;
     }
@@ -340,11 +340,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     // Get the first segment of the path
     const segments = pathname.split('/').filter(Boolean);
     if (segments.length === 0) {
-      separator.textContent = '';
-      separator.classList.remove('visible');
-      breadcrumb.textContent = '';
-      breadcrumb.removeAttribute('href');
-      currentBreadcrumbText = '';
+      clearBreadcrumb(separator, breadcrumb);
       return;
     }
 
@@ -354,11 +350,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     if (!knownSections.includes(section)) {
       // Unknown section (like 404 pages) - hide breadcrumb
-      separator.textContent = '';
-      separator.classList.remove('visible');
-      breadcrumb.textContent = '';
-      breadcrumb.removeAttribute('href');
-      currentBreadcrumbText = '';
+      clearBreadcrumb(separator, breadcrumb);
       return;
     }
 
