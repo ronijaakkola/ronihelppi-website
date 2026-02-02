@@ -15,6 +15,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.15",
     "astro": "^5.17.1",
     "unist-util-visit": "^5.1.0"
   },
