@@ -44,6 +44,15 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     view-transition-name: header;
   }
 
+  ::view-transition-old(header),
+  ::view-transition-new(header),
+  ::view-transition-group(header),
+  ::view-transition-image-pair(header) {
+    animation: none !important;
+    opacity: 1 !important;
+    mix-blend-mode: normal !important;
+  }
+
   .nav {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
