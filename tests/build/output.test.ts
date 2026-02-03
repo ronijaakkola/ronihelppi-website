@@ -80,7 +80,8 @@ describe('Build Output Validation', () => {
 
     it('generates HTML for each work item', async () => {
       const workPath = join(distPath, 'work');
-      const workDirs = await readdir(workPath);
+      const entries = await readdir(workPath, { withFileTypes: true });
+      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Should have at least one work item (RESOKILL)
       expect(workDirs.length).toBeGreaterThan(0);
@@ -94,7 +95,8 @@ describe('Build Output Validation', () => {
 
     it('work HTML contains proper structure', async () => {
       const workPath = join(distPath, 'work');
-      const workDirs = await readdir(workPath);
+      const entries = await readdir(workPath, { withFileTypes: true });
+      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Check the first work item
       if (workDirs.length > 0) {
@@ -140,7 +142,8 @@ describe('Build Output Validation', () => {
 
     it('work pages link back to home', async () => {
       const workPath = join(distPath, 'work');
-      const workDirs = await readdir(workPath);
+      const entries = await readdir(workPath, { withFileTypes: true });
+      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       if (workDirs.length > 0) {
         const firstWorkPath = join(workPath, workDirs[0], 'index.html');
@@ -156,7 +159,8 @@ describe('Build Output Validation', () => {
     it('Obsidian images are transformed to /images/ path', async () => {
       // Check if any work or post content contains image references
       const workPath = join(distPath, 'work');
-      const workDirs = await readdir(workPath);
+      const entries = await readdir(workPath, { withFileTypes: true });
+      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       for (const workDir of workDirs) {
         const workIndexPath = join(workPath, workDir, 'index.html');
