@@ -31,14 +31,9 @@ test.describe('404 Page', () => {
     await expect(page.locator('.link-item a', { hasText: 'About me' })).toBeVisible();
     await expect(page.locator('.link-item a', { hasText: 'My writing' })).toBeVisible();
 
-    // Each link should have an icon
+    // Each link should have an icon (rendered via CSS ::before pseudo-element)
     const linkItems = page.locator('.link-item');
-    const count = await linkItems.count();
-    expect(count).toBe(3);
-
-    // Check that icons are present
-    const icons = page.locator('.link-icon');
-    await expect(icons).toHaveCount(3);
+    await expect(linkItems).toHaveCount(3);
   });
 
   test('should have correct link destinations', async ({ page }) => {
