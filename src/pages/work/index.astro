@@ -1,0 +1,298 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getTitle } from '../../utils/title';
+import { sortByDateDesc } from '../../utils/sortByDate';
+
+const work = sortByDateDesc(await getCollection('work'));
+
+// Extract unique categories from tags
+function getCategoryFromTag(tag: string): string {
+  return tag.replace('#', '');
+}
+
+// Build category counts
+const categoryCounts = new Map<string, number>();
+categoryCounts.set('all', work.length);
+
+work.forEach((item) => {
+  item.data.tags?.forEach((tag) => {
+    const category = getCategoryFromTag(tag);
+    categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
+  });
+});
+
+// Build filters dynamically from content tags
+// "All" filter always comes first, then alphabetically sorted categories
+const categoryKeys = Array.from(categoryCounts.keys())
+  .filter((k) => k !== 'all')
+  .sort();
+
+const filters = [
+  { id: 'all', label: 'All', count: categoryCounts.get('all') || 0 },
+  ...categoryKeys.map((k) => ({
+    id: k,
+    label: k.charAt(0).toUpperCase() + k.slice(1),
+    count: categoryCounts.get(k) || 0,
+  })),
+];
+---
+
+<BaseLayout title="Work | Roni Helppi">
+  <main class="main">
+    <div class="layout work-layout">
+      <div class="content">
+        <!-- Filters -->
+        <div class="filters">
+          {filters.map((filter, index) => (
+            <button
+              class:list={['filter-chip', { active: index === 0 }]}
+              data-filter={filter.id}
+              type="button"
+            >
+              <span class="filter-name">{filter.label}</span>
+              <span class="filter-count">[{filter.count}]</span>
+            </button>
+          ))}
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="bento-grid">
+          {work.map((item, index) => {
+            const title = getTitle(item.id);
+            const categories = item.data.tags?.map(getCategoryFromTag) || [];
+            const coverImage = item.data.coverImage;
+
+            return (
+              <a
+                href={`/work/${item.slug}`}
+                class="grid-item cascade-item"
+                data-categories={categories.join(',')}
+                style={`--cascade-delay: ${index * 60}ms`}
+              >
+                {coverImage && (
+                  <img src={coverImage} alt={title} class="grid-item-image" />
+                )}
+                <span class="visually-hidden">{title}</span>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .work-layout {
+    max-width: var(--layout-width);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    width: 100%;
+  }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-2xs);
+  }
+
+  .filter-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--color-border);
+    background: var(--color-bg);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: -0.6px;
+    line-height: normal;
+    transition: background-color 100ms ease, color 100ms ease;
+  }
+
+  .filter-chip .filter-name {
+    color: var(--color-text-primary);
+  }
+
+  .filter-chip .filter-count {
+    color: var(--color-border);
+    font-weight: 300;
+    margin-left: 0.25em;
+  }
+
+  .filter-chip.active {
+    background: var(--color-button-bg);
+  }
+
+  .filter-chip.active .filter-name {
+    color: var(--color-button-text);
+  }
+
+  .filter-chip.active .filter-count {
+    color: #494949;
+    font-weight: 300;
+  }
+
+  .filter-chip:not(.active):hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Bento Grid */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-md);
+    width: 100%;
+  }
+
+  .grid-item {
+    position: relative;
+    height: 224px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.5);
+    transition: opacity 300ms ease, transform 300ms ease;
+    text-decoration: none;
+    overflow: hidden;
+  }
+
+  .grid-item:hover {
+    border-color: var(--color-text-primary);
+  }
+
+  .grid-item.hidden {
+    display: none;
+  }
+
+  .grid-item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Bento grid spanning patterns based on Figma */
+  /* First item spans 2 columns */
+  .grid-item:nth-child(1) {
+    grid-column: span 2;
+  }
+
+  /* Items 2-5 are single column (already default) */
+
+  /* 7th item spans 2 columns */
+  .grid-item:nth-child(7) {
+    grid-column: span 2;
+  }
+
+  /* Cascade Animation */
+  @keyframes cascade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .cascade-animate .cascade-item {
+    animation: cascade-in 0.4s ease-out both;
+    animation-delay: var(--cascade-delay, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cascade-animate .cascade-item {
+      animation: none;
+    }
+  }
+
+  /* Responsive - Tablet */
+  @media (max-width: 960px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gap-md);
+    }
+
+    .grid-item:nth-child(1) {
+      grid-column: span 2;
+    }
+
+    .grid-item:nth-child(7) {
+      grid-column: span 1;
+    }
+  }
+
+  /* Responsive - Phone */
+  @media (max-width: 600px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      gap: var(--gap-sm);
+    }
+
+    .grid-item {
+      height: 180px;
+    }
+
+    .grid-item:nth-child(1),
+    .grid-item:nth-child(7) {
+      grid-column: span 1;
+    }
+  }
+</style>
+
+<script is:inline>
+  // Filter functionality
+  function initFilters() {
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const gridItems = document.querySelectorAll('.grid-item');
+
+    filterChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        // Update active state
+        filterChips.forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        const filter = chip.dataset.filter;
+
+        // Filter grid items
+        gridItems.forEach((item) => {
+          const categories = item.dataset.categories?.split(',') || [];
+
+          if (filter === 'all' || categories.includes(filter)) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+      });
+    });
+  }
+
+  // Cascade animation - only on direct page load
+  if (!window.__cascadeListenersAdded) {
+    window.__cascadeListenersAdded = true;
+
+    document.addEventListener('astro:after-swap', () => {
+      window.__wasNavigation = true;
+    });
+  }
+
+  if (!window.__wasNavigation) {
+    document.querySelector('.bento-grid')?.classList.add('cascade-animate');
+  }
+  window.__wasNavigation = false;
+
+  // Initialize filters
+  initFilters();
+
+  // Re-initialize on view transitions
+  document.addEventListener('astro:page-load', initFilters);
+</script>
