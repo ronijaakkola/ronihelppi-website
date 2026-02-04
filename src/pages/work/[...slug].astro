@@ -20,7 +20,7 @@ const title = getTitle(item.id);
 
 <BaseLayout title={title}>
   <main class="main">
-    <div class="layout">
+    <article class="layout">
       <div class="prose">
         <header class="work-header">
           <h1 class="work-title">{title}</h1>
@@ -64,15 +64,30 @@ const title = getTitle(item.id);
               <span class="meta-value">{item.data.skills}</span>
             </div>
           )}
+
+          {item.data.tags && item.data.tags.length > 0 && (
+            <div class="meta-item">
+              <span class="meta-label">Tags</span>
+              <ul class="tags-list">
+                {item.data.tags.map((tag) => (
+                  <li class="tag">{tag.replace('#', '')}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <time datetime={item.data.date.toISOString()} class="visually-hidden">
+            {item.data.date.toLocaleDateString()}
+          </time>
         </div>
 
         <div class="divider"></div>
 
-        <article class="prose-content">
+        <div class="prose-content">
           <Content />
-        </article>
+        </div>
       </div>
-    </div>
+    </article>
   </main>
 </BaseLayout>
 
@@ -143,6 +158,19 @@ const title = getTitle(item.id);
   }
 
   .meta-value {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-primary);
+  }
+
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gap-2xs);
+  }
+
+  .tag {
     font-family: var(--font-sans);
     font-size: var(--text-small);
     letter-spacing: var(--tracking-small);
