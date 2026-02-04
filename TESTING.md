@@ -1,11 +1,13 @@
 # Testing Documentation
 
-This project uses a comprehensive test setup to ensure code quality and reliability.
+This project uses a comprehensive test setup to ensure code quality, accessibility, and performance.
 
 ## Test Stack
 
 - **Vitest** - Unit and integration tests
 - **Playwright** - End-to-end browser tests
+- **axe-core** - Accessibility testing
+- **Lighthouse CI** - Performance, accessibility, SEO, and best practices validation
 - **@astrojs/check** - TypeScript validation for Astro files
 
 ## Running Tests
@@ -41,32 +43,59 @@ npm run check
 ## Test Structure
 
 ```
-kampala/
 ├── src/
 │   ├── utils/
-│   │   └── remark-obsidian-images.test.ts    # Remark plugin tests
+│   │   ├── remark-obsidian-images.test.ts    # Remark plugin tests
+│   │   ├── sortByDate.test.ts                # Date sorting tests
+│   │   ├── readTime.test.ts                  # Read time calculation tests
+│   │   └── title.test.ts                     # Title extraction tests
 │   └── content/
-│       └── config.test.ts                     # Content schema tests
+│       └── config.test.ts                    # Content schema tests
 └── tests/
     ├── build/
-    │   └── output.test.ts                     # Build validation tests
+    │   └── output.test.ts                    # Build validation tests
     └── e2e/
-        ├── home.spec.ts                       # Home page E2E tests
-        ├── posts.spec.ts                      # Post pages E2E tests
-        └── work.spec.ts                       # Work pages E2E tests
+        ├── home.spec.ts                      # Home page E2E tests
+        ├── about.spec.ts                     # About page E2E tests
+        ├── posts.spec.ts                     # Post pages E2E tests
+        ├── posts-breadcrumb.spec.ts          # Breadcrumb navigation tests
+        ├── work.spec.ts                      # Work pages E2E tests
+        ├── 404.spec.ts                       # Error page tests
+        ├── accessibility.spec.ts             # Accessibility tests (axe-core)
+        └── mobile.spec.ts                    # Mobile/tablet viewport tests
 ```
 
 ## What's Tested
 
-### Unit Tests (56 tests)
+### Unit Tests (76 tests)
 - **Remark Plugin** (16 tests): Obsidian image syntax transformation
-- **Content Schemas** (24 tests): Zod schema validation for posts and work collections
-- **Build Output** (16 tests): Verifies correct HTML generation and file structure
+- **Content Schemas** (31 tests): Zod schema validation for posts and work collections
+- **Utility Functions** (29 tests): sortByDate, readTime, title extraction
 
-### E2E Tests (33 tests)
-- **Home Page** (9 tests): Navigation, content display, links
-- **Post Pages** (10 tests): Post rendering, dates, back navigation
-- **Work Pages** (14 tests): Work item rendering, images, tags, team info
+### Build Validation Tests (16 tests)
+- HTML structure and file generation
+- Dynamic route generation for posts and work
+- Image path validation
+- DOCTYPE and tag closure validation
+
+### E2E Tests (76 tests)
+- **Home Page** (11 tests): Navigation, content display, breadcrumb behavior
+- **About Page** (12 tests): Content sections, responsive table layout
+- **Post Pages** (11 tests): Post rendering, dates, markdown, back navigation
+- **Work Pages** (15 tests): Work item rendering, images, tags, team info
+- **404 Page** (9 tests): Error page display and navigation
+- **Breadcrumb** (3 tests): Navigation state across pages
+- **Accessibility** (8 tests): WCAG compliance via axe-core on all pages
+- **Mobile/Tablet** (8 tests): Responsive layout validation at 375px and 768px viewports
+
+## Testing Flow
+
+| Stage | What Runs | Purpose |
+|-------|-----------|---------|
+| **Commit** | Type check + Unit tests | Fast feedback, catch obvious errors |
+| **Push** | Full CI (type check, unit, build, E2E) | Comprehensive validation |
+| **PR to master** | Full CI + Lighthouse CI | Quality gate with 100/100 score enforcement |
+| **Merge to master** | Full CI | Final validation |
 
 ## CI/CD
 
@@ -75,17 +104,29 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and 
 1. Type checking (`npm run check`)
 2. Unit tests (`npm test`)
 3. Build (`npm run build`)
-4. E2E tests (`npx playwright test`)
+4. Build validation tests (`npm run test:build`)
+5. E2E tests (`npx playwright test`)
 
-Tests must pass before code can be merged.
+### Lighthouse CI (PRs to master only)
 
-## Test Coverage
+On pull requests to master, Lighthouse CI runs additionally to enforce quality standards:
 
-Current test coverage focuses on:
-- ✅ Custom remark plugin logic (80%+ coverage)
-- ✅ Content collection schemas (100% coverage)
-- ✅ Build output validation
-- ✅ Critical user paths in E2E tests
+- **Performance**: 100/100
+- **Accessibility**: 100/100
+- **Best Practices**: 100/100
+- **SEO**: 100/100
+
+Configuration is in `lighthouserc.json`.
+
+## Pre-commit Hook
+
+The pre-commit hook (via Husky) runs before every commit:
+
+```bash
+npm run check && npm test
+```
+
+This ensures type errors and unit test failures are caught before commits.
 
 ## Adding New Tests
 
@@ -112,9 +153,23 @@ test('my test', async ({ page }) => {
 });
 ```
 
+### Accessibility Tests
+Add axe-core assertions to E2E tests:
+```typescript
+import AxeBuilder from '@axe-core/playwright';
+
+test('should have no accessibility violations', async ({ page }) => {
+  await page.goto('/my-page');
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+```
+
 ## Notes
 
 - E2E tests require the project to be built first (`npm run build`)
 - Playwright tests run against the preview server (`npm run preview`)
 - Vitest excludes the `tests/e2e/` directory to avoid conflicts with Playwright
+- Accessibility tests wait 700ms for cascade animations to complete
+- Mobile tests use viewport sizes: 375x667 (phone), 768x1024 (tablet)
 - All tests run in CI before deployment
