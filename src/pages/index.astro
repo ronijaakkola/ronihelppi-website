@@ -45,9 +45,12 @@ const work = sortByDateDesc(await getCollection('work'));
                 />
               ))}
             </div>
-            <span class="view-all-link">
-              <a href="/work">View all projects</a><span class="arrow">→</span>
-            </span>
+            <a href="/work" class="view-all-link">
+              <span>View all projects</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arrow-icon">
+                <path d="M1.5 6H10.5M10.5 6L6.25 1.75M10.5 6L6.25 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
           </section>
 
           <!-- Writing Section -->
@@ -62,9 +65,12 @@ const work = sortByDateDesc(await getCollection('work'));
                 />
               ))}
             </div>
-            <span class="view-all-link">
-              <a href="/posts">View all posts</a><span class="arrow">→</span>
-            </span>
+            <a href="/posts" class="view-all-link">
+              <span>View all posts</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arrow-icon">
+                <path d="M1.5 6H10.5M10.5 6L6.25 1.75M10.5 6L6.25 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
           </section>
 
           <!-- Elsewhere Section -->
@@ -170,19 +176,26 @@ const work = sortByDateDesc(await getCollection('work'));
   .view-all-link {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--gap-4xs);
     font-size: var(--text-small);
     letter-spacing: var(--tracking-small);
     color: var(--color-text-primary);
-  }
-
-  .view-all-link a {
-    text-decoration-line: underline;
-    color: inherit;
-  }
-
-  .arrow {
     text-decoration: none;
+  }
+
+  .view-all-link span {
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-text-secondary);
+    text-underline-offset: 2px;
+    transition: text-decoration-color 100ms;
+  }
+
+  .view-all-link:hover span {
+    text-decoration-color: var(--color-text-primary);
+  }
+
+  .arrow-icon {
+    flex-shrink: 0;
     color: var(--color-text-secondary);
   }
 
