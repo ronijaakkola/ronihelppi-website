@@ -17,9 +17,33 @@ const { Content } = await item.render();
 
 // Derive title from id (preserves original filename)
 const title = getTitle(item.id);
+
+// Use frontmatter description or generate from body
+function generateDescription(description: string | undefined, body: string): string {
+  if (description) return description;
+
+  const plainText = body
+    .replace(/^---[\s\S]*?---/, '') // Remove frontmatter
+    .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+    .replace(/[#*_`~]/g, '') // Remove markdown formatting
+    .replace(/\n+/g, ' ') // Replace newlines with spaces
+    .trim();
+
+  if (plainText.length <= 155) return plainText;
+  return plainText.slice(0, 152).trim() + '...';
+}
+
+const description = generateDescription(item.data.description, item.body || '');
 ---
 
-<BaseLayout title={title}>
+<BaseLayout
+  title={`${title} | Roni Helppi`}
+  description={description}
+  image={item.data.coverImage}
+  type="article"
+  publishedTime={item.data.date.toISOString()}
+>
   <main id="main-content" class="main">
     <article class="layout">
       <div class="prose">
