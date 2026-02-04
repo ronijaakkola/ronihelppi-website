@@ -367,3 +367,24 @@ ol {
   color: var(--color-text-primary);
   line-height: var(--leading-normal);
 }
+
+/* ==========================================================================
+   Focus Styles (Accessibility)
+   ========================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
+/* Buttons with light backgrounds need dark outlines */
+button:focus-visible,
+[type="button"]:focus-visible,
+[type="submit"]:focus-visible {
+  outline-color: var(--color-text-primary);
+}
+
+/* Remove default focus ring, rely on focus-visible */
+:focus:not(:focus-visible) {
+  outline: none;
+}

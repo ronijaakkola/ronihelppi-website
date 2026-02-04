@@ -3,7 +3,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 ---
 
 <header class="header">
-  <nav class="nav">
+  <nav class="nav" aria-label="Main">
     <div class="logo-breadcrumb">
       <a href="/" class="logo">Roni Helppi</a>
       <span class="breadcrumb-separator" id="breadcrumb-separator"></span>
@@ -21,7 +21,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       <KeyboardShortcut key="C" />
     </a>
 
-    <button class="menu-button" aria-label="Menu">
+    <button class="menu-button" aria-label="Menu" aria-expanded="false">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="3" y1="6" x2="21" y2="6" />
         <line x1="3" y1="12" x2="21" y2="12" />
