@@ -156,7 +156,7 @@ describe('Build Output Validation', () => {
   });
 
   describe('Image Paths', () => {
-    it('Obsidian images are transformed to /images/ path', async () => {
+    it('images use valid paths (/images/ or /_astro/)', async () => {
       // Check if any work or post content contains image references
       const workPath = join(distPath, 'work');
       const entries = await readdir(workPath, { withFileTypes: true });
@@ -167,10 +167,10 @@ describe('Build Output Validation', () => {
         const content = await readFile(workIndexPath, 'utf-8');
 
         if (content.includes('<img')) {
-          // Images should use /images/ path
+          // Images should use /images/ path (static) or /_astro/ path (optimized)
           const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/);
           if (imgMatch) {
-            expect(imgMatch[1]).toMatch(/^\/images\//);
+            expect(imgMatch[1]).toMatch(/^\/(images|_astro)\//);
           }
         }
       }
