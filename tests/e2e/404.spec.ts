@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('404 Page', () => {
   test('should load successfully for non-existent routes', async ({ page }) => {
     await page.goto('/nonexistent-page');
-    await expect(page).toHaveTitle(/Page not found – Roni Helppi/);
+    await expect(page).toHaveTitle(/Page Not Found \| Roni Helppi/);
   });
 
   test('should display the error heading', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('404 Page', () => {
     await aboutLink.click();
 
     await expect(page).toHaveURL('/about');
-    await expect(page).toHaveTitle(/About – Roni Helppi/);
+    await expect(page).toHaveTitle(/About \| Roni Helppi/);
   });
 
   test('should navigate to posts when clicking My writing link', async ({ page }) => {
