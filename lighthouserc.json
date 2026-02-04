@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicholasbraun/lighthouse-ci/main/.lighthouseci.schema.json",
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm run preview",
+      "startServerReadyPattern": "Local",
+      "url": [
+        "http://localhost:4321/",
+        "http://localhost:4321/about",
+        "http://localhost:4321/posts",
+        "http://localhost:4321/work"
+      ],
+      "numberOfRuns": 1
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 1 }],
+        "categories:accessibility": ["error", { "minScore": 1 }],
+        "categories:best-practices": ["error", { "minScore": 1 }],
+        "categories:seo": ["error", { "minScore": 1 }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
