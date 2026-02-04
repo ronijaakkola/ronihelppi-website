@@ -5,23 +5,19 @@ interface Props {
 }
 
 const { href, label = 'Back' } = Astro.props;
+
+const Tag = href ? 'a' : 'button';
+const tagProps = href
+  ? { href }
+  : { type: 'button' as const, onclick: 'history.back()' };
 ---
 
-{href ? (
-  <a href={href} class="back-link">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M10.5 6H1.5M1.5 6L5.75 1.75M1.5 6L5.75 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>{label}</span>
-  </a>
-) : (
-  <button type="button" class="back-link" onclick="history.back()">
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M10.5 6H1.5M1.5 6L5.75 1.75M1.5 6L5.75 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span>{label}</span>
-  </button>
-)}
+<Tag class="back-link" {...tagProps}>
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M10.5 6H1.5M1.5 6L5.75 1.75M1.5 6L5.75 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span>{label}</span>
+</Tag>
 
 <style>
   .back-link {
