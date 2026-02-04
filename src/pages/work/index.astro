@@ -71,7 +71,12 @@ const filters = [
                 style={`--cascade-delay: ${index * 60}ms`}
               >
                 {coverImage && (
-                  <img src={coverImage} alt={title} class="grid-item-image" />
+                  <img
+                    src={coverImage}
+                    alt={title}
+                    class="grid-item-image"
+                    style={`view-transition-name: work-cover-${item.slug}`}
+                  />
                 )}
                 <span class="visually-hidden">{title}</span>
               </a>
@@ -157,14 +162,13 @@ const filters = [
     position: relative;
     height: 224px;
     border-radius: var(--radius-md);
-    border: 0.5px solid var(--color-border);
     background: rgba(0, 0, 0, 0.5);
     transition: opacity 300ms ease, transform 300ms ease;
     text-decoration: none;
     overflow: hidden;
   }
 
-  .grid-item:hover {
+  .grid-item:hover .grid-item-image {
     border-color: var(--color-text-primary);
   }
 
@@ -176,6 +180,9 @@ const filters = [
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--color-border);
+    transition: border-color 150ms ease;
   }
 
   /* Bento grid spanning patterns based on Figma */
