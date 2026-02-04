@@ -17,6 +17,8 @@ const workCollection = defineCollection({
     tags: z.array(z.string()).optional(),
     team: z.string().optional(),
     coverImage: z.string().optional(),
+    duration: z.string().optional(),
+    skills: z.string().optional(),
   }),
 });
 
