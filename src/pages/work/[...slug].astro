@@ -19,20 +19,154 @@ const title = getTitle(item.id);
 ---
 
 <BaseLayout title={title}>
-  <article>
-    <a href="/">&larr; Back</a>
-    <h1>{title}</h1>
-    <time datetime={item.data.date.toISOString()}>
-      {item.data.date.toLocaleDateString()}
-    </time>
-    {item.data.team && <p>Team: {item.data.team}</p>}
-    {item.data.tags && (
-      <ul>
-        {item.data.tags.map((tag) => (
-          <li>{tag.replace('#', '')}</li>
-        ))}
-      </ul>
-    )}
-    <Content />
-  </article>
+  <main class="main">
+    <div class="layout">
+      <div class="prose">
+        <header class="work-header">
+          <h1 class="work-title">{title}</h1>
+          <p class="work-subtitle">Case study</p>
+        </header>
+      </div>
+
+      {item.data.coverImage && (
+        <div class="cover-image-container">
+          <img
+            src={item.data.coverImage}
+            alt={`Cover image for ${title}`}
+            class="cover-image"
+          />
+        </div>
+      )}
+
+      <div class="prose">
+        <div class="work-meta">
+          {item.data.description && (
+            <p class="work-description">{item.data.description}</p>
+          )}
+
+          {item.data.team && (
+            <div class="meta-item">
+              <span class="meta-label">Team</span>
+              <span class="meta-value">{item.data.team}</span>
+            </div>
+          )}
+
+          {item.data.duration && (
+            <div class="meta-item">
+              <span class="meta-label">Duration</span>
+              <span class="meta-value">{item.data.duration}</span>
+            </div>
+          )}
+
+          {item.data.skills && (
+            <div class="meta-item">
+              <span class="meta-label">Skills</span>
+              <span class="meta-value">{item.data.skills}</span>
+            </div>
+          )}
+        </div>
+
+        <div class="divider"></div>
+
+        <article class="prose-content">
+          <Content />
+        </article>
+      </div>
+    </div>
+  </main>
 </BaseLayout>
+
+<style>
+  .work-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+
+  .work-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-hero);
+    font-weight: 400;
+    letter-spacing: var(--tracking-hero);
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+  }
+
+  .work-subtitle {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: 400;
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-secondary);
+  }
+
+  .cover-image-container {
+    width: 100%;
+    max-width: var(--layout-width);
+    margin-top: var(--gap-lg);
+  }
+
+  .cover-image {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--color-border);
+  }
+
+  .work-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+    margin-top: var(--gap-lg);
+  }
+
+  .work-description {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    font-weight: 400;
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-primary);
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+
+  .meta-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+  }
+
+  .meta-value {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-primary);
+  }
+
+  .divider {
+    height: 1px;
+    background-color: var(--color-divider);
+    margin-top: var(--gap-section);
+    margin-bottom: var(--gap-section);
+  }
+
+  @media (max-width: 960px) {
+    .cover-image-container {
+      padding-left: var(--spacing-horizontal-tablet);
+      padding-right: var(--spacing-horizontal-tablet);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .cover-image-container {
+      padding-left: var(--spacing-horizontal-phone);
+      padding-right: var(--spacing-horizontal-phone);
+    }
+  }
+</style>
