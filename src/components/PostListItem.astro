@@ -9,10 +9,12 @@ const { title, date, href } = Astro.props;
 
 // Format date as YYYY-MM
 const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+// ISO date for datetime attribute
+const isoDate = date.toISOString().split('T')[0];
 ---
 
 <div class="post-item">
-  <span class="post-date">{formattedDate}</span>
+  <time class="post-date" datetime={isoDate}>{formattedDate}</time>
   <a href={href} class="post-title">{title}</a>
 </div>
 

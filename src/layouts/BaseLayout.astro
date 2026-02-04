@@ -27,6 +27,7 @@ const { title } = Astro.props;
     <ViewTransitions />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="site-wrapper">
       <Header transition:persist />
       <slot />
@@ -35,6 +36,31 @@ const { title } = Astro.props;
 </html>
 
 <style is:global>
+  /* Skip to main content link - styled like contact button */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 100;
+    padding: 4px 8px;
+    background-color: var(--color-button-bg);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: -0.6px;
+    color: var(--color-button-text);
+    text-decoration: none;
+    opacity: 0;
+    transition: top 0.2s ease, opacity 0.2s ease;
+  }
+
+  .skip-link:focus {
+    top: 12px;
+    opacity: 1;
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
   /* Ensure view transition background matches site background */
   ::view-transition {
     background-color: var(--color-bg);
