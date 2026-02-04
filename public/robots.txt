@@ -1,0 +1,6 @@
+# https://www.ronihelppi.com robots.txt
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.ronihelppi.com/sitemap-index.xml

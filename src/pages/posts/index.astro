@@ -21,7 +21,10 @@ const postsByYear = posts.reduce((acc, post) => {
 const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 ---
 
-<BaseLayout title="Posts - Roni Helppi">
+<BaseLayout
+  title="Posts | Roni Helppi"
+  description="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."
+>
   <main class="main">
     <div class="layout">
       <div class="prose">

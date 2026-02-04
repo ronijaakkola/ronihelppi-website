@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
     "astro": "^5.17.1",
     "rehype-external-links": "^3.0.0",
     "unist-util-visit": "^5.1.0"

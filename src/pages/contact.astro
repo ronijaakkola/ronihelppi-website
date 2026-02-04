@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Contact | Roni Helppi"
+  description="Get in touch with Roni Helppi. Reach out via email or connect on LinkedIn for design collaboration, speaking opportunities, or just to say hello."
+>
+  <main class="main">
+    <div class="layout">
+      <div class="prose">
+        <div class="content">
+          <h1 class="page-title">Contact</h1>
+          <div class="contact-info">
+            <p>
+              I'd love to hear from you. Whether you have a project in mind, want to collaborate, or just want to say hello.
+            </p>
+            <div class="contact-methods">
+              <div class="contact-method">
+                <span class="contact-label">Email</span>
+                <a href="mailto:hello@ronihelppi.com" class="contact-link">hello@ronihelppi.com</a>
+              </div>
+              <div class="contact-method">
+                <span class="contact-label">LinkedIn</span>
+                <a href="https://linkedin.com/in/ronihelppi" class="contact-link">linkedin.com/in/ronihelppi</a>
+              </div>
+              <div class="contact-method">
+                <span class="contact-label">Twitter</span>
+                <a href="https://twitter.com/ronihelppi" class="contact-link">@ronihelppi</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+  }
+
+  .contact-info > p {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-primary);
+    max-width: 468px;
+  }
+
+  .contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .contact-method {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+  }
+
+  .contact-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+  }
+
+  .contact-link {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+    text-decoration-line: underline;
+  }
+</style>

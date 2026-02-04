@@ -42,9 +42,31 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
 
 // Get hero image from frontmatter
 const heroImage = post.data.heroImage;
+
+// Generate description from post body (first ~155 chars)
+function generateDescription(body: string): string {
+  const plainText = body
+    .replace(/^---[\s\S]*?---/, '') // Remove frontmatter
+    .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+    .replace(/[#*_`~]/g, '') // Remove markdown formatting
+    .replace(/\n+/g, ' ') // Replace newlines with spaces
+    .trim();
+
+  if (plainText.length <= 155) return plainText;
+  return plainText.slice(0, 152).trim() + '...';
+}
+
+const description = generateDescription(post.body || '');
 ---
 
-<BaseLayout title={title}>
+<BaseLayout
+  title={`${title} | Roni Helppi`}
+  description={description}
+  image={heroImage}
+  type="article"
+  publishedTime={post.data.date.toISOString()}
+>
   <main class="main">
     <div class="layout">
       <!-- Post Heading -->
