@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import { getTitle } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
 
@@ -75,12 +76,14 @@ const filters = [
                 style={`--cascade-delay: ${index * 60}ms`}
               >
                 {coverImage && (
-                  <img
+                  <Image
                     src={coverImage}
                     alt=""
                     class="grid-item-image"
-                    width="584"
-                    height="224"
+                    widths={[372, 584, 744, 1168]}
+                    sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                    format="webp"
+                    quality={80}
                     loading={index < 3 ? "eager" : "lazy"}
                     style={`view-transition-name: work-cover-${item.slug}`}
                   />

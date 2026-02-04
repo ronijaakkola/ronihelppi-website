@@ -5,7 +5,7 @@ tags:
   - "#personal"
   - "#games"
 team: 3 people
-coverImage: /images/resokill-cover.png
+coverImage: ../images/resokill-cover.png
 duration: "11/2025 — 12/2025"
 skills: "Game design, Game development, Unity, 3D modelling"
 ---

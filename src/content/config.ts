@@ -11,12 +11,12 @@ const postsCollection = defineCollection({
 
 const workCollection = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     date: z.coerce.date(),
     description: z.string().optional(),
     tags: z.array(z.string()).optional(),
     team: z.string().optional(),
-    coverImage: z.string().optional(),
+    coverImage: image().optional(),
     duration: z.string().optional(),
     skills: z.string().optional(),
   }),
