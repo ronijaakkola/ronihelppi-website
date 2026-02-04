@@ -53,10 +53,14 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     <meta name="twitter:description" content={description} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts - loaded asynchronously to avoid render blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Rethink+Sans:wght@400;500;600&family=Spectral:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Rethink+Sans:wght@400;500;600&family=Spectral:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Rethink+Sans:wght@400;500;600&family=Spectral:wght@400;500&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&family=Rethink+Sans:wght@400;500;600&family=Spectral:wght@400;500&display=swap" />
+    </noscript>
 
     <title>{title}</title>
     <ViewTransitions />
