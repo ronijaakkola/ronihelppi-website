@@ -9,7 +9,7 @@ const { href, label = 'Back' } = Astro.props;
 const Tag = href ? 'a' : 'button';
 const tagProps = href
   ? { href }
-  : { type: 'button', onclick: 'history.back()' };
+  : { type: 'button' as const, onclick: 'history.back()' };
 ---
 
 <Tag class="back-link" {...tagProps}>
