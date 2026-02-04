@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
 import { getTitle } from '../../utils/title';
 
 export async function getStaticPaths() {
@@ -23,8 +24,11 @@ const title = getTitle(item.id);
     <article class="layout">
       <div class="prose">
         <header class="work-header">
-          <h1 class="work-title">{title}</h1>
-          <p class="work-subtitle">Case study</p>
+          <BackLink />
+          <div class="work-title-group">
+            <h1 class="work-title">{title}</h1>
+            <p class="work-subtitle">Case study</p>
+          </div>
         </header>
       </div>
 
@@ -93,6 +97,12 @@ const title = getTitle(item.id);
 
 <style>
   .work-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-2xs);
+  }
+
+  .work-title-group {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);

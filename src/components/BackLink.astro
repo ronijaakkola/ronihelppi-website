@@ -1,0 +1,58 @@
+---
+interface Props {
+  href?: string;
+  label?: string;
+}
+
+const { href, label = 'Back' } = Astro.props;
+---
+
+{href ? (
+  <a href={href} class="back-link">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M10.5 6H1.5M1.5 6L5.75 1.75M1.5 6L5.75 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>{label}</span>
+  </a>
+) : (
+  <button type="button" class="back-link" onclick="history.back()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M10.5 6H1.5M1.5 6L5.75 1.75M1.5 6L5.75 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>{label}</span>
+  </button>
+)}
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-4xs);
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .back-link span {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .back-link:hover {
+    color: var(--color-text-primary);
+  }
+
+  .back-link:hover span {
+    text-decoration-color: var(--color-text-primary);
+  }
+
+  .back-link svg {
+    flex-shrink: 0;
+  }
+</style>
