@@ -75,6 +75,9 @@ const filters = [
                     src={coverImage}
                     alt={title}
                     class="grid-item-image"
+                    width="584"
+                    height="224"
+                    loading={index < 3 ? "eager" : "lazy"}
                     style={`view-transition-name: work-cover-${item.slug}`}
                   />
                 )}
@@ -148,6 +151,11 @@ const filters = [
 
   .filter-chip:not(.active):hover {
     background: rgba(255, 255, 255, 0.05);
+  }
+
+  .filter-chip:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
   }
 
   /* Bento Grid */
