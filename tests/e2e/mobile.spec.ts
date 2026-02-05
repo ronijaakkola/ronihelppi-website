@@ -3,6 +3,101 @@ import { test, expect } from '@playwright/test';
 // Mobile viewport (iPhone SE)
 test.use({ viewport: { width: 375, height: 667 } });
 
+test.describe('Mobile Menu', () => {
+  test('menu button is visible on mobile', async ({ page }) => {
+    await page.goto('/');
+    const menuButton = page.locator('#menu-button');
+    await expect(menuButton).toBeVisible();
+  });
+
+  test('opens when clicking menu button', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).toHaveClass(/open/);
+  });
+
+  test('closes when clicking close button', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).toHaveClass(/open/);
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).not.toHaveClass(/open/);
+  });
+
+  test('closes when pressing Escape', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).toHaveClass(/open/);
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#mobile-menu')).not.toHaveClass(/open/);
+  });
+
+  test('navigates and closes when clicking link', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await page.click('.mobile-menu-link >> text=About');
+    await expect(page).toHaveURL('/about');
+    await expect(page.locator('#mobile-menu')).not.toHaveClass(/open/);
+  });
+
+  test('all navigation links are visible when open', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+
+    await expect(page.locator('.mobile-menu-link >> text=About')).toBeVisible();
+    await expect(page.locator('.mobile-menu-link >> text=Work')).toBeVisible();
+    await expect(page.locator('.mobile-menu-link >> text=Posts')).toBeVisible();
+    await expect(page.locator('.mobile-menu-link >> text=Contact')).toBeVisible();
+  });
+
+  test('header has menu-open class when menu is open', async ({ page }) => {
+    await page.goto('/');
+    const header = page.locator('.header');
+
+    await expect(header).not.toHaveClass(/menu-open/);
+    await page.click('#menu-button');
+    await expect(header).toHaveClass(/menu-open/);
+  });
+});
+
+test.describe('Mobile Menu Accessibility', () => {
+  test('has correct aria-expanded state', async ({ page }) => {
+    await page.goto('/');
+    const button = page.locator('#menu-button');
+
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'true');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('menu has correct aria-hidden state', async ({ page }) => {
+    await page.goto('/');
+    const menu = page.locator('#mobile-menu');
+
+    await expect(menu).toHaveAttribute('aria-hidden', 'true');
+    await page.click('#menu-button');
+    await expect(menu).toHaveAttribute('aria-hidden', 'false');
+  });
+
+  test('returns focus to button on Escape', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#menu-button')).toBeFocused();
+  });
+
+  test('has correct aria-label on button', async ({ page }) => {
+    await page.goto('/');
+    const button = page.locator('#menu-button');
+
+    await expect(button).toHaveAttribute('aria-label', 'Open menu');
+    await button.click();
+    await expect(button).toHaveAttribute('aria-label', 'Close menu');
+  });
+});
+
 test.describe('Mobile Layout', () => {
   test('home page renders correctly on mobile', async ({ page }) => {
     await page.goto('/');
@@ -41,7 +136,7 @@ test.describe('Mobile Layout', () => {
     await expect(page).toHaveTitle(/About/);
 
     // About heading should be visible
-    const heading = page.locator('h1');
+    const heading = page.locator('.page-title');
     await expect(heading).toBeVisible();
   });
 
@@ -68,7 +163,7 @@ test.describe('Mobile Layout', () => {
     await page.goto('/contact');
 
     // Contact heading should be visible
-    const heading = page.locator('h1');
+    const heading = page.locator('.page-title');
     await expect(heading).toContainText('Contact');
 
     // Contact methods should be visible
@@ -84,7 +179,7 @@ test.describe('Mobile Layout', () => {
     await postLink.click();
 
     // Post title should be visible
-    const title = page.locator('h1');
+    const title = page.locator('.page-title');
     await expect(title).toBeVisible();
 
     // Content should not overflow
@@ -137,5 +232,20 @@ test.describe('Tablet Layout', () => {
         expect(yDifference).toBeLessThan(50);
       }
     }
+  });
+});
+
+test.describe('Desktop - No Mobile Menu', () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test('menu button is hidden on desktop', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#menu-button')).not.toBeVisible();
+  });
+
+  test('desktop nav links are visible', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.nav-links')).toBeVisible();
+    await expect(page.locator('.contact-button')).toBeVisible();
   });
 });

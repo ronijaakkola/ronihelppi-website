@@ -399,3 +399,11 @@ button:focus-visible,
 :focus:not(:focus-visible) {
   outline: none;
 }
+
+/* ==========================================================================
+   Mobile Menu Utilities
+   ========================================================================== */
+
+.scroll-lock {
+  overflow: hidden;
+}

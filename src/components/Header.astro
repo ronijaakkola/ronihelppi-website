@@ -21,15 +21,28 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       <KeyboardShortcut key="C" />
     </a>
 
-    <button class="menu-button" aria-label="Menu" aria-expanded="false">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="6" x2="21" y2="6" />
-        <line x1="3" y1="12" x2="21" y2="12" />
-        <line x1="3" y1="18" x2="21" y2="18" />
+    <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M13 5H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 12H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 19H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M6.75827 17.2426L12.0009 12M12.0009 12L17.2435 6.75736M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </nav>
 </header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+    <a href="/about" class="mobile-menu-link">About</a>
+    <a href="/work" class="mobile-menu-link">Work</a>
+    <a href="/posts" class="mobile-menu-link">Posts</a>
+    <a href="/contact" class="mobile-menu-link">Contact</a>
+  </nav>
+</div>
 
 <style>
   .header {
@@ -189,6 +202,96 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     justify-self: end;
   }
 
+  .menu-button .close-icon {
+    display: none;
+  }
+
+  .header.menu-open .menu-button .menu-icon {
+    display: none;
+  }
+
+  .header.menu-open .menu-button .close-icon {
+    display: block;
+  }
+
+  /* Header background when menu is open */
+  .header.menu-open {
+    background-color: #000000;
+  }
+
+  /* Mobile Menu Overlay */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 72px var(--spacing-horizontal-phone) 24px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .mobile-menu.open {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mobile-menu-link {
+    font-family: var(--font-sans);
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -1.6px;
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .mobile-menu-link:hover {
+    text-decoration: none;
+  }
+
+  .mobile-menu.open .mobile-menu-link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Cascading animation delays */
+  .mobile-menu.open .mobile-menu-link:nth-child(1) {
+    transition-delay: 0ms;
+  }
+
+  .mobile-menu.open .mobile-menu-link:nth-child(2) {
+    transition-delay: 50ms;
+  }
+
+  .mobile-menu.open .mobile-menu-link:nth-child(3) {
+    transition-delay: 100ms;
+  }
+
+  .mobile-menu.open .mobile-menu-link:nth-child(4) {
+    transition-delay: 150ms;
+  }
+
+  /* Reset delays when closing */
+  .mobile-menu:not(.open) .mobile-menu-link {
+    transition-delay: 0ms;
+  }
+
   /* Tablet */
   @media (max-width: 960px) {
     .header {
@@ -219,10 +322,85 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       align-items: center;
       justify-content: center;
     }
+
+    .mobile-menu {
+      display: block;
+    }
   }
 </style>
 
 <script>
+  // Mobile menu toggle functionality
+  function initMobileMenu() {
+    const menuButton = document.getElementById('menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const header = document.querySelector('.header');
+    const menuLinks = mobileMenu?.querySelectorAll('.mobile-menu-link');
+
+    if (!menuButton || !mobileMenu || !header) return;
+
+    // Store references to avoid TypeScript null warnings in nested functions
+    const menu = mobileMenu;
+    const btn = menuButton;
+    const hdr = header;
+
+    function openMenu() {
+      menu.classList.add('open');
+      menu.setAttribute('aria-hidden', 'false');
+      hdr.classList.add('menu-open');
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Close menu');
+      document.body.classList.add('scroll-lock');
+    }
+
+    function closeMenu() {
+      menu.classList.remove('open');
+      menu.setAttribute('aria-hidden', 'true');
+      hdr.classList.remove('menu-open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open menu');
+      document.body.classList.remove('scroll-lock');
+    }
+
+    function toggleMenu() {
+      const isOpen = menu.classList.contains('open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }
+
+    // Toggle on button click
+    btn.addEventListener('click', toggleMenu);
+
+    // Close on link click
+    menuLinks?.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        closeMenu();
+        btn.focus();
+      }
+    });
+
+    // Close menu on resize to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 600 && menu.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+  }
+
+  // Initialize on page load
+  initMobileMenu();
+
+  // Re-initialize after Astro view transitions
+  document.addEventListener('astro:after-swap', initMobileMenu);
+
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
@@ -230,6 +408,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     if (activeElement?.tagName === 'INPUT') return;
     if (activeElement?.tagName === 'TEXTAREA') return;
     if (activeElement?.isContentEditable) return;
+
+    // Don't trigger keyboard shortcuts when menu is open
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu?.classList.contains('open')) return;
 
     if (e.key === 'c' || e.key === 'C') {
       window.location.href = '/contact';
