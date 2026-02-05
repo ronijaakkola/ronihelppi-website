@@ -57,7 +57,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     height: var(--header-height);
     width: 100%;
     padding: 0 355px;
-    overflow: hidden;
     view-transition-name: header;
   }
 
@@ -76,7 +75,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     align-items: center;
     width: 976px;
     min-height: 1px;
-    overflow: hidden;
   }
 
   .logo {
@@ -146,7 +144,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     to { opacity: 0; }
   }
 
-  .breadcrumb:hover {
+  .breadcrumb:hover,
+  .breadcrumb:focus-visible {
     color: var(--color-text-primary);
     text-decoration-line: underline;
   }
@@ -170,7 +169,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     text-decoration: none;
   }
 
-  .nav-link:hover {
+  .nav-link:hover,
+  .nav-link:focus-visible {
     color: var(--color-text-primary);
     text-decoration-line: underline;
   }
@@ -270,7 +270,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
   }
 
-  .mobile-menu-link:hover {
+  .mobile-menu-link:hover,
+  .mobile-menu-link:focus-visible {
     text-decoration: underline;
     color: var(--color-text-primary);
   }
@@ -327,7 +328,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     text-align: right;
   }
 
-  .mobile-menu-rss:hover {
+  .mobile-menu-rss:hover,
+  .mobile-menu-rss:focus-visible {
     color: var(--color-text-primary);
   }
 
