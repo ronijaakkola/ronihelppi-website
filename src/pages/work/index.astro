@@ -157,7 +157,8 @@ const filters = [
     font-weight: 300;
   }
 
-  .filter-chip:not(.active):hover {
+  .filter-chip:not(.active):hover,
+  .filter-chip:not(.active):focus-visible {
     background: rgba(255, 255, 255, 0.05);
   }
 
@@ -172,6 +173,8 @@ const filters = [
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap-md);
     width: 100%;
+    padding: 4px;
+    margin: -4px;
   }
 
   .grid-item {
@@ -184,7 +187,8 @@ const filters = [
     overflow: hidden;
   }
 
-  .grid-item:hover .grid-item-image {
+  .grid-item:hover .grid-item-image,
+  .grid-item:focus-visible .grid-item-image {
     border-color: var(--color-text-primary);
   }
 
