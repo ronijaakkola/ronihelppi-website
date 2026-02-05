@@ -37,11 +37,15 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 <!-- Mobile Menu Overlay -->
 <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
   <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+    <a href="/" class="mobile-menu-link">Home</a>
     <a href="/about" class="mobile-menu-link">About</a>
     <a href="/work" class="mobile-menu-link">Work</a>
     <a href="/posts" class="mobile-menu-link">Posts</a>
     <a href="/contact" class="mobile-menu-link">Contact</a>
   </nav>
+  <div class="mobile-menu-footer">
+    <a href="/rss.xml" class="mobile-menu-rss">RSS</a>
+  </div>
 </div>
 
 <style>
@@ -171,6 +175,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     text-decoration-line: underline;
   }
 
+  .nav-link[aria-current="page"] {
+    color: var(--color-text-primary);
+  }
+
   .contact-button {
     display: flex;
     align-items: center;
@@ -222,6 +230,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   /* Mobile Menu Overlay */
   .mobile-menu {
     display: none;
+    flex-direction: column;
     position: fixed;
     top: var(--header-height);
     left: 0;
@@ -254,15 +263,20 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     font-size: 32px;
     font-weight: 400;
     letter-spacing: -1.6px;
-    color: #ffffff;
+    color: var(--color-text-secondary);
     text-decoration: none;
     opacity: 0;
     transform: translateY(-20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
   }
 
   .mobile-menu-link:hover {
-    text-decoration: none;
+    text-decoration: underline;
+    color: var(--color-text-primary);
+  }
+
+  .mobile-menu-link[aria-current="page"] {
+    color: var(--color-text-primary);
   }
 
   .mobile-menu.open .mobile-menu-link {
@@ -287,9 +301,34 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     transition-delay: 150ms;
   }
 
+  .mobile-menu.open .mobile-menu-link:nth-child(5) {
+    transition-delay: 200ms;
+  }
+
   /* Reset delays when closing */
   .mobile-menu:not(.open) .mobile-menu-link {
     transition-delay: 0ms;
+  }
+
+  /* Mobile menu footer with RSS link */
+  .mobile-menu-footer {
+    position: absolute;
+    bottom: 24px;
+    right: var(--spacing-horizontal-phone);
+  }
+
+  .mobile-menu-rss {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -1.2px;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-align: right;
+  }
+
+  .mobile-menu-rss:hover {
+    color: var(--color-text-primary);
   }
 
   /* Tablet */
@@ -324,12 +363,64 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
 
     .mobile-menu {
-      display: block;
+      display: flex;
     }
   }
 </style>
 
 <script>
+  // Update active navigation state based on current URL
+  function updateActiveNavLinks() {
+    const pathname = window.location.pathname;
+
+    // Get all nav links (desktop and mobile)
+    const desktopLinks = document.querySelectorAll('.nav-link');
+    const mobileLinks = document.querySelectorAll('.mobile-menu-link');
+
+    // Clear all aria-current attributes first
+    desktopLinks.forEach(link => link.removeAttribute('aria-current'));
+    mobileLinks.forEach(link => link.removeAttribute('aria-current'));
+
+    // Determine the active section based on pathname
+    const getActiveSection = (path: string): string => {
+      if (path === '/') return '/';
+      const segments = path.split('/').filter(Boolean);
+      if (segments.length > 0) {
+        return `/${segments[0]}`;
+      }
+      return '/';
+    };
+
+    const activeSection = getActiveSection(pathname);
+
+    // Set aria-current for matching links
+    const setAriaCurrentForLinks = (links: NodeListOf<Element>) => {
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        // Exact match for home
+        if (href === '/' && activeSection === '/') {
+          link.setAttribute('aria-current', 'page');
+        }
+        // Section match for other pages
+        else if (href !== '/' && activeSection === href) {
+          link.setAttribute('aria-current', 'page');
+        }
+      });
+    };
+
+    setAriaCurrentForLinks(desktopLinks);
+    setAriaCurrentForLinks(mobileLinks);
+  }
+
+  // Initialize active nav state
+  updateActiveNavLinks();
+
+  // Update on view transitions
+  document.addEventListener('astro:after-swap', updateActiveNavLinks);
+  document.addEventListener('astro:page-load', updateActiveNavLinks);
+
   // Mobile menu toggle functionality
   function initMobileMenu() {
     const menuButton = document.getElementById('menu-button');
