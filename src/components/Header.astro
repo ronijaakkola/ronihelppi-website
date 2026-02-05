@@ -492,7 +492,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   // Re-initialize after Astro view transitions
   document.addEventListener('astro:after-swap', initMobileMenu);
 
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', async (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
 
     const activeElement = document.activeElement as HTMLElement | null;
@@ -505,7 +505,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     if (mobileMenu?.classList.contains('open')) return;
 
     if (e.key === 'c' || e.key === 'C') {
-      window.location.href = '/contact';
+      const { navigate } = await import('astro:transitions/client');
+      navigate('/contact');
     }
   });
 
