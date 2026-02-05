@@ -1,0 +1,51 @@
+# Learnings
+
+This file contains learnings from development sessions to help future agents avoid similar mistakes.
+
+---
+
+## Search all files when fixing CSS pattern issues
+
+When fixing a CSS pattern issue (like `overflow: hidden` clipping focus outlines), I initially only fixed the files I identified in my initial exploration. The user had to point out that posts page, about page, and contact page also had the same issue.
+
+**Steps to avoid this:**
+1. When identifying a CSS pattern problem, immediately do a project-wide search: `grep -r "pattern" src/`
+2. Create a checklist of ALL affected files before making any changes
+3. Fix all occurrences in one pass rather than iteratively
+
+---
+
+## Focus borders need width: fit-content in flex containers
+
+Links inside flex column containers stretch to full width by default, causing focus borders to span the entire container width instead of hugging the content.
+
+**Steps to avoid this:**
+1. When adding focus styles to links/buttons, check if they're inside a flex container
+2. Add `width: fit-content` to prevent stretching
+3. Test by tabbing through the page and visually verifying focus borders hug content
+
+---
+
+## Focus-visible should match hover styling
+
+When a component has `:hover` styling (color changes, underlines, background changes), the same visual feedback should apply on `:focus-visible` for keyboard users.
+
+**Steps to avoid this:**
+1. When writing hover styles, always add the same rules to focus-visible:
+   ```css
+   .element:hover,
+   .element:focus-visible {
+     /* visual feedback styles */
+   }
+   ```
+2. Keep the outline/border-radius for focus-visible separate from the visual feedback styles
+
+---
+
+## Lighthouse CI can be flaky for performance metrics
+
+The Lighthouse CI assertion for 100% performance score failed on PR checks (93%) while passing on push checks. This is due to variance in CI environment performance.
+
+**Notes:**
+- May need admin override to merge PRs when Lighthouse is flaky
+- Consider lowering the performance threshold slightly (e.g., 0.95) if this becomes a recurring issue
