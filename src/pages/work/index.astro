@@ -281,41 +281,62 @@ const filters = [
 
 <script is:inline>
   // Filter functionality
+  function applyFilter(filter, filterChips, gridItems) {
+    // Update active state and aria-pressed
+    filterChips.forEach(function(c) {
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed', 'false');
+    });
+
+    var activeChip = Array.from(filterChips).find(function(c) {
+      return c.dataset.filter === filter;
+    });
+    if (activeChip) {
+      activeChip.classList.add('active');
+      activeChip.setAttribute('aria-pressed', 'true');
+    }
+
+    // Filter grid items
+    gridItems.forEach(function(item) {
+      var categories = item.dataset.categories ? item.dataset.categories.split(',') : [];
+      if (filter === 'all' || categories.includes(filter)) {
+        item.classList.remove('hidden');
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  }
+
   function initFilters() {
-    const filterChips = document.querySelectorAll('.filter-chip');
-    const gridItems = document.querySelectorAll('.grid-item');
-    const filterStatus = document.getElementById('filter-status');
+    var filterChips = document.querySelectorAll('.filter-chip');
+    var gridItems = document.querySelectorAll('.grid-item');
+    var filterStatus = document.getElementById('filter-status');
 
-    filterChips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        // Update active state and aria-pressed
-        filterChips.forEach((c) => {
-          c.classList.remove('active');
-          c.setAttribute('aria-pressed', 'false');
-        });
-        chip.classList.add('active');
-        chip.setAttribute('aria-pressed', 'true');
+    // Restore filter from URL on load
+    var params = new URLSearchParams(window.location.search);
+    var initialFilter = params.get('filter') || 'all';
+    applyFilter(initialFilter, filterChips, gridItems);
 
-        const filter = chip.dataset.filter;
-        let visibleCount = 0;
-
-        // Filter grid items
-        gridItems.forEach((item) => {
-          const categories = item.dataset.categories?.split(',') || [];
-
-          if (filter === 'all' || categories.includes(filter)) {
-            item.classList.remove('hidden');
-            visibleCount++;
-          } else {
-            item.classList.add('hidden');
-          }
-        });
+    filterChips.forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var filter = chip.dataset.filter;
+        applyFilter(filter, filterChips, gridItems);
 
         // Announce filter result to screen readers
         if (filterStatus) {
-          const label = chip.querySelector('.filter-name')?.textContent || filter;
-          filterStatus.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'project' : 'projects'}${filter !== 'all' ? ` in ${label}` : ''}`;
+          var visibleCount = document.querySelectorAll('.grid-item:not(.hidden)').length;
+          var label = chip.querySelector('.filter-name')?.textContent || filter;
+          filterStatus.textContent = 'Showing ' + visibleCount + ' ' + (visibleCount === 1 ? 'project' : 'projects') + (filter !== 'all' ? ' in ' + label : '');
         }
+
+        // Sync to URL
+        var url = new URL(window.location);
+        if (filter === 'all') {
+          url.searchParams.delete('filter');
+        } else {
+          url.searchParams.set('filter', filter);
+        }
+        history.replaceState({}, '', url);
       });
     });
   }
@@ -324,7 +345,7 @@ const filters = [
   if (!window.__cascadeListenersAdded) {
     window.__cascadeListenersAdded = true;
 
-    document.addEventListener('astro:after-swap', () => {
+    document.addEventListener('astro:after-swap', function() {
       window.__wasNavigation = true;
     });
   }

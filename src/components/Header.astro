@@ -110,6 +110,29 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     view-transition-name: breadcrumb-separator;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .breadcrumb-separator {
+      transition: none;
+    }
+
+    ::view-transition-old(breadcrumb-text),
+    ::view-transition-old(breadcrumb-separator),
+    ::view-transition-new(breadcrumb-text),
+    ::view-transition-new(breadcrumb-separator) {
+      animation: none;
+    }
+
+    .mobile-menu-link {
+      transition: color 0.2s ease;
+      opacity: 1;
+      transform: none;
+    }
+
+    .mobile-menu.open .mobile-menu-link {
+      transition-delay: 0ms;
+    }
+  }
+
   .breadcrumb-separator.visible {
     opacity: 1;
   }
@@ -240,7 +263,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    padding: 72px var(--spacing-horizontal-phone) 24px;
+    padding: 72px var(--spacing-horizontal-phone) calc(24px + env(safe-area-inset-bottom, 0px));
     z-index: 100;
     opacity: 0;
     visibility: hidden;
@@ -251,6 +274,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     display: block;
     opacity: 1;
     visibility: visible;
+    overscroll-behavior: contain;
   }
 
   .mobile-menu-nav {

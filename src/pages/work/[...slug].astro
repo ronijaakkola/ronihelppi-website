@@ -32,7 +32,7 @@ function generateDescription(description: string | undefined, body: string): str
     .trim();
 
   if (plainText.length <= 155) return plainText;
-  return plainText.slice(0, 152).trim() + '...';
+  return plainText.slice(0, 152).trim() + '\u2026';
 }
 
 const description = generateDescription(item.data.description, item.body || '');
@@ -145,6 +145,7 @@ const description = generateDescription(item.data.description, item.body || '');
     letter-spacing: var(--tracking-hero);
     color: var(--color-text-primary);
     line-height: var(--leading-normal);
+    text-wrap: balance;
   }
 
   .work-subtitle {
