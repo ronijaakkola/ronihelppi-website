@@ -31,11 +31,31 @@ const otherProjects = [
     href: '#',
   },
 ];
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Roni Helppi',
+    url: 'https://www.ronihelppi.com',
+    jobTitle: 'Senior UX Designer',
+    worksFor: {
+      '@type': 'Organization',
+      name: 'Reaktor',
+      url: 'https://reaktor.com',
+    },
+    sameAs: [
+      'https://twitter.com/ronihelppi',
+      'https://linkedin.com/in/ronihelppi',
+    ],
+  },
+];
 ---
 
 <BaseLayout
   title="About | Roni Helppi"
   description="Senior UX Designer at Reaktor with experience at Gofore, Leadin, and Atostek. Learn about my background, case studies, and how to get in touch."
+  schemas={schemas}
 >
   <main id="main-content" class="main">
     <div class="layout">
