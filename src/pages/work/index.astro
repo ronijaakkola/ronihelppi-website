@@ -62,6 +62,9 @@ const filters = [
           ))}
         </div>
 
+        <!-- Filter status for screen readers -->
+        <div class="visually-hidden" aria-live="polite" id="filter-status"></div>
+
         <!-- Bento Grid -->
         <div class="bento-grid">
           {work.map((item, index) => {
@@ -123,7 +126,8 @@ const filters = [
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 6px;
+    padding: 4px 8px;
+    min-height: 24px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--color-border);
     background: var(--color-bg);
@@ -307,6 +311,7 @@ const filters = [
   function initFilters() {
     var filterChips = document.querySelectorAll('.filter-chip');
     var gridItems = document.querySelectorAll('.grid-item');
+    var filterStatus = document.getElementById('filter-status');
 
     // Restore filter from URL on load
     var params = new URLSearchParams(window.location.search);
@@ -317,6 +322,13 @@ const filters = [
       chip.addEventListener('click', function() {
         var filter = chip.dataset.filter;
         applyFilter(filter, filterChips, gridItems);
+
+        // Announce filter result to screen readers
+        if (filterStatus) {
+          var visibleCount = document.querySelectorAll('.grid-item:not(.hidden)').length;
+          var label = chip.querySelector('.filter-name')?.textContent || filter;
+          filterStatus.textContent = 'Showing ' + visibleCount + ' ' + (visibleCount === 1 ? 'project' : 'projects') + (filter !== 'all' ? ' in ' + label : '');
+        }
 
         // Sync to URL
         var url = new URL(window.location);

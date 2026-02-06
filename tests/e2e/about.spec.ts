@@ -115,9 +115,11 @@ test.describe('About Page', () => {
     await page.setViewportSize({ width: 375, height: 800 });
     await page.goto('/about');
 
-    // Table headers should be hidden on mobile
+    // Table headers should be visually hidden on mobile (but accessible to screen readers)
     const tableHeaders = page.locator('.experience-table thead');
-    await expect(tableHeaders).toBeHidden();
+    await expect(tableHeaders).toHaveCSS('position', 'absolute');
+    await expect(tableHeaders).toHaveCSS('width', '1px');
+    await expect(tableHeaders).toHaveCSS('height', '1px');
 
     // Experience data should still be visible
     await expect(page.locator('.company-cell', { hasText: 'Reaktor' })).toBeVisible();
