@@ -49,6 +49,7 @@
     outline: none;
     box-shadow: none;
     opacity: 0;
+    overscroll-behavior: contain;
   }
 
   .lightbox.is-animating {
@@ -86,6 +87,7 @@
     width: 100%;
     height: 100%;
     padding: var(--gap-lg);
+    padding-bottom: calc(var(--gap-lg) + env(safe-area-inset-bottom, 0px));
   }
 
   .lightbox-figure {

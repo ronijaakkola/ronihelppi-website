@@ -54,7 +54,7 @@ function generateDescription(body: string): string {
     .trim();
 
   if (plainText.length <= 155) return plainText;
-  return plainText.slice(0, 152).trim() + '...';
+  return plainText.slice(0, 152).trim() + '\u2026';
 }
 
 const description = post.data.description || generateDescription(post.body || '');
@@ -99,7 +99,7 @@ const schemas = [
 
       {heroImage && (
         <div class="hero-image-container">
-          <img src={heroImage} alt={`Hero image for ${title}`} class="hero-image" width="920" height="518" loading="lazy" />
+          <img src={heroImage} alt={`Hero image for ${title}`} class="hero-image" width="920" height="518" fetchpriority="high" />
         </div>
       )}
 

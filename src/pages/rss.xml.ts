@@ -14,7 +14,7 @@ function generateDescription(body: string): string {
     .trim();
 
   if (plainText.length <= 155) return plainText;
-  return plainText.slice(0, 152).trim() + '...';
+  return plainText.slice(0, 152).trim() + '\u2026';
 }
 
 export async function GET(context: APIContext) {

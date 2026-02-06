@@ -121,6 +121,13 @@ h1, h2, h3, h4, h5, h6 {
    Links
    ========================================================================== */
 
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 a {
   color: inherit;
   text-decoration-line: underline;
@@ -217,12 +224,14 @@ ol {
   font-size: var(--text-section);
   letter-spacing: var(--tracking-section);
   margin-top: 2em;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 .prose-content h3 {
   font-size: var(--text-nav);
   letter-spacing: var(--tracking-nav);
   margin-top: 1.5em;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 .prose-content p {
@@ -378,6 +387,7 @@ ol {
   letter-spacing: var(--tracking-hero);
   color: var(--color-text-primary);
   line-height: var(--leading-normal);
+  text-wrap: balance;
 }
 
 /* ==========================================================================
