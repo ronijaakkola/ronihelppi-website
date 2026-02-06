@@ -36,6 +36,23 @@ function generateDescription(description: string | undefined, body: string): str
 }
 
 const description = generateDescription(item.data.description, item.body || '');
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: title,
+    description,
+    datePublished: item.data.date.toISOString(),
+    author: {
+      '@type': 'Person',
+      name: 'Roni Helppi',
+      url: 'https://www.ronihelppi.com',
+    },
+    ...(item.data.coverImage && { image: new URL(item.data.coverImage.src, Astro.site).href }),
+    ...(item.data.skills && { keywords: item.data.skills }),
+  },
+];
 ---
 
 <BaseLayout
@@ -44,6 +61,7 @@ const description = generateDescription(item.data.description, item.body || '');
   image={item.data.coverImage?.src}
   type="article"
   publishedTime={item.data.date.toISOString()}
+  schemas={schemas}
 >
   <main id="main-content" class="main">
     <article class="layout">

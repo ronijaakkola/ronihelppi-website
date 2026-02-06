@@ -57,7 +57,23 @@ function generateDescription(body: string): string {
   return plainText.slice(0, 152).trim() + '\u2026';
 }
 
-const description = generateDescription(post.body || '');
+const description = post.data.description || generateDescription(post.body || '');
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description,
+    datePublished: post.data.date.toISOString(),
+    author: {
+      '@type': 'Person',
+      name: 'Roni Helppi',
+      url: 'https://www.ronihelppi.com',
+    },
+    ...(heroImage && { image: new URL(heroImage, Astro.site).href }),
+  },
+];
 ---
 
 <BaseLayout
@@ -66,6 +82,7 @@ const description = generateDescription(post.body || '');
   image={heroImage}
   type="article"
   publishedTime={post.data.date.toISOString()}
+  schemas={schemas}
 >
   <main id="main-content" class="main">
     <div class="layout">
@@ -82,7 +99,7 @@ const description = generateDescription(post.body || '');
 
       {heroImage && (
         <div class="hero-image-container">
-          <img src={heroImage} alt="" class="hero-image" width="920" height="518" fetchpriority="high" />
+          <img src={heroImage} alt={`Hero image for ${title}`} class="hero-image" width="920" height="518" fetchpriority="high" />
         </div>
       )}
 

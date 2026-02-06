@@ -7,7 +7,12 @@ import rehypeExternalLinks from 'rehype-external-links';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.ronihelppi.com',
-  integrations: [sitemap()],
+  integrations: [sitemap({
+    serialize(item) {
+      item.lastmod = new Date().toISOString();
+      return item;
+    },
+  })],
   markdown: {
     remarkPlugins: [remarkObsidianImages],
     rehypePlugins: [

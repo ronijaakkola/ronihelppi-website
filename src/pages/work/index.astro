@@ -76,10 +76,10 @@ const filters = [
                 data-categories={categories.join(',')}
                 style={`--cascade-delay: ${index * 60}ms`}
               >
-                {coverImage && (
+                {coverImage ? (
                   <Image
                     src={coverImage}
-                    alt=""
+                    alt={title}
                     class="grid-item-image"
                     widths={[372, 584, 744, 1168]}
                     sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
@@ -88,8 +88,9 @@ const filters = [
                     loading={index < 3 ? "eager" : "lazy"}
                     style={`view-transition-name: work-cover-${item.slug}`}
                   />
+                ) : (
+                  <span class="visually-hidden">{title}</span>
                 )}
-                <span class="visually-hidden">{title}</span>
               </a>
             );
           })}

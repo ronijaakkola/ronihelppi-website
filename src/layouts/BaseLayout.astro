@@ -10,6 +10,7 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   publishedTime?: string;
+  schemas?: Record<string, unknown>[];
 }
 
 const SITE_NAME = 'Roni Helppi';
@@ -21,10 +22,35 @@ const {
   image,
   type = 'website',
   publishedTime,
+  schemas = [],
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImage = image ? new URL(image, Astro.site).href : undefined;
+const ogImage = new URL(image || '/og-default.png', Astro.site).href;
+
+// Auto-generate BreadcrumbList from URL path
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const breadcrumbItems = [
+  { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.href }
+];
+pathSegments.forEach((segment, i) => {
+  const url = new URL(pathSegments.slice(0, i + 1).join('/') + '/', Astro.site);
+  const name = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  breadcrumbItems.push({
+    '@type': 'ListItem',
+    position: i + 2,
+    name,
+    item: url.href,
+  });
+});
+
+const breadcrumbSchema = pathSegments.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems,
+} : null;
+
+const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])];
 ---
 
 <!doctype html>
@@ -38,6 +64,7 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     <!-- SEO -->
     <link rel="canonical" href={canonicalURL} />
     <meta name="description" content={description} />
+    <meta name="author" content="Roni Helppi" />
 
     <!-- Open Graph -->
     <meta property="og:type" content={type} />
@@ -45,14 +72,17 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content={SITE_NAME} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content={ogImage} />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:site" content="@ronihelppi" />
+    <meta name="twitter:creator" content="@ronihelppi" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    <meta name="twitter:image" content={ogImage} />
 
     <!-- Google Fonts - loaded asynchronously to avoid render blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,6 +94,12 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     </noscript>
 
     <title>{title}</title>
+
+    <!-- Structured Data -->
+    {allSchemas.map((schema) => (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
+    ))}
+
     <ViewTransitions />
   </head>
   <body>
