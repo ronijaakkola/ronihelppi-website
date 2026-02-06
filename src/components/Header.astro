@@ -4,11 +4,11 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
 <header class="header">
   <nav class="nav" aria-label="Main">
-    <div class="logo-breadcrumb">
+    <nav class="logo-breadcrumb" aria-label="Breadcrumb">
       <a href="/" class="logo">Roni Helppi</a>
-      <span class="breadcrumb-separator" id="breadcrumb-separator"></span>
+      <span class="breadcrumb-separator" id="breadcrumb-separator" aria-hidden="true"></span>
       <a href="/" class="breadcrumb" id="breadcrumb"></a>
-    </div>
+    </nav>
 
     <div class="nav-links">
       <a href="/about" class="nav-link">About</a>
@@ -183,7 +183,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 6px;
+    padding: 4px 8px;
+    min-height: 24px;
     background-color: var(--color-button-bg);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
@@ -444,6 +445,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       btn.setAttribute('aria-expanded', 'true');
       btn.setAttribute('aria-label', 'Close menu');
       document.body.classList.add('scroll-lock');
+      // Trap focus: make main content inert so focus stays in menu
+      const mainContent = document.querySelector('main');
+      if (mainContent) mainContent.setAttribute('inert', '');
     }
 
     function closeMenu() {
@@ -453,6 +457,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       btn.setAttribute('aria-expanded', 'false');
       btn.setAttribute('aria-label', 'Open menu');
       document.body.classList.remove('scroll-lock');
+      // Release focus trap
+      const mainContent = document.querySelector('main');
+      if (mainContent) mainContent.removeAttribute('inert');
     }
 
     function toggleMenu() {
@@ -501,6 +508,11 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     if (activeElement?.tagName === 'INPUT') return;
     if (activeElement?.tagName === 'TEXTAREA') return;
     if (activeElement?.isContentEditable) return;
+
+    // Don't trigger when focus is on interactive elements (WCAG 2.1.4)
+    if (activeElement?.tagName === 'BUTTON') return;
+    if (activeElement?.tagName === 'A') return;
+    if (activeElement?.tagName === 'SELECT') return;
 
     // Don't trigger keyboard shortcuts when menu is open
     const mobileMenu = document.getElementById('mobile-menu');

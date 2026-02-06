@@ -62,6 +62,9 @@ const filters = [
           ))}
         </div>
 
+        <!-- Filter status for screen readers -->
+        <div class="visually-hidden" aria-live="polite" id="filter-status"></div>
+
         <!-- Bento Grid -->
         <div class="bento-grid">
           {work.map((item, index) => {
@@ -122,7 +125,8 @@ const filters = [
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 6px;
+    padding: 4px 8px;
+    min-height: 24px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--color-border);
     background: var(--color-bg);
@@ -280,6 +284,7 @@ const filters = [
   function initFilters() {
     const filterChips = document.querySelectorAll('.filter-chip');
     const gridItems = document.querySelectorAll('.grid-item');
+    const filterStatus = document.getElementById('filter-status');
 
     filterChips.forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -292,6 +297,7 @@ const filters = [
         chip.setAttribute('aria-pressed', 'true');
 
         const filter = chip.dataset.filter;
+        let visibleCount = 0;
 
         // Filter grid items
         gridItems.forEach((item) => {
@@ -299,10 +305,17 @@ const filters = [
 
           if (filter === 'all' || categories.includes(filter)) {
             item.classList.remove('hidden');
+            visibleCount++;
           } else {
             item.classList.add('hidden');
           }
         });
+
+        // Announce filter result to screen readers
+        if (filterStatus) {
+          const label = chip.querySelector('.filter-name')?.textContent || filter;
+          filterStatus.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'project' : 'projects'}${filter !== 'all' ? ` in ${label}` : ''}`;
+        }
       });
     });
   }

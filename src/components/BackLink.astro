@@ -9,7 +9,7 @@ const { href, label = 'Back' } = Astro.props;
 const Tag = href ? 'a' : 'button';
 const tagProps = href
   ? { href }
-  : { type: 'button' as const, onclick: 'history.back()' };
+  : { type: 'button' as const, 'data-back': 'true' };
 ---
 
 <Tag class="back-link" {...tagProps}>
@@ -18,6 +18,17 @@ const tagProps = href
   </svg>
   <span>{label}</span>
 </Tag>
+
+<script>
+  function initBackLink() {
+    document.querySelectorAll('.back-link[data-back]').forEach((btn) => {
+      btn.addEventListener('click', () => history.back());
+    });
+  }
+
+  initBackLink();
+  document.addEventListener('astro:after-swap', initBackLink);
+</script>
 
 <style>
   .back-link {

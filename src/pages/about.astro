@@ -201,7 +201,15 @@ const otherProjects = [
   /* Mobile: Stack table rows as cards */
   @media (max-width: 400px) {
     .experience-table thead {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .experience-table,

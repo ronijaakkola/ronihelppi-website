@@ -11,7 +11,16 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkObsidianImages],
     rehypePlugins: [
-      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
+      [rehypeExternalLinks, {
+        target: '_blank',
+        rel: ['noopener', 'noreferrer'],
+        content: {
+          type: 'element',
+          tagName: 'span',
+          properties: { className: ['visually-hidden'] },
+          children: [{ type: 'text', value: ' (opens in new tab)' }],
+        },
+      }],
     ],
   },
 });
