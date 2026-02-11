@@ -51,3 +51,13 @@ The Lighthouse CI assertion for 100% performance score failed on PR checks (93%)
 - `numberOfRuns` increased to 3 (median of 3 runs smooths outliers)
 - Accessibility, best-practices, and SEO remain at 1.0 (deterministic, no CI variance)
 - Do NOT use `lighthouse:recommended` preset — it adds strict per-audit assertions (network-dependency-tree-insight, uses-responsive-images, etc.) that are harder to satisfy than category scores and increase flakiness
+
+---
+
+## `gh pr merge --match-head-commit` requires full SHA
+
+When using `gh pr merge` with `--match-head-commit`, passing a short SHA (e.g. `29960dc`) fails with a GraphQL error: `Could not coerce value "29960dc" to GitObjectID`.
+
+**Steps to avoid this:**
+1. Always use `git rev-parse HEAD` to get the full 40-character SHA
+2. Pass the full SHA to `--match-head-commit`, never a short one from `git log --oneline`
