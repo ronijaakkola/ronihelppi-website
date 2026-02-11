@@ -54,6 +54,23 @@ The Lighthouse CI assertion for 100% performance score failed on PR checks (93%)
 
 ---
 
+## Always register Astro View Transitions listeners for client-side scripts
+
+This project uses Astro View Transitions (`<ViewTransitions />`). Scripts that run on page load will only execute once — subsequent client-side navigations swap the DOM without re-running `<script>` tags. Multiple components in the codebase already follow this pattern (BackLink, Header, Lightbox).
+
+**Steps to avoid this:**
+1. When adding any client-side `<script>` in an Astro component, wrap logic in a named function
+2. Call the function immediately for the initial load
+3. Also register it on `astro:page-load` for View Transitions navigations:
+   ```js
+   function init() { /* ... */ }
+   init();
+   document.addEventListener('astro:page-load', init);
+   ```
+4. If the function manipulates DOM elements, reset state at the start (e.g. remove classes, move elements back) since the DOM may be in a stale state from the previous page
+
+---
+
 ## `gh pr merge --match-head-commit` requires full SHA
 
 When using `gh pr merge` with `--match-head-commit`, passing a short SHA (e.g. `29960dc`) fails with a GraphQL error: `Could not coerce value "29960dc" to GitObjectID`.
