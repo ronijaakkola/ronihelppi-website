@@ -68,3 +68,13 @@ This project uses Astro View Transitions (`<ViewTransitions />`). Scripts that r
    document.addEventListener('astro:page-load', init);
    ```
 4. If the function manipulates DOM elements, reset state at the start (e.g. remove classes, move elements back) since the DOM may be in a stale state from the previous page
+
+---
+
+## `gh pr merge --match-head-commit` requires full SHA
+
+When using `gh pr merge` with `--match-head-commit`, passing a short SHA (e.g. `29960dc`) fails with a GraphQL error: `Could not coerce value "29960dc" to GitObjectID`.
+
+**Steps to avoid this:**
+1. Always use `git rev-parse HEAD` to get the full 40-character SHA
+2. Pass the full SHA to `--match-head-commit`, never a short one from `git log --oneline`
