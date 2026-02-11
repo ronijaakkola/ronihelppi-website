@@ -108,6 +108,7 @@ const schemas = [
         <article class="post-content">
           <div class="prose-content">
             <Content />
+            <span class="writing-cursor" aria-hidden="true"></span>
           </div>
         </article>
 
@@ -211,4 +212,65 @@ const schemas = [
   .prose > * + :global(.divider) {
     margin-top: var(--gap-section);
   }
+
+  /* Blinking writing cursor */
+  .writing-cursor {
+    display: none;
+  }
+
+  .writing-cursor.placed {
+    display: inline-block;
+    width: 2px;
+    height: 0.95em;
+    background-color: var(--color-text-secondary);
+    margin-left: 2px;
+    vertical-align: -0.1em;
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .writing-cursor.placed {
+      animation: none;
+    }
+  }
 </style>
+
+<script>
+  function placeCursor() {
+    const cursor = document.querySelector('.writing-cursor');
+    if (!cursor) return;
+
+    // Reset: move cursor back to prose-content and remove placed class
+    const proseContent = cursor.closest('.prose-content');
+    if (!proseContent) return;
+    proseContent.appendChild(cursor);
+    cursor.classList.remove('placed');
+
+    const children = Array.from(proseContent.children).filter((c) => c !== cursor);
+    const lastBlock = children[children.length - 1];
+
+    if (lastBlock) {
+      const tag = lastBlock.tagName;
+      if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(tag)) {
+        lastBlock.appendChild(cursor);
+      } else if (tag === 'UL' || tag === 'OL') {
+        const lastLi = lastBlock.querySelector('li:last-child');
+        if (lastLi) lastLi.appendChild(cursor);
+      } else if (tag === 'BLOCKQUOTE') {
+        const lastP = lastBlock.querySelector('p:last-child');
+        if (lastP) lastP.appendChild(cursor);
+        else lastBlock.appendChild(cursor);
+      }
+    }
+
+    cursor.classList.add('placed');
+  }
+
+  placeCursor();
+  document.addEventListener('astro:page-load', placeCursor);
+</script>
