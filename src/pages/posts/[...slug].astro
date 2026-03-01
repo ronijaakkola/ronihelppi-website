@@ -92,7 +92,11 @@ const schemas = [
           <BackLink />
           <div class="post-title-group">
             <h1 class="page-title">{title}</h1>
-            <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
+            <div class="post-meta-row">
+              <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
+              <span class="post-meta" aria-hidden="true">•</span>
+              <button class="copy-markdown-btn" data-title={title} data-body={post.body} type="button">Copy markdown</button>
+            </div>
           </div>
         </header>
       </div>
@@ -152,10 +156,45 @@ const schemas = [
     gap: var(--gap-4xs);
   }
 
+  .post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-2xs);
+    flex-wrap: wrap;
+  }
+
   .post-meta {
     font-size: var(--text-body);
     letter-spacing: var(--tracking-body-tight);
     color: var(--color-text-secondary);
+  }
+
+  .copy-markdown-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: -0.6px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    min-height: 24px;
+  }
+
+  .copy-markdown-btn:hover,
+  .copy-markdown-btn:focus-visible {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    outline: none;
+  }
+
+  .copy-markdown-btn:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
   }
 
   .hero-image-container {
@@ -241,6 +280,30 @@ const schemas = [
 </style>
 
 <script>
+  function initCopyMarkdown() {
+    const btn = document.querySelector<HTMLButtonElement>('.copy-markdown-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+      const title = btn.dataset.title ?? '';
+      const body = btn.dataset.body ?? '';
+      const markdown = `# ${title}\n\n${body}`;
+
+      try {
+        await navigator.clipboard.writeText(markdown);
+        btn.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.textContent = 'Copy markdown';
+        }, 2000);
+      } catch {
+        // Clipboard API not available (e.g. non-HTTPS) — silently ignore
+      }
+    });
+  }
+
+  initCopyMarkdown();
+  document.addEventListener('astro:page-load', initCopyMarkdown);
+
   function placeCursor() {
     const cursor = document.querySelector('.writing-cursor');
     if (!cursor) return;
