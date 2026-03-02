@@ -94,8 +94,7 @@ const schemas = [
             <h1 class="page-title">{title}</h1>
             <div class="post-meta-row">
               <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
-              <span class="post-meta" aria-hidden="true">•</span>
-              <button class="copy-markdown-btn" data-title={title} data-body={post.body} type="button">Copy markdown</button>
+              <button class="copy-markdown-btn" data-title={title} data-body={post.body} type="button">Copy post</button>
             </div>
           </div>
         </header>
@@ -159,7 +158,7 @@ const schemas = [
   .post-meta-row {
     display: flex;
     align-items: center;
-    gap: var(--gap-2xs);
+    gap: var(--gap-xs);
     flex-wrap: wrap;
   }
 
@@ -293,7 +292,7 @@ const schemas = [
         await navigator.clipboard.writeText(markdown);
         btn.textContent = 'Copied!';
         setTimeout(() => {
-          btn.textContent = 'Copy markdown';
+          btn.textContent = 'Copy post';
         }, 2000);
       } catch {
         // Clipboard API not available (e.g. non-HTTPS) — silently ignore
