@@ -283,6 +283,87 @@ ol {
   padding: 0;
 }
 
+/* ==========================================================================
+   Code Block Wrapper (wraps <pre> elements from rehypeCodeBlocks plugin)
+   ========================================================================== */
+
+.code-block-wrapper {
+  position: relative;
+  /* Extend slightly beyond prose width */
+  margin: 1.5em -32px;
+  border-radius: var(--radius-md);
+  /* overflow:hidden clips the pre background to our border-radius */
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+}
+
+/* Reset pre margin/radius/background when inside wrapper */
+.prose-content .code-block-wrapper pre {
+  margin: 0;
+  border-radius: 0;
+  /* Override Shiki's inline background-color */
+  background: #131313 !important;
+}
+
+.code-block-filename {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: var(--tracking-small);
+  color: var(--color-text-secondary);
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-divider);
+  background: #0f0f0f;
+}
+
+.code-block-body {
+  position: relative;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: rgba(19, 19, 19, 0.9);
+  border: 1px solid var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: -0.6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  min-height: 24px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.code-block-wrapper:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover,
+.code-copy-btn:focus-visible {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  outline: none;
+}
+
+.code-copy-btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
+/* Remove the extension on smaller viewports to prevent overflow */
+@media (max-width: 750px) {
+  .code-block-wrapper {
+    margin-inline: 0;
+  }
+}
+
 .prose-content blockquote {
   border-left: 2px solid var(--color-divider);
   padding-left: 1rem;

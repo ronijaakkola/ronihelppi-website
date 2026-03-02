@@ -11,5 +11,3 @@ If you think what often persists between iterations of software, it is data. See
 
 One can also view the products we build as a collection of ideas. Those ideas will carry over to new software. We see this all the time when we design and build software. Old conventions from past apps will always have an effect to our work — for good and for bad.
 
-For more on this topic, see [this article on Google](https://www.google.com).
-

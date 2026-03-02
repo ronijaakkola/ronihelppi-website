@@ -303,6 +303,32 @@ const schemas = [
   initCopyMarkdown();
   document.addEventListener('astro:page-load', initCopyMarkdown);
 
+  function initCopyCode() {
+    document.querySelectorAll<HTMLButtonElement>('.code-copy-btn').forEach((btn) => {
+      // Remove any previous listener by cloning
+      const fresh = btn.cloneNode(true) as HTMLButtonElement;
+      btn.replaceWith(fresh);
+
+      fresh.addEventListener('click', async () => {
+        const pre = fresh.closest('.code-block-wrapper')?.querySelector('pre');
+        if (!pre) return;
+
+        try {
+          await navigator.clipboard.writeText(pre.textContent ?? '');
+          fresh.textContent = 'Copied!';
+          setTimeout(() => {
+            fresh.textContent = 'Copy';
+          }, 2000);
+        } catch {
+          // Clipboard API unavailable — silently ignore
+        }
+      });
+    });
+  }
+
+  initCopyCode();
+  document.addEventListener('astro:page-load', initCopyCode);
+
   function placeCursor() {
     const cursor = document.querySelector('.writing-cursor');
     if (!cursor) return;

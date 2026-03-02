@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { remarkObsidianImages } from './src/utils/remark-obsidian-images';
 import rehypeExternalLinks from 'rehype-external-links';
+import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
+import { remarkCodeTitle } from './src/utils/remark-code-title';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,8 +16,12 @@ export default defineConfig({
     },
   })],
   markdown: {
-    remarkPlugins: [remarkObsidianImages],
+    shikiConfig: {
+      theme: 'github-dark',
+    },
+    remarkPlugins: [remarkObsidianImages, remarkCodeTitle],
     rehypePlugins: [
+      rehypeCodeBlocks,
       [rehypeExternalLinks, {
         target: '_blank',
         rel: ['noopener', 'noreferrer'],
