@@ -1,9 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Element } from 'hast';
 
-// Must match the prefix in remark-code-title.ts
-const TITLE_COMMENT_PREFIX = 'code-block-title:';
-
 export function rehypeCodeBlocks() {
   return (tree: Root) => {
     visit(
