@@ -246,7 +246,7 @@ ol {
 .prose-content a[href^="http"] {
   display: inline-flex;
   align-items: center;
-  gap: var(--gap-4xs);
+  gap: 2px;
 }
 
 .prose-content a[href^="http"]::after {
