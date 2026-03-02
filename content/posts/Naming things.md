@@ -3,6 +3,9 @@ date: 2026-02-18
 ---
 There is an old joke in programming that the two hardest problems are cache invalidation, naming things, and off-by-one errors. The joke is that it lists three problems despite claiming there are two.
 
+> There are only two hard things in Computer Science: cache invalidation and naming things.
+> <cite>Phil Karlton</cite>
+
 Naming is genuinely difficult. Not because we lack vocabulary, but because a name is a commitment. It shapes how others — and your future self — will understand the intent behind a piece of code.
 
 Consider this function:

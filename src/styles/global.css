@@ -365,10 +365,39 @@ ol {
 }
 
 .prose-content blockquote {
-  border-left: 2px solid var(--color-divider);
-  padding-left: 1rem;
-  margin: 1.5em 0;
+  font-family: var(--font-serif);
+  font-size: clamp(18px, calc(18px + 2 * ((100vw - 600px) / 360)), 20px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  border-left: 3px solid var(--color-text-secondary);
+  padding: 0.25em 0 0.25em 1.5rem;
+  margin: 1.5em -32px;
+}
+
+.prose-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-content blockquote footer,
+.prose-content blockquote cite {
+  display: block;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: var(--text-small);
   color: var(--color-text-secondary);
+  margin-top: 0.75em;
+}
+
+.prose-content blockquote footer::before,
+.prose-content blockquote cite::before {
+  content: '— ';
+}
+
+@media (max-width: 750px) {
+  .prose-content blockquote {
+    margin-inline: 0;
+  }
 }
 
 .prose-content ul,
