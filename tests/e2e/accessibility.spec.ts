@@ -20,13 +20,13 @@ test.describe('Accessibility', () => {
   });
 
   test('posts listing should have no accessibility violations', async ({ page }) => {
-    await page.goto('/posts');
+    await page.goto('/writing');
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
 
-  test('work listing should have no accessibility violations', async ({ page }) => {
-    await page.goto('/work');
+  test('projects listing should have no accessibility violations', async ({ page }) => {
+    await page.goto('/projects');
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
@@ -36,7 +36,7 @@ test.describe('Accessibility', () => {
   }) => {
     // Navigate to posts and get a real post URL
     await page.goto('/');
-    const postLink = page.locator('a[href^="/posts/"]').first();
+    const postLink = page.locator('a[href^="/writing/"]').first();
     const href = await postLink.getAttribute('href');
     expect(href).toBeTruthy();
 
@@ -45,13 +45,13 @@ test.describe('Accessibility', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('individual work page should have no accessibility violations', async ({
+  test('individual project page should have no accessibility violations', async ({
     page,
   }) => {
-    // Navigate to work and get a real work URL
+    // Navigate to projects and get a real project URL
     await page.goto('/');
-    const workLink = page.locator('a[href^="/work/"]').first();
-    const href = await workLink.getAttribute('href');
+    const projectLink = page.locator('a[href^="/projects/"]').first();
+    const href = await projectLink.getAttribute('href');
     expect(href).toBeTruthy();
 
     await page.goto(href!);

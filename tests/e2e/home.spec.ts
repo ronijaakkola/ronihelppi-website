@@ -27,19 +27,19 @@ test.describe('Home Page', () => {
     await page.goto('/');
 
     // Should have at least one link to posts
-    const postLinks = page.locator('a[href^="/posts/"]');
+    const postLinks = page.locator('a[href^="/writing/"]');
     await expect(postLinks.first()).toBeVisible();
     const count = await postLinks.count();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should have links to work pages', async ({ page }) => {
+  test('should have links to project pages', async ({ page }) => {
     await page.goto('/');
 
-    // Should have at least one link to work
-    const workLinks = page.locator('a[href^="/work/"]');
-    await expect(workLinks.first()).toBeVisible();
-    const count = await workLinks.count();
+    // Should have at least one link to projects
+    const projectLinks = page.locator('a[href^="/projects/"]');
+    await expect(projectLinks.first()).toBeVisible();
+    const count = await projectLinks.count();
     expect(count).toBeGreaterThan(0);
   });
 
@@ -47,22 +47,22 @@ test.describe('Home Page', () => {
     await page.goto('/');
 
     // Click the first post link
-    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    const firstPostLink = page.locator('a[href^="/writing/"]').first();
     await firstPostLink.click();
 
     // Should navigate to post page
-    await expect(page).toHaveURL(/\/posts\//);
+    await expect(page).toHaveURL(/\/writing\//);
   });
 
-  test('should navigate to work page when clicking work link', async ({ page }) => {
+  test('should navigate to project page when clicking project link', async ({ page }) => {
     await page.goto('/');
 
-    // Click the first work link
-    const firstWorkLink = page.locator('a[href^="/work/"]').first();
-    await firstWorkLink.click();
+    // Click the first project link
+    const firstProjectLink = page.locator('a[href^="/projects/"]').first();
+    await firstProjectLink.click();
 
-    // Should navigate to work page
-    await expect(page).toHaveURL(/\/work\//);
+    // Should navigate to project page
+    await expect(page).toHaveURL(/\/projects\//);
   });
 
   test('should have proper HTML structure', async ({ page }) => {
@@ -90,14 +90,14 @@ test.describe('Home Page', () => {
     await expect(breadcrumb).toBeEmpty();
 
     // Navigate to posts section
-    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    const firstPostLink = page.locator('a[href^="/writing/"]').first();
     await firstPostLink.click();
 
     // Wait for navigation and animation
-    await page.waitForURL(/\/posts\//);
+    await page.waitForURL(/\/writing\//);
 
     // Breadcrumb should show "Posts" (allow time for scramble animation)
-    await expect(breadcrumb).toHaveText('Posts', { timeout: 2000 });
+    await expect(breadcrumb).toHaveText('Writing', { timeout: 2000 });
 
     // Separator should be visible
     const separator = page.locator('#breadcrumb-separator');
@@ -109,12 +109,12 @@ test.describe('Home Page', () => {
     await page.goto('/');
 
     // Navigate to a post
-    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    const firstPostLink = page.locator('a[href^="/writing/"]').first();
     await firstPostLink.click();
-    await page.waitForURL(/\/posts\//);
+    await page.waitForURL(/\/writing\//);
 
     const breadcrumb = page.locator('#breadcrumb');
-    await expect(breadcrumb).toHaveText('Posts', { timeout: 2000 });
+    await expect(breadcrumb).toHaveText('Writing', { timeout: 2000 });
 
     // Navigate home via logo
     await page.locator('.logo').click();

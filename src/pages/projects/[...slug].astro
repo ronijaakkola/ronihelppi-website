@@ -6,8 +6,8 @@ import BackLink from '../../components/BackLink.astro';
 import { getTitle } from '../../utils/title';
 
 export async function getStaticPaths() {
-  const work = await getCollection('work');
-  return work.map((item) => ({
+  const projects = await getCollection('projects');
+  return projects.map((item) => ({
     params: { slug: item.slug },
     props: { item },
   }));
@@ -66,11 +66,11 @@ const schemas = [
   <main id="main-content" class="main">
     <article class="layout">
       <div class="prose">
-        <header class="work-header">
+        <header class="project-header">
           <BackLink />
-          <div class="work-title-group">
-            <h1 class="work-title">{title}</h1>
-            <p class="work-subtitle">Case study</p>
+          <div class="project-title-group">
+            <h1 class="project-title">{title}</h1>
+            <p class="project-subtitle">Case study</p>
           </div>
         </header>
       </div>
@@ -85,15 +85,15 @@ const schemas = [
             sizes="(max-width: 960px) 100vw, 920px"
             format="webp"
             quality={85}
-            style={`view-transition-name: work-cover-${item.slug}`}
+            style={`view-transition-name: project-cover-${item.slug}`}
           />
         </div>
       )}
 
       <div class="prose">
-        <div class="work-meta">
+        <div class="project-meta">
           {item.data.description && (
-            <p class="work-description">{item.data.description}</p>
+            <p class="project-description">{item.data.description}</p>
           )}
 
           {item.data.team && (
@@ -144,19 +144,19 @@ const schemas = [
 </BaseLayout>
 
 <style>
-  .work-header {
+  .project-header {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  .work-title-group {
+  .project-title-group {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
   }
 
-  .work-title {
+  .project-title {
     font-family: var(--font-serif);
     font-size: var(--text-hero);
     font-weight: 400;
@@ -166,7 +166,7 @@ const schemas = [
     text-wrap: balance;
   }
 
-  .work-subtitle {
+  .project-subtitle {
     font-family: var(--font-sans);
     font-size: var(--text-body);
     font-weight: 400;
@@ -187,14 +187,14 @@ const schemas = [
     border: 0.5px solid var(--color-border);
   }
 
-  .work-meta {
+  .project-meta {
     display: flex;
     flex-direction: column;
     gap: var(--gap-sm);
     margin-top: var(--gap-lg);
   }
 
-  .work-description {
+  .project-description {
     font-family: var(--font-sans);
     font-size: var(--text-body);
     font-weight: 400;

@@ -12,8 +12,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     <div class="nav-links">
       <a href="/about" class="nav-link">About</a>
-      <a href="/work" class="nav-link">Work</a>
-      <a href="/posts" class="nav-link">Posts</a>
+      <a href="/projects" class="nav-link">Projects</a>
+      <a href="/writing" class="nav-link">Writing</a>
     </div>
 
     <a href="/contact" class="contact-button">
@@ -39,8 +39,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   <nav class="mobile-menu-nav" aria-label="Mobile navigation">
     <a href="/" class="mobile-menu-link">Home</a>
     <a href="/about" class="mobile-menu-link">About</a>
-    <a href="/work" class="mobile-menu-link">Work</a>
-    <a href="/posts" class="mobile-menu-link">Posts</a>
+    <a href="/projects" class="mobile-menu-link">Projects</a>
+    <a href="/writing" class="mobile-menu-link">Writing</a>
     <a href="/contact" class="mobile-menu-link">Contact</a>
   </nav>
   <div class="mobile-menu-footer">
@@ -667,7 +667,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
 
     // Only show breadcrumb for known sections
-    const knownSections = ['about', 'posts', 'work'];
+    const knownSections = ['about', 'writing', 'projects'];
     const section = segments[0];
 
     if (!knownSections.includes(section)) {

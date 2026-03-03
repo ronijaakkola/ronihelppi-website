@@ -6,16 +6,16 @@ test.describe('Post Pages', () => {
     await page.goto('/');
 
     // Click on a post link
-    const firstPostLink = page.locator('a[href^="/posts/"]').first();
+    const firstPostLink = page.locator('a[href^="/writing/"]').first();
     await firstPostLink.click();
 
     // Should be on a post page
-    await expect(page).toHaveURL(/\/posts\/.+/);
+    await expect(page).toHaveURL(/\/writing\/.+/);
   });
 
   test('should display post title', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Should have an h1 title
     const title = page.locator('h1.page-title');
@@ -25,7 +25,7 @@ test.describe('Post Pages', () => {
 
   test('should display post date', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Should have a time element
     const time = page.locator('time.post-meta');
@@ -35,7 +35,7 @@ test.describe('Post Pages', () => {
 
   test('should display post content', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Should have content in the body
     const body = page.locator('body');
@@ -46,7 +46,7 @@ test.describe('Post Pages', () => {
 
   test('should have back navigation link', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Should have the logo link back to home
     const backLink = page.locator('.logo');
@@ -55,7 +55,7 @@ test.describe('Post Pages', () => {
 
   test('should navigate back to home when clicking back link', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Click logo to go back home
     const backLink = page.locator('.logo');
@@ -67,7 +67,7 @@ test.describe('Post Pages', () => {
 
   test('should render markdown content as HTML', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Check for HTML elements that indicate markdown was rendered
     // (paragraphs, headings, etc.)
@@ -78,7 +78,7 @@ test.describe('Post Pages', () => {
 
   test('should have proper meta tags', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Check for basic meta tags
     await expect(page.locator('meta[charset]')).toBeAttached();
@@ -87,7 +87,7 @@ test.describe('Post Pages', () => {
 
   test('should format date correctly', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/posts/"]').first().click();
+    await page.locator('a[href^="/writing/"]').first().click();
 
     // Check that datetime attribute is a valid ISO date
     const time = page.locator('time.post-meta');
@@ -101,7 +101,7 @@ test.describe('Post Pages', () => {
 
   test('should be accessible via direct URL', async ({ page }) => {
     // Directly navigate to a known post URL
-    await page.goto('/posts/digital-tangibleness/');
+    await page.goto('/writing/digital-tangibleness/');
 
     // Should load successfully
     await expect(page.locator('h1.page-title')).toBeVisible();

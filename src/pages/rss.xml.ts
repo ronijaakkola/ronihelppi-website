@@ -22,13 +22,13 @@ export async function GET(context: APIContext) {
 
   return rss({
     title: 'Roni Helppi',
-    description: 'Posts by Roni Helppi',
+    description: 'Writing by Roni Helppi',
     site: context.site!,
     items: sortedPosts.map((post) => ({
       title: getTitle(post.id),
       pubDate: post.data.date,
       description: post.data.description || generateDescription(post.body || ''),
-      link: `/posts/${post.slug}/`,
+      link: `/writing/${post.slug}/`,
     })),
   });
 }

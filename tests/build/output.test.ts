@@ -33,13 +33,13 @@ describe('Build Output Validation', () => {
   });
 
   describe('Dynamic Routes - Posts', () => {
-    it('posts directory exists', async () => {
-      const postsPath = join(distPath, 'posts');
+    it('writing directory exists', async () => {
+      const postsPath = join(distPath, 'writing');
       await expect(access(postsPath)).resolves.not.toThrow();
     });
 
     it('generates HTML for each post', async () => {
-      const postsPath = join(distPath, 'posts');
+      const postsPath = join(distPath, 'writing');
       const entries = await readdir(postsPath, { withFileTypes: true });
       const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
@@ -54,7 +54,7 @@ describe('Build Output Validation', () => {
     });
 
     it('post HTML contains proper structure', async () => {
-      const postsPath = join(distPath, 'posts');
+      const postsPath = join(distPath, 'writing');
       const entries = await readdir(postsPath, { withFileTypes: true });
       const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
@@ -72,36 +72,36 @@ describe('Build Output Validation', () => {
     });
   });
 
-  describe('Dynamic Routes - Work', () => {
-    it('work directory exists', async () => {
-      const workPath = join(distPath, 'work');
-      await expect(access(workPath)).resolves.not.toThrow();
+  describe('Dynamic Routes - Projects', () => {
+    it('projects directory exists', async () => {
+      const projectsPath = join(distPath, 'projects');
+      await expect(access(projectsPath)).resolves.not.toThrow();
     });
 
-    it('generates HTML for each work item', async () => {
-      const workPath = join(distPath, 'work');
-      const entries = await readdir(workPath, { withFileTypes: true });
-      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    it('generates HTML for each project', async () => {
+      const projectsPath = join(distPath, 'projects');
+      const entries = await readdir(projectsPath, { withFileTypes: true });
+      const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      // Should have at least one work item (RESOKILL)
-      expect(workDirs.length).toBeGreaterThan(0);
+      // Should have at least one project (RESOKILL)
+      expect(projectDirs.length).toBeGreaterThan(0);
 
-      // Each work item should have an index.html
-      for (const workDir of workDirs) {
-        const workIndexPath = join(workPath, workDir, 'index.html');
-        await expect(access(workIndexPath)).resolves.not.toThrow();
+      // Each project should have an index.html
+      for (const projectDir of projectDirs) {
+        const projectIndexPath = join(projectsPath, projectDir, 'index.html');
+        await expect(access(projectIndexPath)).resolves.not.toThrow();
       }
     });
 
-    it('work HTML contains proper structure', async () => {
-      const workPath = join(distPath, 'work');
-      const entries = await readdir(workPath, { withFileTypes: true });
-      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    it('project HTML contains proper structure', async () => {
+      const projectsPath = join(distPath, 'projects');
+      const entries = await readdir(projectsPath, { withFileTypes: true });
+      const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      // Check the first work item
-      if (workDirs.length > 0) {
-        const firstWorkPath = join(workPath, workDirs[0], 'index.html');
-        const content = await readFile(firstWorkPath, 'utf-8');
+      // Check the first project
+      if (projectDirs.length > 0) {
+        const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
+        const content = await readFile(firstProjectPath, 'utf-8');
 
         expect(content).toContain('<!DOCTYPE html>');
         expect(content).toContain('<html');
@@ -113,21 +113,21 @@ describe('Build Output Validation', () => {
   });
 
   describe('Content Rendering', () => {
-    it('home page lists posts and work items', async () => {
+    it('home page lists posts and projects', async () => {
       const indexPath = join(distPath, 'index.html');
       const content = await readFile(indexPath, 'utf-8');
 
-      // Should have sections for posts and work
-      expect(content.toLowerCase()).toMatch(/posts?/);
-      expect(content.toLowerCase()).toMatch(/work/);
+      // Should have sections for writing and projects
+      expect(content.toLowerCase()).toMatch(/writing/);
+      expect(content.toLowerCase()).toMatch(/projects?/);
 
-      // Should have links to posts and work pages
-      expect(content).toContain('/posts/');
-      expect(content).toContain('/work/');
+      // Should have links to writing and project pages
+      expect(content).toContain('/writing/');
+      expect(content).toContain('/projects/');
     });
 
     it('post pages link back to home', async () => {
-      const postsPath = join(distPath, 'posts');
+      const postsPath = join(distPath, 'writing');
       const entries = await readdir(postsPath, { withFileTypes: true });
       const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
@@ -140,14 +140,14 @@ describe('Build Output Validation', () => {
       }
     });
 
-    it('work pages link back to home', async () => {
-      const workPath = join(distPath, 'work');
-      const entries = await readdir(workPath, { withFileTypes: true });
-      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    it('project pages link back to home', async () => {
+      const projectsPath = join(distPath, 'projects');
+      const entries = await readdir(projectsPath, { withFileTypes: true });
+      const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      if (workDirs.length > 0) {
-        const firstWorkPath = join(workPath, workDirs[0], 'index.html');
-        const content = await readFile(firstWorkPath, 'utf-8');
+      if (projectDirs.length > 0) {
+        const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
+        const content = await readFile(firstProjectPath, 'utf-8');
 
         // Should have a back link
         expect(content).toMatch(/href=["']\//);
@@ -157,14 +157,14 @@ describe('Build Output Validation', () => {
 
   describe('Image Paths', () => {
     it('images use valid paths (/images/ or /_astro/)', async () => {
-      // Check if any work or post content contains image references
-      const workPath = join(distPath, 'work');
-      const entries = await readdir(workPath, { withFileTypes: true });
-      const workDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+      // Check if any project or post content contains image references
+      const projectsPath = join(distPath, 'projects');
+      const entries = await readdir(projectsPath, { withFileTypes: true });
+      const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      for (const workDir of workDirs) {
-        const workIndexPath = join(workPath, workDir, 'index.html');
-        const content = await readFile(workIndexPath, 'utf-8');
+      for (const projectDir of projectDirs) {
+        const projectIndexPath = join(projectsPath, projectDir, 'index.html');
+        const content = await readFile(projectIndexPath, 'utf-8');
 
         if (content.includes('<img')) {
           // Images should use /images/ path (static) or /_astro/ path (optimized)

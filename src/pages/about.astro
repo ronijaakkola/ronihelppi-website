@@ -47,6 +47,7 @@ const schemas = [
     sameAs: [
       'https://twitter.com/ronihelppi',
       'https://linkedin.com/in/ronihelppi',
+      'https://github.com/ronijaakkola',
     ],
   },
 ];
@@ -65,8 +66,9 @@ const schemas = [
           <section class="about-section">
             <h1 class="page-title">About</h1>
             <p class="intro">
-              I'm a designer at <a href="https://reaktor.com">Reaktor</a> helping their industrial customers to grow.
-              Previously I have worked at various design consultancies like Gofore and Leadin.
+              I design things, build things, and occasionally convince people they're the same thing.
+              At <a href="https://reaktor.com">Reaktor</a> I work as a consultant across design and engineering.
+              On my own time, I'm deep in AI, generative tools, and pushing the edges of what design and code can do together.
             </p>
           </section>
 
@@ -112,7 +114,7 @@ const schemas = [
 
           <!-- Other Projects Section -->
           <section class="section">
-            <SectionHeading title="Other projects" />
+            <SectionHeading title="Selected projects" />
             <div class="project-list">
               {otherProjects.map((project) => (
                 <ProjectCard
@@ -128,8 +130,10 @@ const schemas = [
           <section class="section">
             <SectionHeading title="How to reach me" />
             <p class="contact-text">
-              Reach me out via <a href="mailto:hello@ronihelppi.com">email</a> or in{' '}
+              Reach me out via <a href="mailto:hello@ronihelppi.com">email</a> or{' '}
               <a href="https://linkedin.com/in/ronihelppi">LinkedIn</a>.
+              You can also find some of my work on{' '}
+              <a href="https://github.com/ronijaakkola">GitHub</a>.
             </p>
           </section>
         </div>
@@ -157,7 +161,7 @@ const schemas = [
     letter-spacing: var(--tracking-body);
     line-height: var(--leading-body);
     color: var(--color-text-primary);
-    max-width: 468px;
+    max-width: 100%;
   }
 
   .intro a {

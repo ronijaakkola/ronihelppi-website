@@ -57,9 +57,9 @@ npm run check
     └── e2e/
         ├── home.spec.ts                      # Home page E2E tests
         ├── about.spec.ts                     # About page E2E tests
-        ├── posts.spec.ts                     # Post pages E2E tests
-        ├── posts-breadcrumb.spec.ts          # Breadcrumb navigation tests
-        ├── work.spec.ts                      # Work pages E2E tests
+        ├── writing.spec.ts                    # Writing pages E2E tests
+        ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
+        ├── projects.spec.ts                   # Project pages E2E tests
         ├── 404.spec.ts                       # Error page tests
         ├── accessibility.spec.ts             # Accessibility tests (axe-core)
         └── mobile.spec.ts                    # Mobile/tablet viewport tests
@@ -69,12 +69,12 @@ npm run check
 
 ### Unit Tests (76 tests)
 - **Remark Plugin** (16 tests): Obsidian image syntax transformation
-- **Content Schemas** (31 tests): Zod schema validation for posts and work collections
+- **Content Schemas** (31 tests): Zod schema validation for posts and projects collections
 - **Utility Functions** (29 tests): sortByDate, readTime, title extraction
 
 ### Build Validation Tests (16 tests)
 - HTML structure and file generation
-- Dynamic route generation for posts and work
+- Dynamic route generation for posts and projects
 - Image path validation
 - DOCTYPE and tag closure validation
 
@@ -82,7 +82,7 @@ npm run check
 - **Home Page** (11 tests): Navigation, content display, breadcrumb behavior
 - **About Page** (12 tests): Content sections, responsive table layout
 - **Post Pages** (11 tests): Post rendering, dates, markdown, back navigation
-- **Work Pages** (15 tests): Work item rendering, images, tags, team info
+- **Project Pages** (15 tests): Project rendering, images, tags, team info
 - **404 Page** (9 tests): Error page display and navigation
 - **Breadcrumb** (3 tests): Navigation state across pages
 - **Accessibility** (8 tests): WCAG compliance via axe-core on all pages

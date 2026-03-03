@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Lightbox', () => {
-  test('opens when clicking cover image on work page', async ({ page }) => {
-    await page.goto('/work/resokill');
+  test('opens when clicking cover image on project page', async ({ page }) => {
+    await page.goto('/projects/resokill');
 
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -17,7 +17,7 @@ test.describe('Lightbox', () => {
   });
 
   test('closes when clicking X button', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -28,7 +28,7 @@ test.describe('Lightbox', () => {
   });
 
   test('closes when pressing Escape key', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -39,7 +39,7 @@ test.describe('Lightbox', () => {
   });
 
   test('closes when clicking backdrop', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -56,7 +56,7 @@ test.describe('Lightbox', () => {
   });
 
   test('closes when clicking the image', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -67,7 +67,7 @@ test.describe('Lightbox', () => {
   });
 
   test('image has zoom-out cursor', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -78,7 +78,7 @@ test.describe('Lightbox', () => {
   });
 
   test('displays image and caption', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -102,7 +102,7 @@ test.describe('Lightbox', () => {
 
 test.describe('Lightbox Keyboard Accessibility', () => {
   test('opens with Enter key when image is focused', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -113,7 +113,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
   });
 
   test('opens with Space key when image is focused', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -124,7 +124,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
   });
 
   test('focus moves to close button on open', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -136,7 +136,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
   });
 
   test('returns focus to trigger element on close', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -149,7 +149,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
   });
 
   test('image has role button and is focusable', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -158,7 +158,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
   });
 
   test('image has aria-label', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -172,7 +172,7 @@ test.describe('Lightbox Navigation', () => {
   // Testing navigation controls visibility
 
   test('navigation buttons exist', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -184,7 +184,7 @@ test.describe('Lightbox Navigation', () => {
   });
 
   test('prev button is disabled on first image', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();
@@ -199,7 +199,7 @@ test.describe('Lightbox Mobile', () => {
   test.use({ viewport: { width: 375, height: 667 } });
 
   test('opens on mobile viewport', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
@@ -209,7 +209,7 @@ test.describe('Lightbox Mobile', () => {
   });
 
   test('close button is accessible on mobile', async ({ page }) => {
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
     await page.locator('.cover-image').click();

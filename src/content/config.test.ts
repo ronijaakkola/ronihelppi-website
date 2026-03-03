@@ -9,7 +9,7 @@ const postsSchema = z.object({
   relatedPosts: z.array(z.string()).optional(),
 });
 
-const workSchema = z.object({
+const projectsSchema = z.object({
   date: z.coerce.date(),
   tags: z.array(z.string()).optional(),
   team: z.string().optional(),
@@ -136,18 +136,18 @@ describe('Content Collection Schemas', () => {
     });
   });
 
-  describe('Work Schema', () => {
+  describe('Projects Schema', () => {
     it('requires a date field', () => {
-      expect(() => workSchema.parse({})).toThrow();
+      expect(() => projectsSchema.parse({})).toThrow();
     });
 
     it('accepts valid date string', () => {
-      const result = workSchema.parse({ date: '2026-01-30' });
+      const result = projectsSchema.parse({ date: '2026-01-30' });
       expect(result.date).toBeInstanceOf(Date);
     });
 
     it('accepts optional tags array', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#personal', '#games'],
       });
@@ -156,7 +156,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('accepts empty tags array', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         tags: [],
       });
@@ -165,7 +165,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('works without tags field', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
       });
       expect(result.date).toBeInstanceOf(Date);
@@ -173,7 +173,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('accepts optional team string', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         team: 'solo',
       });
@@ -181,7 +181,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('works without team field', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
       });
       expect(result.date).toBeInstanceOf(Date);
@@ -189,7 +189,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('accepts both tags and team', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#personal', '#project'],
         team: 'team of 3',
@@ -201,7 +201,7 @@ describe('Content Collection Schemas', () => {
 
     it('rejects invalid tags (not an array)', () => {
       expect(() =>
-        workSchema.parse({
+        projectsSchema.parse({
           date: '2026-01-30',
           tags: 'not an array',
         })
@@ -210,7 +210,7 @@ describe('Content Collection Schemas', () => {
 
     it('rejects tags array with non-string elements', () => {
       expect(() =>
-        workSchema.parse({
+        projectsSchema.parse({
           date: '2026-01-30',
           tags: [1, 2, 3],
         })
@@ -219,7 +219,7 @@ describe('Content Collection Schemas', () => {
 
     it('rejects invalid team (not a string)', () => {
       expect(() =>
-        workSchema.parse({
+        projectsSchema.parse({
           date: '2026-01-30',
           team: 123,
         })
@@ -227,7 +227,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('handles tags with special characters', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#tag-with-dashes', '#tag_with_underscores', '#tag123'],
       });
@@ -239,7 +239,7 @@ describe('Content Collection Schemas', () => {
     });
 
     it('handles team with special characters', () => {
-      const result = workSchema.parse({
+      const result = projectsSchema.parse({
         date: '2026-01-30',
         team: 'Team of 4 (remote)',
       });
@@ -255,15 +255,15 @@ describe('Content Collection Schemas', () => {
       expect(validPost.date).toBeInstanceOf(Date);
     });
 
-    it('work schema produces correct TypeScript types', () => {
-      const validWork = workSchema.parse({
+    it('projects schema produces correct TypeScript types', () => {
+      const validProject = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#test'],
         team: 'solo',
       });
 
       // TypeScript will catch type errors at compile time
-      expect(validWork.date).toBeInstanceOf(Date);
+      expect(validProject.date).toBeInstanceOf(Date);
     });
   });
 });

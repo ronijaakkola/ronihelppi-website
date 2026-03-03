@@ -9,7 +9,7 @@ import { getTitle } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
 
 const posts = sortByDateDesc(await getCollection('posts'));
-const work = sortByDateDesc(await getCollection('work'));
+const projects = sortByDateDesc(await getCollection('projects'));
 
 const schemas = [
   {
@@ -32,6 +32,7 @@ const schemas = [
     sameAs: [
       'https://twitter.com/ronihelppi',
       'https://linkedin.com/in/ronihelppi',
+      'https://github.com/ronijaakkola',
     ],
   },
 ];
@@ -39,7 +40,7 @@ const schemas = [
 
 <BaseLayout
   title="Roni Helppi | Designer"
-  description="Designer at Reaktor, speaking all sides of digital. Portfolio and writings on design, technology, and creative work."
+  description="Designer & engineer at Reaktor. I think by building and write to think — and spend my off-hours deep in AI and whatever's pulling my attention next."
   schemas={schemas}
 >
   <main id="main-content" class="main">
@@ -53,10 +54,8 @@ const schemas = [
             </h1>
             <div class="bio">
               <p class="bio-secondary">
-                I'm a designer at <a href="https://reaktor.com">Reaktor</a> helping their industrial customers to grow.
-                Previously I have worked at various design consultancies like Gofore and Leadin.
+                <span class="bio-highlight">Designer & engineer</span> at <a href="https://reaktor.com" target="_blank" rel="noopener noreferrer">Reaktor</a>. I think by building and write to think — and spend my off-hours deep in AI and whatever's pulling my attention next.
               </p>
-              <p class="bio-primary">I'm a designer.</p>
             </div>
           </section>
 
@@ -64,17 +63,17 @@ const schemas = [
 
           <!-- Projects Section -->
           <section class="section cascade-item">
-            <SectionHeading title="Projects" />
+            <SectionHeading title="Recent projects" />
             <div class="projects-list">
-              {work.map((item) => (
+              {projects.slice(0, 3).map((item) => (
                 <ProjectCard
                   title={getTitle(item.id)}
                   description={item.data.description || ''}
-                  href={`/work/${item.slug}`}
+                  href={`/projects/${item.slug}`}
                 />
               ))}
             </div>
-            <a href="/work" class="view-all-link">
+            <a href="/projects" class="view-all-link">
               <span>View all projects</span>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arrow-icon">
                 <path d="M1.5 6H10.5M10.5 6L6.25 1.75M10.5 6L6.25 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
@@ -84,18 +83,18 @@ const schemas = [
 
           <!-- Writing Section -->
           <section class="section cascade-item">
-            <SectionHeading title="Writing" />
+            <SectionHeading title="Latest writing" />
             <div class="posts-list">
-              {posts.slice(0, 5).map((post) => (
+              {posts.slice(0, 3).map((post) => (
                 <PostListItem
                   title={getTitle(post.id)}
                   date={post.data.date}
-                  href={`/posts/${post.slug}`}
+                  href={`/writing/${post.slug}`}
                 />
               ))}
             </div>
-            <a href="/posts" class="view-all-link">
-              <span>View all posts</span>
+            <a href="/writing" class="view-all-link">
+              <span>View all writing</span>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arrow-icon">
                 <path d="M1.5 6H10.5M10.5 6L6.25 1.75M10.5 6L6.25 10.25" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -108,10 +107,11 @@ const schemas = [
             <div class="elsewhere-links">
               <p>
                 Reach me out via <a href="mailto:hello@ronihelppi.com">email</a>,{' '}
-                <a href="https://twitter.com/ronihelppi">Twitter</a>, or{' '}
-                <a href="https://linkedin.com/in/ronihelppi">LinkedIn</a>.
+                <a href="https://twitter.com/ronihelppi">Twitter</a>,{' '}
+                <a href="https://linkedin.com/in/ronihelppi">LinkedIn</a>, or{' '}
+                <a href="https://github.com/ronijaakkola">GitHub</a>.
               </p>
-              <p>Subscribe to my posts via <a href="/rss.xml">RSS</a>.</p>
+              <p>Subscribe to my writing via <a href="/rss.xml">RSS</a>.</p>
             </div>
           </section>
         </div>
@@ -150,16 +150,13 @@ const schemas = [
   }
 
   .bio {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
     font-size: var(--text-body);
     letter-spacing: var(--tracking-body);
   }
 
   .bio-secondary {
     color: var(--color-text-secondary);
-    max-width: 428px;
+    max-width: 480px;
     line-height: var(--leading-body);
   }
 
@@ -174,9 +171,16 @@ const schemas = [
     text-decoration-color: var(--color-text-primary);
   }
 
-  .bio-primary {
-    color: var(--color-text-primary);
-    max-width: 428px;
+  .bio-highlight {
+    background: linear-gradient(
+      120deg,
+      var(--color-text-primary),
+      rgba(255, 255, 255, 0.85)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
   }
 
   /* Sections */

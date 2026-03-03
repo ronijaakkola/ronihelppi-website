@@ -7,8 +7,8 @@
       "url": [
         "http://localhost:4321/",
         "http://localhost:4321/about",
-        "http://localhost:4321/posts",
-        "http://localhost:4321/work"
+        "http://localhost:4321/writing",
+        "http://localhost:4321/projects"
       ],
       "numberOfRuns": 3
     },

@@ -46,7 +46,7 @@ test.describe('404 Page', () => {
     await expect(aboutLink).toHaveAttribute('href', '/about');
 
     const writingLink = page.locator('.link-item a', { hasText: 'My writing' });
-    await expect(writingLink).toHaveAttribute('href', '/posts');
+    await expect(writingLink).toHaveAttribute('href', '/writing');
   });
 
   test('should navigate to home when clicking Home link', async ({ page }) => {
@@ -75,8 +75,8 @@ test.describe('404 Page', () => {
     const writingLink = page.locator('.link-item a', { hasText: 'My writing' });
     await writingLink.click();
 
-    await expect(page).toHaveURL('/posts');
-    await expect(page).toHaveTitle(/Posts.*Roni Helppi/);
+    await expect(page).toHaveURL('/writing');
+    await expect(page).toHaveTitle(/Writing.*Roni Helppi/);
   });
 
   test('should have proper HTML structure', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('404 Page', () => {
 
     // Header should be visible with navigation links
     await expect(page.locator('.nav-link', { hasText: 'About' })).toBeVisible();
-    await expect(page.locator('.nav-link', { hasText: 'Posts' })).toBeVisible();
+    await expect(page.locator('.nav-link', { hasText: 'Writing' })).toBeVisible();
   });
 
   test('should NOT show breadcrumb on 404 page', async ({ page }) => {

@@ -1,21 +1,21 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Work Pages', () => {
-  test('should load a work page successfully', async ({ page }) => {
+test.describe('Project Pages', () => {
+  test('should load a project page successfully', async ({ page }) => {
     // Navigate to home first
     await page.goto('/');
 
-    // Click on a work link
-    const firstWorkLink = page.locator('a[href^="/work/"]').first();
-    await firstWorkLink.click();
+    // Click on a project link
+    const firstProjectLink = page.locator('a[href^="/projects/"]').first();
+    await firstProjectLink.click();
 
-    // Should be on a work page
-    await expect(page).toHaveURL(/\/work\/.+/);
+    // Should be on a project page
+    await expect(page).toHaveURL(/\/projects\/.+/);
   });
 
-  test('should display work title', async ({ page }) => {
+  test('should display project title', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Should have an h1 title
     const title = page.locator('article h1');
@@ -23,9 +23,9 @@ test.describe('Work Pages', () => {
     await expect(title).not.toBeEmpty();
   });
 
-  test('should display work date', async ({ page }) => {
+  test('should display project date', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Should have a time element
     const time = page.locator('article time');
@@ -33,9 +33,9 @@ test.describe('Work Pages', () => {
     await expect(time).toHaveAttribute('datetime');
   });
 
-  test('should display work content', async ({ page }) => {
+  test('should display project content', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Should have content in the body
     const body = page.locator('body');
@@ -46,7 +46,7 @@ test.describe('Work Pages', () => {
 
   test('should have back navigation link', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Should have a link back to home (either header logo or explicit back link)
     const backLink = page.locator('a[href="/"]').first();
@@ -55,7 +55,7 @@ test.describe('Work Pages', () => {
 
   test('should navigate back to home when clicking back link', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Click back link (use first match - header logo)
     const backLink = page.locator('a[href="/"]').first();
@@ -67,10 +67,10 @@ test.describe('Work Pages', () => {
 
   test('should display team information if present', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Check if team info is displayed
-    // The RESOKILL work item has team: "solo"
+    // The RESOKILL project has team: "solo"
     const bodyText = await page.locator('body').textContent();
 
     // If team is present, it should be visible
@@ -82,7 +82,7 @@ test.describe('Work Pages', () => {
 
   test('should display tags if present', async ({ page }) => {
     // Navigate directly to resokill which has tags
-    await page.goto('/work/resokill');
+    await page.goto('/projects/resokill');
 
     // Wait for page to load
     await page.waitForLoadState('domcontentloaded');
@@ -94,7 +94,7 @@ test.describe('Work Pages', () => {
 
   test('should render markdown content as HTML', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Check for HTML elements that indicate markdown was rendered
     const paragraphs = page.locator('p');
@@ -104,13 +104,13 @@ test.describe('Work Pages', () => {
 
   test('should transform Obsidian images to HTML img tags', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Check for images with /images/ path
     const images = page.locator('img[src^="/images/"]');
     const imageCount = await images.count();
 
-    // The RESOKILL work item has images
+    // The RESOKILL project has images
     if (imageCount > 0) {
       // At least one image should be visible
       await expect(images.first()).toBeVisible();
@@ -127,7 +127,7 @@ test.describe('Work Pages', () => {
 
   test('should format date correctly', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Check that datetime attribute is a valid ISO date
     const time = page.locator('article time');
@@ -140,8 +140,8 @@ test.describe('Work Pages', () => {
   });
 
   test('should be accessible via direct URL', async ({ page }) => {
-    // Directly navigate to a known work URL
-    await page.goto('/work/resokill/');
+    // Directly navigate to a known project URL
+    await page.goto('/projects/resokill/');
 
     // Should load successfully
     await expect(page.locator('article h1')).toBeVisible();
@@ -150,7 +150,7 @@ test.describe('Work Pages', () => {
 
   test('should have proper meta tags', async ({ page }) => {
     await page.goto('/');
-    await page.locator('a[href^="/work/"]').first().click();
+    await page.locator('a[href^="/projects/"]').first().click();
 
     // Check for basic meta tags
     await expect(page.locator('meta[charset]')).toBeAttached();
@@ -158,7 +158,7 @@ test.describe('Work Pages', () => {
   });
 
   test('should display tags without hash prefix', async ({ page }) => {
-    await page.goto('/work/resokill/');
+    await page.goto('/projects/resokill/');
 
     // Check if tags are displayed
     const bodyText = await page.locator('body').textContent();

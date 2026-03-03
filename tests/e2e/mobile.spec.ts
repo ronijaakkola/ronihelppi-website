@@ -45,8 +45,8 @@ test.describe('Mobile Menu', () => {
     await page.click('#menu-button');
 
     await expect(page.locator('.mobile-menu-link >> text=About')).toBeVisible();
-    await expect(page.locator('.mobile-menu-link >> text=Work')).toBeVisible();
-    await expect(page.locator('.mobile-menu-link >> text=Posts')).toBeVisible();
+    await expect(page.locator('.mobile-menu-link >> text=Projects')).toBeVisible();
+    await expect(page.locator('.mobile-menu-link >> text=Writing')).toBeVisible();
     await expect(page.locator('.mobile-menu-link >> text=Contact')).toBeVisible();
   });
 
@@ -118,11 +118,11 @@ test.describe('Mobile Layout', () => {
     await page.goto('/');
 
     // Click on a post link
-    const postLink = page.locator('a[href^="/posts/"]').first();
+    const postLink = page.locator('a[href^="/writing/"]').first();
     await postLink.click();
 
     // Should navigate to post page
-    await expect(page).toHaveURL(/\/posts\//);
+    await expect(page).toHaveURL(/\/writing\//);
 
     // Back navigation should work
     await page.goBack();
@@ -140,8 +140,8 @@ test.describe('Mobile Layout', () => {
     await expect(heading).toBeVisible();
   });
 
-  test('work page grid adapts to mobile', async ({ page }) => {
-    await page.goto('/work');
+  test('projects page grid adapts to mobile', async ({ page }) => {
+    await page.goto('/projects');
 
     // Grid items should be visible
     const gridItems = page.locator('.grid-item');
@@ -175,7 +175,7 @@ test.describe('Mobile Layout', () => {
     await page.goto('/');
 
     // Navigate to a post
-    const postLink = page.locator('a[href^="/posts/"]').first();
+    const postLink = page.locator('a[href^="/writing/"]').first();
     await postLink.click();
 
     // Post title should be visible
@@ -192,7 +192,7 @@ test.describe('Mobile Layout', () => {
   });
 
   test('filter chips are usable on mobile', async ({ page }) => {
-    await page.goto('/work');
+    await page.goto('/projects');
 
     // Filter chips should be visible and tappable
     const filterChips = page.locator('.filter-chip');
@@ -210,8 +210,8 @@ test.describe('Mobile Layout', () => {
 test.describe('Tablet Layout', () => {
   test.use({ viewport: { width: 768, height: 1024 } });
 
-  test('work page grid shows 2 columns on tablet', async ({ page }) => {
-    await page.goto('/work');
+  test('projects page grid shows 2 columns on tablet', async ({ page }) => {
+    await page.goto('/projects');
 
     // Grid items should be visible
     const gridItems = page.locator('.grid-item');

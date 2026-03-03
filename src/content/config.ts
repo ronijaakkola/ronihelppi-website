@@ -10,7 +10,7 @@ const postsCollection = defineCollection({
   }),
 });
 
-const workCollection = defineCollection({
+const projectsCollection = defineCollection({
   type: 'content',
   schema: ({ image }) => z.object({
     date: z.coerce.date(),
@@ -25,5 +25,5 @@ const workCollection = defineCollection({
 
 export const collections = {
   posts: postsCollection,
-  work: workCollection,
+  projects: projectsCollection,
 };

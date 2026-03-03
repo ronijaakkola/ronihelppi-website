@@ -5,7 +5,7 @@ import { Image } from 'astro:assets';
 import { getTitle } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
 
-const work = sortByDateDesc(await getCollection('work'));
+const projects = sortByDateDesc(await getCollection('projects'));
 
 // Extract unique categories from tags
 function getCategoryFromTag(tag: string): string {
@@ -14,9 +14,9 @@ function getCategoryFromTag(tag: string): string {
 
 // Build category counts
 const categoryCounts = new Map<string, number>();
-categoryCounts.set('all', work.length);
+categoryCounts.set('all', projects.length);
 
-work.forEach((item) => {
+projects.forEach((item) => {
   item.data.tags?.forEach((tag) => {
     const category = getCategoryFromTag(tag);
     categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
@@ -40,13 +40,13 @@ const filters = [
 ---
 
 <BaseLayout
-  title="Work | Roni Helppi"
+  title="Projects | Roni Helppi"
   description="Selected projects and case studies in UX design, game development, and creative technology. Explore my portfolio of design work."
 >
   <main id="main-content" class="main">
-    <div class="layout work-layout">
+    <div class="layout projects-layout">
       <div class="content">
-        <h1 class="visually-hidden">Work</h1>
+        <h1 class="visually-hidden">Projects</h1>
         <!-- Filters -->
         <div class="filters">
           {filters.map((filter, index) => (
@@ -67,14 +67,14 @@ const filters = [
 
         <!-- Bento Grid -->
         <div class="bento-grid">
-          {work.map((item, index) => {
+          {projects.map((item, index) => {
             const title = getTitle(item.id);
             const categories = item.data.tags?.map(getCategoryFromTag) || [];
             const coverImage = item.data.coverImage;
 
             return (
               <a
-                href={`/work/${item.slug}`}
+                href={`/projects/${item.slug}`}
                 class="grid-item cascade-item"
                 data-categories={categories.join(',')}
                 style={`--cascade-delay: ${index * 60}ms`}
@@ -89,7 +89,7 @@ const filters = [
                     format="webp"
                     quality={80}
                     loading={index < 3 ? "eager" : "lazy"}
-                    style={`view-transition-name: work-cover-${item.slug}`}
+                    style={`view-transition-name: project-cover-${item.slug}`}
                   />
                 ) : (
                   <span class="visually-hidden">{title}</span>
@@ -104,7 +104,7 @@ const filters = [
 </BaseLayout>
 
 <style>
-  .work-layout {
+  .projects-layout {
     max-width: var(--layout-width);
   }
 
@@ -177,7 +177,7 @@ const filters = [
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--gap-md);
-    width: 100%;
+    width: calc(100% + 8px);
     padding: 4px;
     margin: -4px;
   }

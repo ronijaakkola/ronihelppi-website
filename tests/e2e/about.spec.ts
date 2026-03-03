@@ -16,7 +16,7 @@ test.describe('About Page', () => {
     await page.goto('/about');
     const intro = page.locator('.intro');
     await expect(intro).toBeVisible();
-    await expect(intro).toContainText("I'm a designer at");
+    await expect(intro).toContainText("I design things, build things");
 
     const reaktorLink = intro.locator('a', { hasText: 'Reaktor' });
     await expect(reaktorLink).toHaveAttribute('href', 'https://reaktor.com');
@@ -54,10 +54,10 @@ test.describe('About Page', () => {
     await expect(projectDesc).toBeVisible();
   });
 
-  test('should display Other projects section', async ({ page }) => {
+  test('should display Selected projects section', async ({ page }) => {
     await page.goto('/about');
 
-    const heading = page.locator('h2', { hasText: 'Other projects' });
+    const heading = page.locator('h2', { hasText: 'Selected projects' });
     await expect(heading).toBeVisible();
 
     await expect(page.locator('.project-title', { hasText: 'Game development' })).toBeVisible();
