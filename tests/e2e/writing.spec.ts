@@ -107,4 +107,12 @@ test.describe('Post Pages', () => {
     await expect(page.locator('h1.page-title')).toBeVisible();
     await expect(page.locator('time.post-meta')).toBeVisible();
   });
+
+  test('should display post ingress when description exists', async ({ page }) => {
+    await page.goto('/writing/digital-tangibleness/');
+
+    const ingress = page.locator('.post-ingress');
+    await expect(ingress).toBeVisible();
+    await expect(ingress).not.toBeEmpty();
+  });
 });

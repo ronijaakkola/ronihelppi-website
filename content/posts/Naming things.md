@@ -1,5 +1,6 @@
 ---
 date: 2026-02-18
+description: A name is a commitment. It shapes how others — and your future self — will understand the intent behind a piece of code.
 ---
 There is an old joke in programming that the two hardest problems are cache invalidation, naming things, and off-by-one errors. The joke is that it lists three problems despite claiming there are two.
 

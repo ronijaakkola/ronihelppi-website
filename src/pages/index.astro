@@ -90,6 +90,7 @@ const schemas = [
                   title={getTitle(post.id)}
                   date={post.data.date}
                   href={`/writing/${post.slug}`}
+                  layout="row"
                 />
               ))}
             </div>
@@ -201,7 +202,7 @@ const schemas = [
   .posts-list {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-2xs);
+    gap: var(--gap-xs);
   }
 
   /* View All Links */

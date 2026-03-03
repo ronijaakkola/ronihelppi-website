@@ -98,6 +98,9 @@ const schemas = [
             </div>
           </div>
         </header>
+        {post.data.description && (
+          <p class="post-ingress">{post.data.description}</p>
+        )}
       </div>
 
       {heroImage && (
@@ -196,6 +199,13 @@ const schemas = [
     outline-offset: 2px;
   }
 
+  .post-ingress {
+    font-size: clamp(16px, calc(16px + 4 * ((100vw - 600px) / 360)), 20px);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-body);
+    margin-top: 24px;
+  }
+
   .hero-image-container {
     width: 100%;
     margin-top: var(--gap-lg);
@@ -209,7 +219,7 @@ const schemas = [
   }
 
   .post-content {
-    margin-top: var(--gap-lg);
+    margin-top: 24px;
   }
 
   .related-posts {

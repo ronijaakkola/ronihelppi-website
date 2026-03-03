@@ -6,19 +6,6 @@ import { getTitle } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
 
 const posts = sortByDateDesc(await getCollection('posts'));
-
-// Group posts by year
-const postsByYear = posts.reduce((acc, post) => {
-  const year = post.data.date.getFullYear();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
-  return acc;
-}, {} as Record<number, typeof posts>);
-
-// Get years in descending order
-const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 ---
 
 <BaseLayout
@@ -30,20 +17,14 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
       <div class="prose">
         <div class="content">
           <h1 class="page-title">Writing</h1>
-          <div class="years-list">
-            {years.map((year) => (
-              <section class="year-section">
-                <h2 class="year-heading">{year}</h2>
-                <div class="posts-list">
-                  {postsByYear[year].map((post) => (
-                    <PostListItem
-                      title={getTitle(post.id)}
-                      date={post.data.date}
-                      href={`/writing/${post.slug}`}
-                    />
-                  ))}
-                </div>
-              </section>
+          <div class="posts-list">
+            {posts.map((post) => (
+              <PostListItem
+                title={getTitle(post.id)}
+                date={post.data.date}
+                href={`/writing/${post.slug}`}
+                description={post.data.description}
+              />
             ))}
           </div>
         </div>
@@ -56,32 +37,12 @@ const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
   .content {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-sm);
-  }
-
-  .years-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-lg);
-  }
-
-  .year-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-2xs);
-  }
-
-  .year-heading {
-    font-family: var(--font-serif);
-    font-size: var(--text-section);
-    font-weight: 400;
-    letter-spacing: var(--tracking-section);
-    color: var(--color-text-primary);
-    line-height: var(--leading-normal);
+    gap: var(--gap-md);
   }
 
   .posts-list {
     display: flex;
     flex-direction: column;
+    gap: var(--gap-lg);
   }
 </style>

@@ -3,33 +3,44 @@ interface Props {
   title: string;
   date: Date;
   href: string;
+  description?: string;
+  layout?: 'vertical' | 'row';
 }
 
-const { title, date, href } = Astro.props;
+const { title, date, href, description, layout = 'vertical' } = Astro.props;
 
-// Format date as YYYY-MM
-const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-// ISO date for datetime attribute
+const formattedDate = date.toLocaleDateString('en-US', {
+  ...(layout === 'vertical' && { year: 'numeric' }),
+  month: 'long',
+  day: 'numeric',
+});
 const isoDate = date.toISOString().split('T')[0];
 ---
 
-<div class="post-item">
-  <time class="post-date" datetime={isoDate}>{formattedDate}</time>
-  <a href={href} class="post-title">{title}</a>
+<div class:list={['post-item', { 'post-item--row': layout === 'row' }]}>
+  <div class="post-header">
+    <time class="post-date" datetime={isoDate}>{formattedDate}</time>
+    <a href={href} class="post-title">{title}</a>
+  </div>
+  {description && <p class="post-description">{description}</p>}
 </div>
 
 <style>
   .post-item {
     display: flex;
-    gap: var(--gap-md);
-    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--gap-3xs);
+  }
+
+  .post-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
   }
 
   .post-date {
-    flex-shrink: 0;
-    white-space: nowrap;
-    font-size: var(--text-body);
-    letter-spacing: var(--tracking-body-tight);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
     color: var(--color-text-secondary);
   }
 
@@ -39,5 +50,24 @@ const isoDate = date.toISOString().split('T')[0];
     letter-spacing: var(--tracking-body-tight);
     color: var(--color-text-primary);
     text-decoration-line: underline;
+  }
+
+  .post-description {
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-body);
+  }
+
+  /* Row layout variant */
+  .post-item--row .post-header {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0;
+  }
+
+  .post-item--row .post-date {
+    flex-shrink: 0;
+    width: 130px;
   }
 </style>

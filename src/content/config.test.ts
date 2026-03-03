@@ -5,6 +5,7 @@ import { z } from 'zod';
 // These should match the schemas defined in src/content/config.ts
 const postsSchema = z.object({
   date: z.coerce.date(),
+  description: z.string().optional(),
   heroImage: z.string().optional(),
   relatedPosts: z.array(z.string()).optional(),
 });
@@ -124,13 +125,39 @@ describe('Content Collection Schemas', () => {
       expect(result.relatedPosts).toEqual([]);
     });
 
+    it('accepts optional description string', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+        description: 'A short summary of the post.',
+      });
+      expect(result.description).toBe('A short summary of the post.');
+    });
+
+    it('works without description field', () => {
+      const result = postsSchema.parse({
+        date: '2026-01-30',
+      });
+      expect(result.description).toBeUndefined();
+    });
+
+    it('rejects invalid description (not a string)', () => {
+      expect(() =>
+        postsSchema.parse({
+          date: '2026-01-30',
+          description: 123,
+        })
+      ).toThrow();
+    });
+
     it('accepts all optional fields together', () => {
       const result = postsSchema.parse({
         date: '2026-01-30',
+        description: 'A post description.',
         heroImage: '/images/hero.jpg',
         relatedPosts: ['related-post'],
       });
       expect(result.date).toBeInstanceOf(Date);
+      expect(result.description).toBe('A post description.');
       expect(result.heroImage).toBe('/images/hero.jpg');
       expect(result.relatedPosts).toEqual(['related-post']);
     });

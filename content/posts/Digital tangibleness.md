@@ -1,5 +1,6 @@
 ---
 date: 2026-01-30
+description: In a world of disposable software, what gives digital work the lasting quality of a hand-crafted wooden chair?
 ---
 My daily work consists of designing mostly digital products. Tools, websites, apps. When you think about it, none of what I design today will probably exist in 20 years — probably not even 10 years. Those services will be shut down. Forgotten.
 
