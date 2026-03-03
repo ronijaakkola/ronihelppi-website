@@ -110,6 +110,9 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     <div class="site-wrapper">
       <Header transition:persist />
       <slot />
+      <footer class="site-footer">
+        <p>&copy; {new Date().getFullYear()} Roni Helppi</p>
+      </footer>
     </div>
     <Lightbox />
   </body>
@@ -139,6 +142,29 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     opacity: 1;
     outline: 2px solid var(--color-text-primary);
     outline-offset: 2px;
+  }
+
+  .site-footer {
+    padding: var(--gap-md) var(--spacing-horizontal-desktop);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: -0.6px;
+    color: var(--color-text-secondary);
+  }
+
+  @media (max-width: 960px) {
+    .site-footer {
+      padding-left: var(--spacing-horizontal-tablet);
+      padding-right: var(--spacing-horizontal-tablet);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .site-footer {
+      padding-left: var(--spacing-horizontal-phone);
+      padding-right: var(--spacing-horizontal-phone);
+    }
   }
 
   /* Ensure view transition background matches site background */

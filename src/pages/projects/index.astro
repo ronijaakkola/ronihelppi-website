@@ -49,7 +49,7 @@ const filters = [
       <div class="content">
         <h1 class="visually-hidden">Projects</h1>
         <!-- Filters -->
-        <div class="filters">
+        <div class="filters" role="group" aria-label="Filter projects by category">
           {filters.map((filter, index) => (
             <button
               class:list={['filter-chip', { active: index === 0 }]}
