@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Lightbox from '../components/Lightbox.astro';
@@ -100,7 +100,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
       <script is:inline type="application/ld+json" set:html={JSON.stringify(schema)} />
     ))}
 
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
