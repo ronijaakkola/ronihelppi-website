@@ -87,15 +87,15 @@ const schemas = [
           <BackLink />
           <div class="post-title-group">
             <h1 class="page-title">{title}</h1>
+            {post.data.description && (
+              <p class="post-ingress">{post.data.description}</p>
+            )}
             <div class="post-meta-row">
               <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
               <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>
             </div>
           </div>
         </header>
-        {post.data.description && (
-          <p class="post-ingress">{post.data.description}</p>
-        )}
       </div>
 
       {heroImage && (
@@ -145,13 +145,12 @@ const schemas = [
   .post-header {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: clamp(16px, calc(16px + 8 * ((100vw - 600px) / 360)), 24px);
   }
 
   .post-title-group {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-4xs);
   }
 
   .post-meta-row {
@@ -159,10 +158,11 @@ const schemas = [
     align-items: center;
     gap: var(--gap-xs);
     flex-wrap: wrap;
+    margin-top: clamp(12px, calc(12px + 4 * ((100vw - 600px) / 360)), 16px);
   }
 
   .post-meta {
-    font-size: var(--text-body);
+    font-size: clamp(14px, calc(14px + 2 * ((100vw - 600px) / 360)), 16px);
     letter-spacing: var(--tracking-body-tight);
     color: var(--color-text-secondary);
   }
@@ -199,7 +199,7 @@ const schemas = [
     font-size: clamp(16px, calc(16px + 4 * ((100vw - 600px) / 360)), 20px);
     color: var(--color-text-secondary);
     line-height: var(--leading-body);
-    margin-top: 24px;
+    margin-top: var(--gap-4xs);
   }
 
   .hero-image-container {
