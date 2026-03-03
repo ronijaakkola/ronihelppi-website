@@ -28,7 +28,7 @@ test.describe('Work Pages', () => {
     await page.locator('a[href^="/work/"]').first().click();
 
     // Should have a time element
-    const time = page.locator('time');
+    const time = page.locator('article time');
     await expect(time).toBeVisible();
     await expect(time).toHaveAttribute('datetime');
   });
@@ -130,7 +130,7 @@ test.describe('Work Pages', () => {
     await page.locator('a[href^="/work/"]').first().click();
 
     // Check that datetime attribute is a valid ISO date
-    const time = page.locator('time');
+    const time = page.locator('article time');
     const datetime = await time.getAttribute('datetime');
     expect(datetime).toBeTruthy();
 
