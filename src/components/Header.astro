@@ -449,7 +449,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   document.addEventListener('astro:page-load', updateActiveNavLinks);
 
   // Mobile menu toggle functionality
+  let mobileMenuAbortController: AbortController | null = null;
+
   function initMobileMenu() {
+    // Abort previous document/window listeners to prevent accumulation
+    mobileMenuAbortController?.abort();
+    mobileMenuAbortController = new AbortController();
+    const { signal } = mobileMenuAbortController;
+
     const menuButton = document.getElementById('menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const header = document.querySelector('.header');
@@ -503,20 +510,20 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       link.addEventListener('click', closeMenu);
     });
 
-    // Close on Escape key
+    // Close on Escape key (uses signal to prevent listener accumulation)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && menu.classList.contains('open')) {
         closeMenu();
         btn.focus();
       }
-    });
+    }, { signal });
 
-    // Close menu on resize to desktop
+    // Close menu on resize to desktop (uses signal to prevent listener accumulation)
     window.addEventListener('resize', () => {
       if (window.innerWidth > 600 && menu.classList.contains('open')) {
         closeMenu();
       }
-    });
+    }, { signal });
   }
 
   // Initialize on page load

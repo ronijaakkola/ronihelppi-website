@@ -4,9 +4,11 @@ import Divider from '../components/Divider.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import PostListItem from '../components/PostListItem.astro';
+import CascadeAnimation from '../components/CascadeAnimation.astro';
 import { getCollection } from 'astro:content';
 import { getTitle } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
+import { personSchema } from '../utils/schemas';
 
 const posts = sortByDateDesc(await getCollection('posts'));
 const projects = sortByDateDesc(await getCollection('projects'));
@@ -18,23 +20,7 @@ const schemas = [
     name: 'Roni Helppi',
     url: 'https://www.ronihelppi.com',
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Roni Helppi',
-    url: 'https://www.ronihelppi.com',
-    jobTitle: 'Senior UX Designer',
-    worksFor: {
-      '@type': 'Organization',
-      name: 'Reaktor',
-      url: 'https://reaktor.com',
-    },
-    sameAs: [
-      'https://twitter.com/ronihelppi',
-      'https://linkedin.com/in/ronihelppi',
-      'https://github.com/ronijaakkola',
-    ],
-  },
+  personSchema,
 ];
 ---
 
@@ -119,6 +105,7 @@ const schemas = [
       </div>
     </div>
   </main>
+  <CascadeAnimation selector=".content" />
 </BaseLayout>
 
 <style>
@@ -191,14 +178,7 @@ const schemas = [
     gap: var(--gap-md);
   }
 
-  /* Projects */
-  .projects-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xs);
-  }
-
-  /* Posts */
+  .projects-list,
   .posts-list {
     display: flex;
     flex-direction: column;
@@ -278,23 +258,3 @@ const schemas = [
   }
 </style>
 
-<script is:inline>
-  // Only run cascade animation on direct page load, not SPA navigation
-  // The flag is set by astro:after-swap BEFORE this script runs on navigation
-
-  if (!window.__cascadeListenersAdded) {
-    window.__cascadeListenersAdded = true;
-
-    // Mark that we're doing SPA navigation (fires before new page script runs)
-    document.addEventListener('astro:after-swap', () => {
-      window.__wasNavigation = true;
-    });
-  }
-
-  // Check immediately - on SPA nav, __wasNavigation is already true from after-swap
-  // On direct load, it's undefined/false
-  if (!window.__wasNavigation) {
-    document.querySelector('.content')?.classList.add('cascade-animate');
-  }
-  window.__wasNavigation = false;
-</script>

@@ -22,12 +22,14 @@ const tagProps = href
 <script>
   function initBackLink() {
     document.querySelectorAll('.back-link[data-back]').forEach((btn) => {
+      if (btn.hasAttribute('data-back-init')) return;
+      btn.setAttribute('data-back-init', '');
       btn.addEventListener('click', () => history.back());
     });
   }
 
   initBackLink();
-  document.addEventListener('astro:after-swap', initBackLink);
+  document.addEventListener('astro:page-load', initBackLink);
 </script>
 
 <style>

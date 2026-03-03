@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import { personSchema } from '../utils/schemas';
 
 const experience = [
   { date: '2026-08–', company: 'Reaktor', role: 'Senior UX Designer' },
@@ -32,25 +33,7 @@ const otherProjects = [
   },
 ];
 
-const schemas = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Roni Helppi',
-    url: 'https://www.ronihelppi.com',
-    jobTitle: 'Senior UX Designer',
-    worksFor: {
-      '@type': 'Organization',
-      name: 'Reaktor',
-      url: 'https://reaktor.com',
-    },
-    sameAs: [
-      'https://twitter.com/ronihelppi',
-      'https://linkedin.com/in/ronihelppi',
-      'https://github.com/ronijaakkola',
-    ],
-  },
-];
+const schemas = [personSchema];
 ---
 
 <BaseLayout

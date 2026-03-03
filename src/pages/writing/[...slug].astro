@@ -6,16 +6,17 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import BackLink from '../../components/BackLink.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 import { getTitle } from '../../utils/title';
+import { generateDescription } from '../../utils/description';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: { post },
+    props: { post, allPosts: posts },
   }));
 }
 
-const { post } = Astro.props;
+const { post, allPosts } = Astro.props;
 const { Content } = await post.render();
 
 // Derive title from id (preserves original filename)
@@ -31,9 +32,6 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
 // Calculate read time
 const readTime = formatReadTime(calculateReadTime(post.body));
 
-// Get all posts for related posts lookup
-const allPosts = await getCollection('posts');
-
 // Get related posts from frontmatter (properly typed)
 const relatedPostSlugs = post.data.relatedPosts || [];
 const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
@@ -42,20 +40,6 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
 
 // Get hero image from frontmatter
 const heroImage = post.data.heroImage;
-
-// Generate description from post body (first ~155 chars)
-function generateDescription(body: string): string {
-  const plainText = body
-    .replace(/^---[\s\S]*?---/, '') // Remove frontmatter
-    .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
-    .replace(/[#*_`~]/g, '') // Remove markdown formatting
-    .replace(/\n+/g, ' ') // Replace newlines with spaces
-    .trim();
-
-  if (plainText.length <= 155) return plainText;
-  return plainText.slice(0, 152).trim() + '\u2026';
-}
 
 const description = post.data.description || generateDescription(post.body || '');
 
@@ -94,7 +78,7 @@ const schemas = [
             <h1 class="page-title">{title}</h1>
             <div class="post-meta-row">
               <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
-              <button class="copy-markdown-btn" data-title={title} data-body={post.body} type="button">Copy post</button>
+              <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>
             </div>
           </div>
         </header>
@@ -143,6 +127,7 @@ const schemas = [
       </div>
     </div>
   </main>
+  <script type="text/plain" id="post-body-raw" set:text={post.body || ''} />
 </BaseLayout>
 
 <style>
@@ -295,7 +280,7 @@ const schemas = [
 
     btn.addEventListener('click', async () => {
       const title = btn.dataset.title ?? '';
-      const body = btn.dataset.body ?? '';
+      const body = document.getElementById('post-body-raw')?.textContent ?? '';
       const markdown = `# ${title}\n\n${body}`;
 
       try {

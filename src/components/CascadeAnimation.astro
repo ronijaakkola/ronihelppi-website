@@ -1,0 +1,20 @@
+---
+interface Props {
+  selector: string;
+}
+const { selector } = Astro.props;
+---
+
+<script is:inline define:vars={{ selector }}>
+  if (!window.__cascadeListenersAdded) {
+    window.__cascadeListenersAdded = true;
+    document.addEventListener('astro:after-swap', function() {
+      window.__wasNavigation = true;
+    });
+  }
+
+  if (!window.__wasNavigation) {
+    document.querySelector(selector)?.classList.add('cascade-animate');
+  }
+  window.__wasNavigation = false;
+</script>

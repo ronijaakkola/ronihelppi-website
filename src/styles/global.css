@@ -474,10 +474,6 @@ ol {
    Utility Classes
    ========================================================================== */
 
-.text-secondary {
-  color: var(--color-text-secondary);
-}
-
 .visually-hidden {
   position: absolute;
   width: 1px;
