@@ -9,12 +9,7 @@ import { remarkCodeTitle } from './src/utils/remark-code-title';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.ronihelppi.com',
-  integrations: [sitemap({
-    serialize(item) {
-      item.lastmod = new Date().toISOString();
-      return item;
-    },
-  })],
+  integrations: [sitemap()],
   markdown: {
     shikiConfig: {
       theme: 'github-dark',

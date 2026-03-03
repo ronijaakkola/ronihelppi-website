@@ -43,6 +43,8 @@ const heroImage = post.data.heroImage;
 
 const description = post.data.description || generateDescription(post.body || '');
 
+const postURL = new URL(`/writing/${post.slug}/`, Astro.site).href;
+
 const schemas = [
   {
     '@context': 'https://schema.org',
@@ -50,7 +52,16 @@ const schemas = [
     headline: title,
     description,
     datePublished: post.data.date.toISOString(),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postURL,
+    },
     author: {
+      '@type': 'Person',
+      name: 'Roni Helppi',
+      url: 'https://www.ronihelppi.com',
+    },
+    publisher: {
       '@type': 'Person',
       name: 'Roni Helppi',
       url: 'https://www.ronihelppi.com',

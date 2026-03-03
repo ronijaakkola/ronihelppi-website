@@ -23,6 +23,8 @@ const title = getTitle(item.id);
 
 const description = item.data.description || generateDescription(item.body || '');
 
+const projectURL = new URL(`/projects/${item.slug}/`, Astro.site).href;
+
 const schemas = [
   {
     '@context': 'https://schema.org',
@@ -30,6 +32,10 @@ const schemas = [
     name: title,
     description,
     datePublished: item.data.date.toISOString(),
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': projectURL,
+    },
     author: {
       '@type': 'Person',
       name: 'Roni Helppi',
