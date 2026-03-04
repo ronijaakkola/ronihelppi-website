@@ -79,7 +79,7 @@ test.describe('Home Page', () => {
 
     // Check for favicon link
     const favicon = page.locator('link[rel="icon"]');
-    await expect(favicon).toBeAttached();
+    await expect(favicon.first()).toBeAttached();
   });
 
   test('should show breadcrumb when navigating to section page', async ({ page }) => {
