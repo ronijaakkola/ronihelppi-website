@@ -111,7 +111,16 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
       <Header transition:persist />
       <slot />
       <footer class="site-footer">
-        <p>&copy; {new Date().getFullYear()} Roni Helppi</p>
+        <div class="footer-inner">
+          <p class="footer-copyright">&copy; {new Date().getFullYear()} Roni Helppi</p>
+          <nav class="footer-links" aria-label="Social links">
+            <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">github<span class="visually-hidden"> (opens in new tab)</span></a>
+            <span class="footer-sep" aria-hidden="true">/</span>
+            <a href="https://linkedin.com/in/ronihelppi" target="_blank" rel="noopener noreferrer">linkedin<span class="visually-hidden"> (opens in new tab)</span></a>
+            <span class="footer-sep" aria-hidden="true">/</span>
+            <a href="/rss.xml">rss</a>
+          </nav>
+        </div>
       </footer>
     </div>
     <Lightbox />
@@ -145,23 +154,55 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
   }
 
   .site-footer {
-    padding: var(--gap-md) var(--spacing-horizontal-desktop);
-    text-align: center;
+    display: flex;
+    justify-content: center;
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: -0.6px;
     color: var(--color-text-secondary);
   }
 
+  .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: var(--layout-width);
+    padding: var(--gap-sm) var(--spacing-horizontal-desktop);
+  }
+
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+  }
+
+  .footer-links a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .footer-links a:hover,
+  .footer-links a:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .footer-sep {
+    color: var(--color-divider);
+  }
+
   @media (max-width: 960px) {
-    .site-footer {
+    .footer-inner {
       padding-left: var(--spacing-horizontal-tablet);
       padding-right: var(--spacing-horizontal-tablet);
     }
   }
 
   @media (max-width: 600px) {
-    .site-footer {
+    .footer-inner {
+      flex-direction: column;
+      gap: var(--gap-2xs);
       padding-left: var(--spacing-horizontal-phone);
       padding-right: var(--spacing-horizontal-phone);
     }

@@ -62,9 +62,9 @@
   --spacing-top-phone: 32px;
 
   /* Spacing - Bottom Padding */
-  --spacing-bottom-desktop: 124px;
-  --spacing-bottom-tablet: 58px;
-  --spacing-bottom-phone: 32px;
+  --spacing-bottom-desktop: 180px;
+  --spacing-bottom-tablet: 100px;
+  --spacing-bottom-phone: 64px;
 
   /* Spacing - Horizontal Padding */
   --spacing-horizontal-desktop: 0px;
