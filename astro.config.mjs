@@ -10,6 +10,7 @@ import { remarkCodeTitle } from './src/utils/remark-code-title';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.ronihelppi.com',
+  devToolbar: { enabled: false },
   integrations: [sitemap()],
   markdown: {
     shikiConfig: {

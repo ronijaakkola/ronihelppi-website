@@ -445,8 +445,8 @@ const filters = [
 
       function onEnter() {
         if (prefersReducedMotion.matches) {
-          titleEl.textContent = titleText;
-          yearEl.textContent = yearText;
+          titleEl!.textContent = titleText;
+          yearEl!.textContent = yearText;
         } else {
           titleScramble.setText(titleText);
           yearScramble.setText(yearText);
@@ -456,8 +456,8 @@ const filters = [
       function onLeave() {
         titleScramble.cancel();
         yearScramble.cancel();
-        titleEl.textContent = '';
-        yearEl.textContent = '';
+        titleEl!.textContent = '';
+        yearEl!.textContent = '';
       }
     });
   }

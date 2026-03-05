@@ -561,7 +561,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   const { TextScramble } = await import('../utils/text-scramble');
 
-  let textScramble: TextScramble | null = null;
+  let textScramble: InstanceType<typeof TextScramble> | null = null;
   let currentBreadcrumbText = '';
 
   function prefersReducedMotion(): boolean {
