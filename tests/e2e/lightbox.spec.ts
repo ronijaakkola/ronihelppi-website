@@ -101,23 +101,23 @@ test.describe('Lightbox', () => {
 });
 
 test.describe('Lightbox Keyboard Accessibility', () => {
-  test('opens with Enter key when image is focused', async ({ page }) => {
+  test('opens with Enter key when trigger button is focused', async ({ page }) => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    await coverImage.focus();
+    const triggerButton = page.locator('.lightbox-trigger').first();
+    await triggerButton.focus();
     await page.keyboard.press('Enter');
 
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
   });
 
-  test('opens with Space key when image is focused', async ({ page }) => {
+  test('opens with Space key when trigger button is focused', async ({ page }) => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    await coverImage.focus();
+    const triggerButton = page.locator('.lightbox-trigger').first();
+    await triggerButton.focus();
     await page.keyboard.press(' ');
 
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
@@ -139,30 +139,32 @@ test.describe('Lightbox Keyboard Accessibility', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    await coverImage.click();
+    const triggerButton = page.locator('.lightbox-trigger').first();
+    await triggerButton.click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     await page.keyboard.press('Escape');
     await expect(page.locator('#lightbox')).not.toHaveAttribute('open');
-    await expect(coverImage).toBeFocused();
+    await expect(triggerButton).toBeFocused();
   });
 
-  test('image has role button and is focusable', async ({ page }) => {
+  test('image is wrapped in a button element', async ({ page }) => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    await expect(coverImage).toHaveAttribute('role', 'button');
-    await expect(coverImage).toHaveAttribute('tabindex', '0');
+    const triggerButton = page.locator('.lightbox-trigger').first();
+    await expect(triggerButton).toBeVisible();
+    // The trigger should be a button element
+    const tagName = await triggerButton.evaluate(el => el.tagName.toLowerCase());
+    expect(tagName).toBe('button');
   });
 
-  test('image has aria-label', async ({ page }) => {
+  test('trigger button has aria-label', async ({ page }) => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    const ariaLabel = await coverImage.getAttribute('aria-label');
+    const triggerButton = page.locator('.lightbox-trigger').first();
+    const ariaLabel = await triggerButton.getAttribute('aria-label');
     expect(ariaLabel).toMatch(/View .* in fullscreen/);
   });
 });

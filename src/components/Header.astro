@@ -18,7 +18,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     <a href="/contact" class="contact-button">
       <span>Contact</span>
-      <KeyboardShortcut key="C" />
+      <KeyboardShortcut key="C" label="Press C to go to contact page" />
     </a>
 
     <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -122,7 +122,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
 
     .mobile-menu-link {
-      transition: color 0.2s ease;
+      transition: none;
       opacity: 1;
       transform: none;
     }
@@ -211,7 +211,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
     font-size: 12px;
-    letter-spacing: -0.6px;
+    letter-spacing: var(--tracking-mono);
     color: var(--color-button-text);
     text-decoration: none;
     grid-column: 3;

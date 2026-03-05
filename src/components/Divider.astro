@@ -2,7 +2,7 @@
 const { class: className } = Astro.props;
 ---
 
-<hr class:list={["divider", className]} />
+<hr class:list={["divider", className]} aria-hidden="true" />
 
 <style>
   .divider {

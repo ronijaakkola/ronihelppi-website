@@ -15,10 +15,14 @@
   --color-keystroke-bg: #c0b3b3;
   --color-border: #aaa1a1;
   --color-code-bg: #131313;
+  --color-code-bg-translucent: rgba(19, 19, 19, 0.9);
   --color-code-header: #0f0f0f;
   --color-overlay: rgba(0, 0, 0, 0.75);
+  --color-overlay-light: rgba(0, 0, 0, 0.55);
   --color-surface-hover: rgba(255, 255, 255, 0.05);
   --color-surface-active: rgba(255, 255, 255, 0.1);
+  --color-highlight-end: rgba(255, 255, 255, 0.85);
+  --color-highlight-glow: rgba(255, 255, 255, 0.15);
 
   /* Typography - Font Families */
   --font-sans: 'Rethink Sans', system-ui, sans-serif;
@@ -31,6 +35,7 @@
   --text-nav: 16px;
   --text-body: clamp(16px, calc(16px + 2 * ((100vw - 600px) / 360)), 18px);
   --text-small: clamp(14px, calc(14px + 2 * ((100vw - 600px) / 360)), 16px);
+  --text-code: 14px;
   --text-keystroke: 9px;
 
   /* Typography - Letter Spacing (Fluid between 600px and 960px viewports) */
@@ -40,6 +45,7 @@
   --tracking-body: clamp(-0.72px, calc(-0.64px + -0.08 * ((100vw - 600px) / 360)), -0.64px);
   --tracking-body-tight: clamp(-0.9px, calc(-0.8px + -0.1 * ((100vw - 600px) / 360)), -0.8px);
   --tracking-small: clamp(-0.8px, calc(-0.7px + -0.1 * ((100vw - 600px) / 360)), -0.7px);
+  --tracking-mono: -0.6px;
   --tracking-keystroke: -0.27px;
 
   /* Typography - Line Heights */
@@ -263,16 +269,21 @@ ol {
   display: inline-block;
   width: 0.75em;
   height: 0.9em;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 18' fill='none'%3E%3Cpath d='M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667' stroke='%23AAA1A1' stroke-width='1.33333' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: contain;
+  background-color: var(--color-text-secondary);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 18' fill='none'%3E%3Cpath d='M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667' stroke='%23000' stroke-width='1.33333' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 18' fill='none'%3E%3Cpath d='M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667' stroke='%23000' stroke-width='1.33333' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-size: contain;
   flex-shrink: 0;
-  transition: transform 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 150ms cubic-bezier(0.25, 1, 0.5, 1), background-color 100ms;
 }
 
 .prose-content a[href^="http"]:hover::after,
 .prose-content a[href^="http"]:focus-visible::after {
   transform: translate(1px, -1px);
+  background-color: var(--color-text-primary);
 }
 
 .prose-content code {
@@ -280,7 +291,7 @@ ol {
   font-size: 0.9em;
   background: var(--color-surface-active);
   padding: 0.15em 0.35em;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .prose-content pre {
@@ -322,7 +333,7 @@ ol {
 
 .code-block-filename {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: var(--text-code);
   letter-spacing: var(--tracking-small);
   color: var(--color-text-secondary);
   padding: 0.5rem 1rem;
@@ -346,12 +357,12 @@ ol {
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  background: rgba(19, 19, 19, 0.9); /* code-bg with opacity for copy button */
+  background: var(--color-code-bg-translucent);
   border: 1px solid var(--color-text-secondary);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 12px;
-  letter-spacing: -0.6px;
+  letter-spacing: var(--tracking-mono);
   color: var(--color-text-secondary);
   cursor: pointer;
   line-height: 1;
@@ -360,7 +371,8 @@ ol {
   transition: opacity 0.15s ease;
 }
 
-.code-block-wrapper:hover .code-copy-btn {
+.code-block-wrapper:hover .code-copy-btn,
+.code-block-wrapper:focus-within .code-copy-btn {
   opacity: 1;
 }
 

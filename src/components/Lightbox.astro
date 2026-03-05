@@ -195,6 +195,26 @@
     display: block;
   }
 
+  /* Lightbox trigger button wrapping images */
+  :global(.lightbox-trigger) {
+    display: block;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    width: 100%;
+  }
+
+  :global(.lightbox-trigger img) {
+    cursor: zoom-in;
+  }
+
+  :global(.lightbox-trigger:focus-visible) {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .lightbox,
@@ -374,7 +394,7 @@
       }
     });
 
-    // Make images clickable
+    // Make images clickable by wrapping in a button
     function setupImageClicks() {
       const proseImages = document.querySelectorAll('.prose-content img, .hero-image, .cover-image');
       proseImages.forEach((img, index) => {
@@ -384,23 +404,16 @@
         if (imgEl.dataset.lightboxSetup === 'true') return;
         imgEl.dataset.lightboxSetup = 'true';
 
-        // Add styles for clickability
-        imgEl.style.cursor = 'zoom-in';
-        imgEl.setAttribute('tabindex', '0');
-        imgEl.setAttribute('role', 'button');
-        imgEl.setAttribute('aria-label', `View ${imgEl.alt || 'image'} in fullscreen`);
+        // Wrap image in a semantic button element
+        const wrapper = document.createElement('button');
+        wrapper.type = 'button';
+        wrapper.className = 'lightbox-trigger';
+        wrapper.setAttribute('aria-label', `View ${imgEl.alt || 'image'} in fullscreen`);
+        imgEl.parentNode!.insertBefore(wrapper, imgEl);
+        wrapper.appendChild(imgEl);
 
-        // Click handler
-        imgEl.addEventListener('click', () => {
-          openLightbox(index, imgEl);
-        });
-
-        // Keyboard handler
-        imgEl.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openLightbox(index, imgEl);
-          }
+        wrapper.addEventListener('click', () => {
+          openLightbox(index, wrapper);
         });
       });
     }

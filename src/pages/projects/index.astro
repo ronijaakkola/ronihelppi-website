@@ -140,7 +140,7 @@ const filters = [
     cursor: pointer;
     font-family: var(--font-mono);
     font-size: 12px;
-    letter-spacing: -0.6px;
+    letter-spacing: var(--tracking-mono);
     line-height: normal;
     transition: background-color 100ms ease, color 100ms ease;
   }
@@ -194,7 +194,7 @@ const filters = [
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 0.5px solid var(--color-border);
-    background: rgba(0, 0, 0, 0.5); /* darker than overlay for image placeholder */
+    background: var(--color-overlay-light);
     transition: opacity 300ms ease, transform 300ms ease, border-color 150ms ease;
     text-decoration: none;
   }
@@ -244,15 +244,15 @@ const filters = [
   .grid-item-year {
     font-family: var(--font-mono);
     color: var(--color-text-primary);
-    background: rgba(0, 0, 0, 0.55);
+    background: var(--color-overlay-light);
     backdrop-filter: blur(8px);
     padding: 4px 8px;
     border-radius: var(--radius-sm);
-    letter-spacing: -0.6px;
+    letter-spacing: var(--tracking-mono);
   }
 
   .grid-item-title {
-    font-size: 14px;
+    font-size: var(--text-code);
   }
 
   .grid-item-year {

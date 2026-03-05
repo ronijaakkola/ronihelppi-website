@@ -1,12 +1,14 @@
 ---
 interface Props {
   key: string;
+  label?: string;
 }
 
-const { key } = Astro.props;
+const { key, label } = Astro.props;
 ---
 
-<span class="keystroke">{key}</span>
+<span class="keystroke" aria-hidden="true">{key}</span>
+{label && <span class="visually-hidden">{label}</span>}
 
 <style>
   .keystroke {

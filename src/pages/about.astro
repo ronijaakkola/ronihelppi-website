@@ -5,11 +5,11 @@ import ProjectCard from '../components/ProjectCard.astro';
 import { personSchema } from '../utils/schemas';
 
 const experience = [
-  { date: '2026-08–', company: 'Reaktor', role: 'Senior UX Designer' },
-  { date: '12/2017–08/2022', company: 'Gofore', role: 'UX Designer' },
-  { date: '02/2017–12/2017', company: 'Leadin', role: 'UX Developer' },
-  { date: '01/2016–02/2017', company: 'Atostek', role: 'Software Designer' },
-  { date: '01/2015–06/2015', company: 'Tampere University', role: 'Research Assistant' },
+  { date: '2026-08–', datetime: '2026-08', company: 'Reaktor', role: 'Senior UX Designer' },
+  { date: '12/2017–08/2022', datetime: '2017-12/2022-08', company: 'Gofore', role: 'UX Designer' },
+  { date: '02/2017–12/2017', datetime: '2017-02/2017-12', company: 'Leadin', role: 'UX Developer' },
+  { date: '01/2016–02/2017', datetime: '2016-01/2017-02', company: 'Atostek', role: 'Software Designer' },
+  { date: '01/2015–06/2015', datetime: '2015-01/2015-06', company: 'Tampere University', role: 'Research Assistant' },
 ];
 
 const caseStudies = [
@@ -71,7 +71,7 @@ const schemas = [personSchema];
                 <tbody>
                   {experience.map((item) => (
                     <tr>
-                      <td class="date-cell" data-label="Date">{item.date}</td>
+                      <td class="date-cell" data-label="Date"><time datetime={item.datetime}>{item.date}</time></td>
                       <td class="company-cell" data-label="Company">{item.company}</td>
                       <td class="role-cell" data-label="Role">{item.role}</td>
                     </tr>
@@ -170,9 +170,9 @@ const schemas = [personSchema];
 
   .experience-table th {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: var(--text-code);
     font-weight: 400;
-    letter-spacing: -0.7px;
+    letter-spacing: var(--tracking-small);
     color: var(--color-text-secondary);
     text-align: left;
     padding-bottom: var(--gap-2xs);
