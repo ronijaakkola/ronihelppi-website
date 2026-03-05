@@ -265,6 +265,12 @@ ol {
   background-repeat: no-repeat;
   background-size: contain;
   flex-shrink: 0;
+  transition: transform 150ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.prose-content a[href^="http"]:hover::after,
+.prose-content a[href^="http"]:focus-visible::after {
+  transform: translate(1px, -1px);
 }
 
 .prose-content code {
