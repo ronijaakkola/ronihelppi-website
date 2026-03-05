@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import BackLink from '../../components/BackLink.astro';
 import Divider from '../../components/Divider.astro';
 import { getTitle } from '../../utils/title';
 import { generateDescription } from '../../utils/description';
@@ -59,9 +58,8 @@ const schemas = [
     <article class="layout">
       <div class="prose">
         <header class="project-header">
-          <BackLink />
           <div class="project-title-group">
-            <h1 class="project-title">{title}</h1>
+            <h1 class="page-title">{title}</h1>
             <p class="project-subtitle">Case study</p>
           </div>
         </header>
@@ -125,7 +123,7 @@ const schemas = [
           </time>
         </div>
 
-        <Divider class="divider" />
+        <Divider />
 
         <div class="prose-content">
           <Content />
@@ -139,23 +137,12 @@ const schemas = [
   .project-header {
     display: flex;
     flex-direction: column;
-    gap: 12px;
   }
 
   .project-title-group {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
-  }
-
-  .project-title {
-    font-family: var(--font-serif);
-    font-size: var(--text-hero);
-    font-weight: 400;
-    letter-spacing: var(--tracking-hero);
-    color: var(--color-text-primary);
-    line-height: var(--leading-normal);
-    text-wrap: balance;
   }
 
   .project-subtitle {
@@ -183,7 +170,7 @@ const schemas = [
     display: flex;
     flex-direction: column;
     gap: var(--gap-sm);
-    margin-top: var(--gap-lg);
+    margin-top: 32px;
   }
 
   .project-description {
@@ -228,7 +215,7 @@ const schemas = [
     color: var(--color-text-primary);
   }
 
-  .divider {
+  .prose > :global(.divider) {
     margin-top: var(--gap-section);
     margin-bottom: var(--gap-section);
   }

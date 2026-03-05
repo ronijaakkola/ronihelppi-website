@@ -3,7 +3,6 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
-import BackLink from '../../components/BackLink.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 import { getTitle } from '../../utils/title';
 import { generateDescription } from '../../utils/description';
@@ -84,7 +83,6 @@ const schemas = [
       <!-- Post Heading -->
       <div class="prose">
         <header class="post-header">
-          <BackLink />
           <div class="post-title-group">
             <h1 class="page-title">{title}</h1>
             {post.data.description && (
@@ -145,7 +143,6 @@ const schemas = [
   .post-header {
     display: flex;
     flex-direction: column;
-    gap: clamp(16px, calc(16px + 8 * ((100vw - 600px) / 360)), 24px);
   }
 
   .post-title-group {
@@ -215,7 +212,7 @@ const schemas = [
   }
 
   .post-content {
-    margin-top: 24px;
+    margin-top: 32px;
   }
 
   .related-posts {
