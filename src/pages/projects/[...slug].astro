@@ -81,47 +81,65 @@ const schemas = [
       )}
 
       <div class="prose">
-        <div class="project-meta">
-          {item.data.description && (
-            <p class="project-description">{item.data.description}</p>
-          )}
+        {item.data.description && (
+          <p class="project-description">{item.data.description}</p>
+        )}
 
-          {item.data.team && (
-            <div class="meta-item">
-              <span class="meta-label">Team</span>
-              <span class="meta-value">{item.data.team}</span>
-            </div>
-          )}
+        <div class="project-meta-card">
+          <dl class="meta-grid">
+            {item.data.team && (
+              <div class="meta-row">
+                <dt class="meta-label">Team</dt>
+                <dd class="meta-value">{item.data.team}</dd>
+              </div>
+            )}
 
-          {item.data.duration && (
-            <div class="meta-item">
-              <span class="meta-label">Duration</span>
-              <span class="meta-value">{item.data.duration}</span>
-            </div>
-          )}
+            {item.data.duration && (
+              <div class="meta-row">
+                <dt class="meta-label">Duration</dt>
+                <dd class="meta-value">{item.data.duration}</dd>
+              </div>
+            )}
 
-          {item.data.skills && (
-            <div class="meta-item">
-              <span class="meta-label">Skills</span>
-              <span class="meta-value">{item.data.skills}</span>
-            </div>
-          )}
+            {item.data.skills && (
+              <div class="meta-row">
+                <dt class="meta-label">Skills</dt>
+                <dd class="meta-value">{item.data.skills}</dd>
+              </div>
+            )}
 
-          {item.data.tags && item.data.tags.length > 0 && (
-            <div class="meta-item">
-              <span class="meta-label">Tags</span>
-              <ul class="tags-list">
-                {item.data.tags.map((tag) => (
-                  <li class="tag">{tag.replace('#', '')}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {item.data.tags && item.data.tags.length > 0 && (
+              <div class="meta-row">
+                <dt class="meta-label">Tags</dt>
+                <dd class="meta-value">
+                  <ul class="tags-list">
+                    {item.data.tags.map((tag) => (
+                      <li class="tag">{tag.replace('#', '')}</li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )}
+          </dl>
 
-          <time datetime={item.data.date.toISOString()} class="visually-hidden">
-            {item.data.date.toLocaleDateString()}
-          </time>
         </div>
+
+        {item.data.links && item.data.links.length > 0 && (
+          <div class="meta-links">
+            {item.data.links.map((link) => (
+              <a href={link.url} class="meta-link" target="_blank" rel="noopener noreferrer">
+                {link.label}
+                <svg width="12" height="12" viewBox="0 0 15 18" fill="none" aria-hidden="true">
+                  <path d="M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        )}
+
+        <time datetime={item.data.date.toISOString()} class="visually-hidden">
+          {item.data.date.toLocaleDateString()}
+        </time>
 
         <Divider />
 
@@ -166,13 +184,6 @@ const schemas = [
     border: 0.5px solid var(--color-border);
   }
 
-  .project-meta {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
-    margin-top: var(--gap-lg);
-  }
-
   .project-description {
     font-family: var(--font-sans);
     font-size: var(--text-body);
@@ -180,25 +191,47 @@ const schemas = [
     letter-spacing: var(--tracking-body);
     line-height: var(--leading-body);
     color: var(--color-text-primary);
+    margin-top: var(--gap-lg);
   }
 
-  .meta-item {
+  .project-meta-card {
+    margin-top: var(--gap-md);
+    padding: var(--gap-2xs) 0;
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .meta-row {
     display: flex;
-    flex-direction: column;
-    gap: var(--gap-4xs);
+    align-items: baseline;
+    gap: var(--gap-md);
+    padding: var(--gap-2xs) var(--gap-xs);
+    border-bottom: 0.5px solid var(--color-divider);
+  }
+
+  .meta-row:last-child {
+    border-bottom: none;
   }
 
   .meta-label {
     font-family: var(--font-mono);
-    font-size: var(--text-small);
-    letter-spacing: var(--tracking-small);
+    font-size: 14px;
+    letter-spacing: -0.7px;
     color: var(--color-text-secondary);
+    flex-shrink: 0;
+    min-width: 72px;
   }
 
   .meta-value {
     font-family: var(--font-sans);
-    font-size: var(--text-small);
-    letter-spacing: var(--tracking-small);
+    font-size: 14px;
+    letter-spacing: -0.7px;
     color: var(--color-text-primary);
   }
 
@@ -210,9 +243,51 @@ const schemas = [
 
   .tag {
     font-family: var(--font-sans);
-    font-size: var(--text-small);
-    letter-spacing: var(--tracking-small);
+    font-size: 14px;
+    letter-spacing: -0.7px;
     color: var(--color-text-primary);
+  }
+
+  .meta-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-2xs);
+    margin-top: var(--gap-sm);
+  }
+
+  .meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 10px;
+    min-height: 26px;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: -0.65px;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: border-color 100ms ease, color 100ms ease;
+    width: fit-content;
+  }
+
+  .meta-link:hover,
+  .meta-link:focus-visible {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  .meta-link:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  .meta-link svg {
+    flex-shrink: 0;
   }
 
   .prose > :global(.divider) {

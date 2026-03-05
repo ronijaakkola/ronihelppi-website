@@ -8,6 +8,11 @@ team: 3 people
 coverImage: ../images/resokill-cover.png
 duration: "11/2025 — 12/2025"
 skills: "Game design, Game development, Unity, 3D modelling"
+links:
+  - label: "Itch.io"
+    url: "https://ronihelppi.itch.io/resokill"
+  - label: "GitHub"
+    url: "https://github.com/ronihelppi/resokill"
 ---
 A **Retro Rhythm Shooter** inspired by the PSX era, made in one month for GitHub’s [Game Off 2025 Jam](https://itch.io/jam/game-off-2025).
 

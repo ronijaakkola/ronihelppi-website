@@ -14,6 +14,10 @@ const projectsSchema = z.object({
   date: z.coerce.date(),
   tags: z.array(z.string()).optional(),
   team: z.string().optional(),
+  links: z.array(z.object({
+    label: z.string(),
+    url: z.string().url(),
+  })).optional(),
 });
 
 describe('Content Collection Schemas', () => {
@@ -271,6 +275,44 @@ describe('Content Collection Schemas', () => {
         team: 'Team of 4 (remote)',
       });
       expect(result.team).toBe('Team of 4 (remote)');
+    });
+
+    it('accepts optional links array', () => {
+      const result = projectsSchema.parse({
+        date: '2026-01-30',
+        links: [
+          { label: 'GitHub', url: 'https://github.com/example' },
+          { label: 'Itch.io', url: 'https://example.itch.io/game' },
+        ],
+      });
+      expect(result.links).toHaveLength(2);
+      expect(result.links![0].label).toBe('GitHub');
+      expect(result.links![0].url).toBe('https://github.com/example');
+    });
+
+    it('works without links field', () => {
+      const result = projectsSchema.parse({
+        date: '2026-01-30',
+      });
+      expect(result.links).toBeUndefined();
+    });
+
+    it('rejects links with invalid URL', () => {
+      expect(() =>
+        projectsSchema.parse({
+          date: '2026-01-30',
+          links: [{ label: 'Bad', url: 'not-a-url' }],
+        })
+      ).toThrow();
+    });
+
+    it('rejects links missing label', () => {
+      expect(() =>
+        projectsSchema.parse({
+          date: '2026-01-30',
+          links: [{ url: 'https://example.com' }],
+        })
+      ).toThrow();
     });
   });
 

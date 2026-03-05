@@ -20,6 +20,10 @@ const projectsCollection = defineCollection({
     coverImage: image().optional(),
     duration: z.string().optional(),
     skills: z.string().optional(),
+    links: z.array(z.object({
+      label: z.string(),
+      url: z.string().url(),
+    })).optional(),
   }),
 });
 
