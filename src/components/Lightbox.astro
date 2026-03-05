@@ -255,6 +255,7 @@
     let images: LightboxImage[] = [];
     let currentIndex = 0;
     let triggerElement: HTMLElement | null = null;
+    let isClosing = false;
 
     function collectImages(): LightboxImage[] {
       const proseImages = document.querySelectorAll('.prose-content img, .hero-image, .cover-image');
@@ -309,12 +310,15 @@
     }
 
     function closeLightbox() {
+      if (isClosing) return;
+      isClosing = true;
       dialog.classList.remove('is-open');
 
       // Wait for animation to complete before closing
       setTimeout(() => {
         dialog.close();
         dialog.classList.remove('is-animating');
+        isClosing = false;
         // Restore body scroll
         document.body.style.overflow = '';
 

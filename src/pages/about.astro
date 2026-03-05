@@ -71,9 +71,9 @@ const schemas = [personSchema];
                 <tbody>
                   {experience.map((item) => (
                     <tr>
-                      <td class="date-cell">{item.date}</td>
-                      <td class="company-cell">{item.company}</td>
-                      <td class="role-cell">{item.role}</td>
+                      <td class="date-cell" data-label="Date">{item.date}</td>
+                      <td class="company-cell" data-label="Company">{item.company}</td>
+                      <td class="role-cell" data-label="Role">{item.role}</td>
                     </tr>
                   ))}
                 </tbody>

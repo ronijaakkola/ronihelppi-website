@@ -15,24 +15,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p>
               I'd love to hear from you. Whether you have a project in mind, want to collaborate, or just want to say hello.
             </p>
-            <div class="contact-methods">
+            <dl class="contact-methods">
               <div class="contact-method">
-                <span class="contact-label">Email</span>
-                <a href="mailto:hello@ronihelppi.com" class="contact-link">hello@ronihelppi.com</a>
+                <dt class="contact-label">Email</dt>
+                <dd><a href="mailto:hello@ronihelppi.com" class="contact-link">hello@ronihelppi.com</a></dd>
               </div>
               <div class="contact-method">
-                <span class="contact-label">LinkedIn</span>
-                <a href="https://linkedin.com/in/ronihelppi" class="contact-link" target="_blank" rel="noopener noreferrer">linkedin.com/in/ronihelppi<span class="visually-hidden"> (opens in new tab)</span></a>
+                <dt class="contact-label">LinkedIn</dt>
+                <dd><a href="https://linkedin.com/in/ronihelppi" class="contact-link" target="_blank" rel="noopener noreferrer">linkedin.com/in/ronihelppi<span class="visually-hidden"> (opens in new tab)</span></a></dd>
               </div>
               <div class="contact-method">
-                <span class="contact-label">Twitter</span>
-                <a href="https://twitter.com/ronihelppi" class="contact-link" target="_blank" rel="noopener noreferrer">@ronihelppi<span class="visually-hidden"> (opens in new tab)</span></a>
+                <dt class="contact-label">Twitter</dt>
+                <dd><a href="https://twitter.com/ronihelppi" class="contact-link" target="_blank" rel="noopener noreferrer">@ronihelppi<span class="visually-hidden"> (opens in new tab)</span></a></dd>
               </div>
               <div class="contact-method">
-                <span class="contact-label">GitHub</span>
-                <a href="https://github.com/ronijaakkola" class="contact-link" target="_blank" rel="noopener noreferrer">github.com/ronijaakkola<span class="visually-hidden"> (opens in new tab)</span></a>
+                <dt class="contact-label">GitHub</dt>
+                <dd><a href="https://github.com/ronijaakkola" class="contact-link" target="_blank" rel="noopener noreferrer">github.com/ronijaakkola<span class="visually-hidden"> (opens in new tab)</span></a></dd>
               </div>
-            </div>
+            </dl>
           </div>
         </div>
       </div>
@@ -65,12 +65,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     display: flex;
     flex-direction: column;
     gap: var(--gap-sm);
+    margin: 0;
+    padding: 0;
   }
 
   .contact-method {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
+  }
+
+  .contact-method dd {
+    margin: 0;
   }
 
   .contact-label {

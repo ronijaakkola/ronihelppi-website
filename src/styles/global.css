@@ -364,6 +364,13 @@ ol {
   }
 }
 
+/* Show copy button on touch devices since there's no hover */
+@media (hover: none) {
+  .code-copy-btn {
+    opacity: 1;
+  }
+}
+
 .prose-content blockquote {
   font-family: var(--font-serif);
   font-size: clamp(18px, calc(18px + 2 * ((100vw - 600px) / 360)), 20px);
