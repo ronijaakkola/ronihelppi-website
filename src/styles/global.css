@@ -332,6 +332,11 @@ ol {
   position: relative;
 }
 
+/* When filename exists, position copy button in the filename bar */
+.code-block-filename ~ .code-block-body {
+  position: static;
+}
+
 .code-copy-btn {
   position: absolute;
   top: 0.5rem;
@@ -379,9 +384,30 @@ ol {
 
 /* Show copy button on touch devices since there's no hover */
 @media (hover: none) {
-  .code-copy-btn {
+  .code-block-filename ~ .code-block-body .code-copy-btn {
     opacity: 1;
-    min-height: 44px;
+    background: transparent;
+    border-color: var(--color-divider);
+  }
+
+  /* Without filename, place button above code */
+  .code-block-body:only-child {
+    display: flex;
+    flex-direction: column-reverse;
+    background: var(--color-code-bg);
+  }
+
+  .code-block-body:only-child pre {
+    padding-top: 0.25rem;
+  }
+
+  .code-block-body:only-child .code-copy-btn {
+    position: static;
+    opacity: 1;
+    align-self: flex-end;
+    margin: 0.25rem 0.5rem 0;
+    background: transparent;
+    border-color: var(--color-divider);
   }
 }
 

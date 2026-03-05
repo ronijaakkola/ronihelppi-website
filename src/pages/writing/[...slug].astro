@@ -194,7 +194,13 @@ const schemas = [
 
   @media (hover: none) {
     .copy-markdown-btn {
-      min-height: 44px;
+      position: relative;
+    }
+
+    .copy-markdown-btn::after {
+      content: '';
+      position: absolute;
+      inset: -10px -6px;
     }
   }
 
