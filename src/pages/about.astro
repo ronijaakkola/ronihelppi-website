@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import ProjectCard from '../components/ProjectCard.astro';
 import { personSchema } from '../utils/schemas';
 
 const experience = [
@@ -12,32 +11,17 @@ const experience = [
   { date: '01/2015–06/2015', datetime: '2015-01/2015-06', company: 'Tampere University', role: 'Research Assistant' },
 ];
 
-const caseStudies = [
-  {
-    title: 'Helsinki Design System',
-    description: '0 to 1 design system for the largest organization in Finland.',
-    href: '#',
-  },
-];
+const profilePageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: personSchema,
+};
 
-const otherProjects = [
-  {
-    title: 'Game development',
-    description: 'Games which I have taken part of designing and developing.',
-    href: '#',
-  },
-  {
-    title: 'Modding',
-    description: 'Plugins and mods that I have released and maintained.',
-    href: '#',
-  },
-];
-
-const schemas = [personSchema];
+const schemas = [personSchema, profilePageSchema];
 ---
 
 <BaseLayout
-  title="About | Roni Helppi"
+  title="About Roni Helppi | Designer & Engineer"
   description="Senior UX Designer at Reaktor with experience at Gofore, Leadin, and Atostek. Learn about my background, case studies, and how to get in touch."
   schemas={schemas}
 >
@@ -47,7 +31,7 @@ const schemas = [personSchema];
         <div class="content">
           <!-- About Section -->
           <section class="about-section">
-            <h1 class="page-title">About</h1>
+            <h1 class="page-title">About Roni Helppi</h1>
             <p class="intro">
               I design things, build things, and occasionally convince people they're the same thing.
               At <a href="https://reaktor.com" target="_blank" rel="noopener noreferrer">Reaktor<span class="visually-hidden"> (opens in new tab)</span></a> I work as a consultant across design and engineering.
@@ -78,34 +62,6 @@ const schemas = [personSchema];
                   ))}
                 </tbody>
               </table>
-            </div>
-          </section>
-
-          <!-- Case Studies Section -->
-          <section class="section">
-            <SectionHeading title="Case studies" />
-            <div class="project-list">
-              {caseStudies.map((study) => (
-                <ProjectCard
-                  title={study.title}
-                  description={study.description}
-                  href={study.href}
-                />
-              ))}
-            </div>
-          </section>
-
-          <!-- Other Projects Section -->
-          <section class="section">
-            <SectionHeading title="Selected projects" />
-            <div class="project-list">
-              {otherProjects.map((project) => (
-                <ProjectCard
-                  title={project.title}
-                  description={project.description}
-                  href={project.href}
-                />
-              ))}
             </div>
           </section>
 
@@ -260,13 +216,6 @@ const schemas = [personSchema];
       order: 3;
       font-size: var(--text-small);
     }
-  }
-
-  /* Project Lists */
-  .project-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-xs);
   }
 
   /* Contact Text */

@@ -44,6 +44,8 @@ const description = post.data.description || generateDescription(post.body || ''
 
 const postURL = new URL(`/writing/${post.slug}/`, Astro.site).href;
 
+const dateModified = post.data.dateModified || post.data.date;
+
 const schemas = [
   {
     '@context': 'https://schema.org',
@@ -51,6 +53,7 @@ const schemas = [
     headline: title,
     description,
     datePublished: post.data.date.toISOString(),
+    dateModified: dateModified.toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': postURL,
@@ -66,6 +69,7 @@ const schemas = [
       url: 'https://www.ronihelppi.com',
     },
     ...(heroImage && { image: new URL(heroImage, Astro.site).href }),
+    ...(post.data.tags && { keywords: post.data.tags }),
   },
 ];
 ---
@@ -79,7 +83,7 @@ const schemas = [
   schemas={schemas}
 >
   <main id="main-content" class="main">
-    <div class="layout">
+    <article class="layout">
       <!-- Post Heading -->
       <div class="prose">
         <header class="post-header">
@@ -90,6 +94,7 @@ const schemas = [
             )}
             <div class="post-meta-row">
               <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
+              <span class="post-author visually-hidden">By <a href="/about" rel="author">Roni Helppi</a></span>
               <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>
             </div>
           </div>
@@ -98,18 +103,18 @@ const schemas = [
 
       {heroImage && (
         <div class="hero-image-container">
-          <img src={heroImage} alt={`Hero image for ${title}`} class="hero-image" width="920" height="518" fetchpriority="high" />
+          <img src={heroImage} alt={post.data.heroImageAlt || title} class="hero-image" width="920" height="518" fetchpriority="high" />
         </div>
       )}
 
       <!-- Post Content -->
       <div class="prose">
-        <article class="post-content">
+        <div class="post-content">
           <div class="prose-content">
             <Content />
             <span class="writing-cursor" aria-hidden="true"></span>
           </div>
-        </article>
+        </div>
 
         {relatedPosts.length > 0 && (
           <>
@@ -134,7 +139,7 @@ const schemas = [
           </>
         )}
       </div>
-    </div>
+    </article>
   </main>
   <script type="text/plain" id="post-body-raw" set:text={post.body || ''} />
 </BaseLayout>

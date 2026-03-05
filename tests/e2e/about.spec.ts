@@ -3,12 +3,12 @@ import { test, expect } from '@playwright/test';
 test.describe('About Page', () => {
   test('should load successfully', async ({ page }) => {
     await page.goto('/about');
-    await expect(page).toHaveTitle(/About \| Roni Helppi/);
+    await expect(page).toHaveTitle(/About Roni Helppi/);
   });
 
   test('should display About heading', async ({ page }) => {
     await page.goto('/about');
-    const heading = page.locator('h1', { hasText: 'About' });
+    const heading = page.locator('h1', { hasText: 'About Roni Helppi' });
     await expect(heading).toBeVisible();
   });
 
@@ -39,29 +39,6 @@ test.describe('About Page', () => {
     // Check at least one row of experience data
     await expect(page.locator('td', { hasText: 'Reaktor' })).toBeVisible();
     await expect(page.locator('td', { hasText: 'Senior UX Designer' })).toBeVisible();
-  });
-
-  test('should display Case studies section', async ({ page }) => {
-    await page.goto('/about');
-
-    const heading = page.locator('h2', { hasText: 'Case studies' });
-    await expect(heading).toBeVisible();
-
-    const projectTitle = page.locator('.project-title', { hasText: 'Helsinki Design System' });
-    await expect(projectTitle).toBeVisible();
-
-    const projectDesc = page.locator('.project-description', { hasText: 'design system' });
-    await expect(projectDesc).toBeVisible();
-  });
-
-  test('should display Selected projects section', async ({ page }) => {
-    await page.goto('/about');
-
-    const heading = page.locator('h2', { hasText: 'Selected projects' });
-    await expect(heading).toBeVisible();
-
-    await expect(page.locator('.project-title', { hasText: 'Game development' })).toBeVisible();
-    await expect(page.locator('.project-title', { hasText: 'Modding' })).toBeVisible();
   });
 
   test('should display How to reach me section', async ({ page }) => {
@@ -99,7 +76,7 @@ test.describe('About Page', () => {
     await aboutLink.click();
 
     await expect(page).toHaveURL('/about');
-    await expect(page).toHaveTitle(/About \| Roni Helppi/);
+    await expect(page).toHaveTitle(/About Roni Helppi/);
   });
 
   test('should have proper HTML structure', async ({ page }) => {

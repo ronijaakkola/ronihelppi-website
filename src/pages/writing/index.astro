@@ -9,14 +9,14 @@ const posts = sortByDateDesc(await getCollection('posts'));
 ---
 
 <BaseLayout
-  title="Writing | Roni Helppi"
+  title="Writing on Design & Technology | Roni Helppi"
   description="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."
 >
   <main id="main-content" class="main">
     <div class="layout">
       <div class="prose">
         <div class="content">
-          <h1 class="page-title">Writing</h1>
+          <h1 class="page-title">Writing on Design & Technology</h1>
           <div class="posts-list">
             {posts.map((post) => (
               <PostListItem
