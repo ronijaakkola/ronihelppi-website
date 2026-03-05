@@ -38,7 +38,7 @@
     border: none;
     padding: 0;
     margin: 0;
-    background: rgba(0, 0, 0, 0.75);
+    background: var(--color-overlay);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     max-width: 100vw;
@@ -73,7 +73,7 @@
   .lightbox-nav:focus-visible {
     outline: 2px solid var(--color-text-primary);
     outline-offset: 2px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-surface-active);
   }
 
   .lightbox::backdrop {
@@ -121,7 +121,7 @@
 
   .lightbox-close:hover,
   .lightbox-close:focus-visible {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-surface-active);
   }
 
   .lightbox-image {
@@ -172,7 +172,7 @@
 
   .lightbox-nav:hover,
   .lightbox-nav:focus-visible {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--color-surface-active);
   }
 
   .lightbox-nav:disabled {
@@ -185,7 +185,7 @@
     font-size: var(--text-body);
     letter-spacing: var(--tracking-body);
     line-height: var(--leading-body);
-    color: #ffffff;
+    color: var(--color-text-inverted);
     text-align: center;
     flex: 1;
     padding: 0 var(--gap-md);

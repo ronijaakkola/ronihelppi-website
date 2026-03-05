@@ -7,11 +7,18 @@
   --color-bg: #0b0b0b;
   --color-text-primary: #e8e6e6;
   --color-text-secondary: #aaa1a1;
+  --color-text-inverted: #ffffff;
   --color-divider: #4a3e3e;
   --color-button-bg: #e8e6e6;
   --color-button-text: #0b0b0b;
+  --color-button-text-muted: #494949;
   --color-keystroke-bg: #c0b3b3;
   --color-border: #aaa1a1;
+  --color-code-bg: #131313;
+  --color-code-header: #0f0f0f;
+  --color-overlay: rgba(0, 0, 0, 0.75);
+  --color-surface-hover: rgba(255, 255, 255, 0.05);
+  --color-surface-active: rgba(255, 255, 255, 0.1);
 
   /* Typography - Font Families */
   --font-sans: 'Rethink Sans', system-ui, sans-serif;
@@ -263,7 +270,7 @@ ol {
 .prose-content code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-surface-active);
   padding: 0.15em 0.35em;
   border-radius: 3px;
 }
@@ -271,7 +278,7 @@ ol {
 .prose-content pre {
   font-family: var(--font-mono);
   font-size: var(--text-small);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-surface-hover);
   padding: 1rem;
   border-radius: var(--radius-md);
   overflow-x: auto;
@@ -302,7 +309,7 @@ ol {
   margin: 0;
   border-radius: 0;
   /* Override Shiki's inline background-color */
-  background: #131313 !important;
+  background: var(--color-code-bg) !important;
 }
 
 .code-block-filename {
@@ -312,7 +319,7 @@ ol {
   color: var(--color-text-secondary);
   padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--color-divider);
-  background: #0f0f0f;
+  background: var(--color-code-header);
 }
 
 .code-block-body {
@@ -326,7 +333,7 @@ ol {
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  background: rgba(19, 19, 19, 0.9);
+  background: rgba(19, 19, 19, 0.9); /* code-bg with opacity for copy button */
   border: 1px solid var(--color-text-secondary);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
