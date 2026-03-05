@@ -60,7 +60,7 @@ const schemas = [
         <header class="project-header">
           <div class="project-title-group">
             <h1 class="page-title">{title}</h1>
-            <p class="project-subtitle">Case study</p>
+            <p class="project-subtitle">{item.data.subtitle || 'Case study'}</p>
           </div>
         </header>
       </div>
@@ -69,7 +69,7 @@ const schemas = [
         <div class="cover-image-container">
           <Image
             src={item.data.coverImage}
-            alt={`Cover image for ${title}`}
+            alt={item.data.coverImageAlt || `Cover image for ${title}`}
             class="cover-image"
             widths={[600, 920, 1200]}
             sizes="(max-width: 960px) 100vw, 920px"
@@ -85,57 +85,51 @@ const schemas = [
           <p class="project-description">{item.data.description}</p>
         )}
 
-        <div class="project-meta-card">
-          <dl class="meta-grid">
-            {item.data.team && (
-              <div class="meta-row">
-                <dt class="meta-label">Team</dt>
-                <dd class="meta-value">{item.data.team}</dd>
-              </div>
-            )}
-
-            {item.data.duration && (
-              <div class="meta-row">
-                <dt class="meta-label">Duration</dt>
-                <dd class="meta-value">{item.data.duration}</dd>
-              </div>
-            )}
-
-            {item.data.skills && (
-              <div class="meta-row">
-                <dt class="meta-label">Skills</dt>
-                <dd class="meta-value">{item.data.skills}</dd>
-              </div>
-            )}
-
-            {item.data.tags && item.data.tags.length > 0 && (
-              <div class="meta-row">
-                <dt class="meta-label">Tags</dt>
-                <dd class="meta-value">
-                  <ul class="tags-list">
-                    {item.data.tags.map((tag) => (
-                      <li class="tag">{tag.replace('#', '')}</li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            )}
-          </dl>
-
-        </div>
-
-        {item.data.links && item.data.links.length > 0 && (
-          <div class="meta-links">
-            {item.data.links.map((link) => (
-              <a href={link.url} class="meta-link" target="_blank" rel="noopener noreferrer">
-                {link.label}
-                <svg width="12" height="12" viewBox="0 0 15 18" fill="none" aria-hidden="true">
-                  <path d="M3 14.6667L11.6666 6M11.6666 6V14.32M11.6666 6H3.34667" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-            ))}
+        {item.data.meta && item.data.meta.length > 0 && (
+          <div class="project-meta-card">
+            <dl class="meta-grid">
+              {item.data.meta.map((entry) => (
+                <div class="meta-row">
+                  <dt class="meta-label">{entry.label}</dt>
+                  <dd class="meta-value">
+                    {entry.list ? (
+                      <ul class="meta-list">
+                        {entry.value.split(',').map((item) => (
+                          <li class="meta-list-item">{item.trim()}</li>
+                        ))}
+                      </ul>
+                    ) : entry.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         )}
+
+        {item.data.links && item.data.links.length > 0 && (() => {
+          const playLinks = item.data.links.filter((l) => l.label === 'Play');
+          const otherLinks = item.data.links.filter((l) => l.label !== 'Play');
+          return (
+            <div class="meta-links">
+              {playLinks.map((link) => (
+                <a href={link.url} class="meta-link meta-link-primary" target="_blank" rel="noopener noreferrer">
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M4.5 2.5L13 8L4.5 13.5V2.5Z"/>
+                  </svg>
+                  {link.label}
+                </a>
+              ))}
+              {otherLinks.map((link) => (
+                <a href={link.url} class="meta-link" target="_blank" rel="noopener noreferrer">
+                  {link.label}
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path d="M2.5 9.5L9.5 2.5M9.5 2.5V8.5M9.5 2.5H3.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+              ))}
+            </div>
+          );
+        })()}
 
         <time datetime={item.data.date.toISOString()} class="visually-hidden">
           {item.data.date.toLocaleDateString()}
@@ -235,17 +229,23 @@ const schemas = [
     color: var(--color-text-primary);
   }
 
-  .tags-list {
+  .meta-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--gap-2xs);
+    gap: var(--gap-3xs);
   }
 
-  .tag {
+  .meta-list-item {
     font-family: var(--font-sans);
     font-size: 14px;
     letter-spacing: -0.7px;
     color: var(--color-text-primary);
+  }
+
+  .meta-list-item + .meta-list-item::before {
+    content: '/';
+    color: var(--color-divider);
+    margin-right: var(--gap-3xs);
   }
 
   .meta-links {
@@ -284,6 +284,20 @@ const schemas = [
   .meta-link:focus-visible {
     outline: 2px solid var(--color-text-primary);
     outline-offset: 2px;
+  }
+
+  .meta-link-primary {
+    background-color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: var(--color-bg);
+    padding-left: 8px;
+  }
+
+  .meta-link-primary:hover,
+  .meta-link-primary:focus-visible {
+    filter: brightness(0.85);
+    color: var(--color-bg);
+    border-color: var(--color-text-primary);
   }
 
   .meta-link svg {

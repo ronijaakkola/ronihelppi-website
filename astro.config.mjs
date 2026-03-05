@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import { remarkObsidianImages } from './src/utils/remark-obsidian-images';
 import rehypeExternalLinks from 'rehype-external-links';
 import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
+import { rehypeImageFigure } from './src/utils/rehype-image-figure';
 import { remarkCodeTitle } from './src/utils/remark-code-title';
 
 // https://astro.build/config
@@ -17,6 +18,7 @@ export default defineConfig({
     remarkPlugins: [remarkObsidianImages, remarkCodeTitle],
     rehypePlugins: [
       rehypeCodeBlocks,
+      rehypeImageFigure,
       [rehypeExternalLinks, {
         target: '_blank',
         rel: ['noopener', 'noreferrer'],

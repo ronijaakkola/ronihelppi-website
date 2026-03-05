@@ -77,6 +77,7 @@
   --spacing-horizontal-desktop: 0px;
   --spacing-horizontal-tablet: 20px;
   --spacing-horizontal-phone: 20px;
+  --page-gutter: 0px;
 
   /* Border Radius */
   --radius-sm: 2px;
@@ -235,8 +236,9 @@ ol {
 }
 
 .prose-content h3 {
-  font-size: var(--text-nav);
-  letter-spacing: var(--tracking-nav);
+  font-family: var(--font-serif);
+  font-size: var(--text-body);
+  letter-spacing: var(--tracking-body);
   margin-top: 1.5em;
   scroll-margin-top: calc(var(--header-height) + 1rem);
 }
@@ -469,8 +471,41 @@ ol {
 }
 
 .prose-content img {
+  display: block;
   border-radius: var(--radius-md);
+  border: 0.5px solid var(--color-border);
   margin: 1.5em 0;
+  width: calc(100vw - 2 * var(--page-gutter));
+  max-width: var(--layout-width);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.prose-content .prose-figure {
+  margin: 1.5em 0;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100vw - 2 * var(--page-gutter));
+  max-width: var(--layout-width);
+}
+
+.prose-content .prose-figure img {
+  margin: 0;
+  left: auto;
+  transform: none;
+  position: static;
+  width: 100%;
+  max-width: 100%;
+}
+
+.prose-content .prose-figure figcaption {
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  margin-top: var(--gap-3xs);
+  text-align: center;
 }
 
 .prose-content hr {
@@ -498,6 +533,10 @@ ol {
     padding-bottom: var(--spacing-bottom-tablet);
   }
 
+  :root {
+    --page-gutter: var(--spacing-horizontal-tablet);
+  }
+
   .layout {
     padding-left: var(--spacing-horizontal-tablet);
     padding-right: var(--spacing-horizontal-tablet);
@@ -506,6 +545,10 @@ ol {
 
 /* Phone */
 @media (max-width: 600px) {
+  :root {
+    --page-gutter: var(--spacing-horizontal-phone);
+  }
+
   .main {
     padding-top: var(--spacing-top-phone);
     padding-bottom: var(--spacing-bottom-phone);

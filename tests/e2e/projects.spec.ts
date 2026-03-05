@@ -65,18 +65,16 @@ test.describe('Project Pages', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('should display team information if present', async ({ page }) => {
+  test('should display meta card if meta entries are present', async ({ page }) => {
     await page.goto('/');
     await page.locator('a[href^="/projects/"]').first().click();
 
-    // Check if team info is displayed
-    // The RESOKILL project has team: "solo"
-    const bodyText = await page.locator('body').textContent();
-
-    // If team is present, it should be visible
-    if (bodyText?.toLowerCase().includes('team')) {
-      const teamSection = page.locator('text=/team/i');
-      await expect(teamSection).toBeVisible();
+    // The RESOKILL project has meta entries (Team, Duration, etc.)
+    const metaCard = page.locator('.project-meta-card');
+    if (await metaCard.count() > 0) {
+      await expect(metaCard).toBeVisible();
+      const rows = metaCard.locator('.meta-row');
+      expect(await rows.count()).toBeGreaterThan(0);
     }
   });
 

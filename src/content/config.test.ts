@@ -13,7 +13,11 @@ const postsSchema = z.object({
 const projectsSchema = z.object({
   date: z.coerce.date(),
   tags: z.array(z.string()).optional(),
-  team: z.string().optional(),
+  meta: z.array(z.object({
+    label: z.string(),
+    value: z.string(),
+    list: z.boolean().optional(),
+  })).optional(),
   links: z.array(z.object({
     label: z.string(),
     url: z.string().url(),
@@ -203,31 +207,31 @@ describe('Content Collection Schemas', () => {
       expect(result.tags).toBeUndefined();
     });
 
-    it('accepts optional team string', () => {
+    it('accepts optional meta array', () => {
       const result = projectsSchema.parse({
         date: '2026-01-30',
-        team: 'solo',
+        meta: [{ label: 'Team', value: 'solo' }],
       });
-      expect(result.team).toBe('solo');
+      expect(result.meta).toEqual([{ label: 'Team', value: 'solo' }]);
     });
 
-    it('works without team field', () => {
+    it('works without meta field', () => {
       const result = projectsSchema.parse({
         date: '2026-01-30',
       });
       expect(result.date).toBeInstanceOf(Date);
-      expect(result.team).toBeUndefined();
+      expect(result.meta).toBeUndefined();
     });
 
-    it('accepts both tags and team', () => {
+    it('accepts both tags and meta', () => {
       const result = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#personal', '#project'],
-        team: 'team of 3',
+        meta: [{ label: 'Team', value: 'team of 3' }],
       });
       expect(result.date).toBeInstanceOf(Date);
       expect(result.tags).toEqual(['#personal', '#project']);
-      expect(result.team).toBe('team of 3');
+      expect(result.meta).toEqual([{ label: 'Team', value: 'team of 3' }]);
     });
 
     it('rejects invalid tags (not an array)', () => {
@@ -248,11 +252,11 @@ describe('Content Collection Schemas', () => {
       ).toThrow();
     });
 
-    it('rejects invalid team (not a string)', () => {
+    it('rejects invalid meta (not an array)', () => {
       expect(() =>
         projectsSchema.parse({
           date: '2026-01-30',
-          team: 123,
+          meta: 'not an array',
         })
       ).toThrow();
     });
@@ -269,12 +273,16 @@ describe('Content Collection Schemas', () => {
       ]);
     });
 
-    it('handles team with special characters', () => {
+    it('accepts meta with multiple entries', () => {
       const result = projectsSchema.parse({
         date: '2026-01-30',
-        team: 'Team of 4 (remote)',
+        meta: [
+          { label: 'Team', value: 'Team of 4 (remote)' },
+          { label: 'Made with', value: 'Unity' },
+        ],
       });
-      expect(result.team).toBe('Team of 4 (remote)');
+      expect(result.meta).toHaveLength(2);
+      expect(result.meta![1].value).toBe('Unity');
     });
 
     it('accepts optional links array', () => {
@@ -328,7 +336,7 @@ describe('Content Collection Schemas', () => {
       const validProject = projectsSchema.parse({
         date: '2026-01-30',
         tags: ['#test'],
-        team: 'solo',
+        meta: [{ label: 'Team', value: 'solo' }],
       });
 
       // TypeScript will catch type errors at compile time

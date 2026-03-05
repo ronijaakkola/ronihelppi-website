@@ -20,12 +20,17 @@ export function remarkObsidianImages() {
                 value: child.value.slice(lastIndex, match.index),
               } as Text);
             }
-            // Add image node
-            newChildren.push({
+            // Add image node — support ![[file.png|alt text]] syntax
+            const parts = match[1].split('|');
+            const filename = parts[0].trim();
+            const alt = parts[1]?.trim() || filename;
+            const imageNode: Image = {
               type: 'image',
-              url: `/images/${match[1]}`,
-              alt: match[1],
-            } as Image);
+              url: `../images/${filename}`,
+              alt,
+              title: parts[1]?.trim() || null,
+            };
+            newChildren.push(imageNode as unknown as PhrasingContent);
             lastIndex = regex.lastIndex;
           }
 

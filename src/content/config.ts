@@ -16,10 +16,14 @@ const projectsCollection = defineCollection({
     date: z.coerce.date(),
     description: z.string().optional(),
     tags: z.array(z.string()).optional(),
-    team: z.string().optional(),
     coverImage: image().optional(),
-    duration: z.string().optional(),
-    skills: z.string().optional(),
+    subtitle: z.string().optional(),
+    coverImageAlt: z.string().optional(),
+    meta: z.array(z.object({
+      label: z.string(),
+      value: z.string(),
+      list: z.boolean().optional(),
+    })).optional(),
     links: z.array(z.object({
       label: z.string(),
       url: z.string().url(),
