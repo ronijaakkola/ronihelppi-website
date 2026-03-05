@@ -41,7 +41,7 @@ const schemas = [
       url: 'https://www.ronihelppi.com',
     },
     ...(item.data.coverImage && { image: new URL(item.data.coverImage.src, Astro.site).href }),
-    ...(item.data.skills && { keywords: item.data.skills }),
+    ...(item.data.tags && { keywords: item.data.tags }),
   },
 ];
 ---
