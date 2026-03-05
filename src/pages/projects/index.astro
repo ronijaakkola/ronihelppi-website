@@ -320,10 +320,18 @@ const filters = [
     }
   }
 
-  /* Touch devices - larger tap targets, always-visible overlay */
+  /* Touch devices - larger tap targets via invisible hit area, always-visible overlay */
   @media (hover: none) {
     .filter-chip {
-      min-height: 44px;
+      position: relative;
+      min-height: 30px;
+      padding: 6px 10px;
+    }
+
+    .filter-chip::after {
+      content: '';
+      position: absolute;
+      inset: -7px -4px;
     }
 
     .grid-item-overlay {
