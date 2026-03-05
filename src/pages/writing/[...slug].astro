@@ -192,6 +192,12 @@ const schemas = [
     outline-offset: 2px;
   }
 
+  @media (hover: none) {
+    .copy-markdown-btn {
+      min-height: 44px;
+    }
+  }
+
   .post-ingress {
     font-size: clamp(16px, calc(16px + 4 * ((100vw - 600px) / 360)), 20px);
     color: var(--color-text-secondary);
@@ -212,7 +218,7 @@ const schemas = [
   }
 
   .post-content {
-    margin-top: 32px;
+    margin-top: var(--gap-lg);
   }
 
   .related-posts {

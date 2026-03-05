@@ -178,7 +178,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   .nav-links {
     display: flex;
-    gap: 32px;
+    gap: var(--gap-lg);
     align-items: center;
   }
 
@@ -204,7 +204,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   .contact-button {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--gap-3xs);
     padding: 4px 8px;
     min-height: 24px;
     background-color: var(--color-button-bg);
@@ -248,7 +248,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   /* Header background when menu is open */
   .header.menu-open {
-    background-color: black;
+    background-color: var(--color-bg);
   }
 
   /* Mobile Menu Overlay */
@@ -280,7 +280,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   .mobile-menu-nav {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--gap-xs);
   }
 
   .mobile-menu-link {

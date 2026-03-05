@@ -375,6 +375,7 @@ ol {
 @media (hover: none) {
   .code-copy-btn {
     opacity: 1;
+    min-height: 44px;
   }
 }
 

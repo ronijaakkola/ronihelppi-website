@@ -102,15 +102,15 @@
 
   .lightbox-close {
     position: absolute;
-    top: calc(-32px - var(--gap-2xs));
-    right: 0;
-    width: 32px;
-    height: 32px;
+    top: calc(-44px - var(--gap-2xs));
+    right: -6px;
+    width: 44px;
+    height: 44px;
     background: none;
     border: none;
     color: var(--color-text-primary);
     cursor: pointer;
-    padding: 0;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -126,7 +126,7 @@
 
   .lightbox-image {
     max-width: 100%;
-    max-height: calc(100vh - var(--gap-lg) * 2 - 32px - var(--gap-2xs) - 40px);
+    max-height: calc(100vh - var(--gap-lg) * 2 - 44px - var(--gap-2xs) - 44px);
     width: auto;
     height: auto;
     object-fit: contain;
@@ -155,13 +155,13 @@
   }
 
   .lightbox-nav {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     background: none;
     border: none;
     color: var(--color-text-primary);
     cursor: pointer;
-    padding: 0;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -225,7 +225,7 @@
     }
 
     .lightbox-image {
-      max-height: calc(100vh - var(--gap-sm) * 2 - 32px - var(--gap-2xs) - 40px);
+      max-height: calc(100vh - var(--gap-sm) * 2 - 44px - var(--gap-2xs) - 44px);
     }
 
     .lightbox-caption {
@@ -294,7 +294,7 @@
       updateDisplay();
 
       // Lock body scroll
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('scroll-lock');
 
       dialog.showModal();
 
@@ -320,7 +320,7 @@
         dialog.classList.remove('is-animating');
         isClosing = false;
         // Restore body scroll
-        document.body.style.overflow = '';
+        document.body.classList.remove('scroll-lock');
 
         if (triggerElement) {
           triggerElement.focus();
