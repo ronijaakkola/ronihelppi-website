@@ -79,15 +79,15 @@ test.describe('Project Pages', () => {
   });
 
   test('should display tags if present', async ({ page }) => {
-    // Navigate directly to resokill which has tags
-    await page.goto('/projects/resokill');
+    // Navigate to projects index where tags appear as filter chips
+    await page.goto('/projects');
 
     // Wait for page to load
     await page.waitForLoadState('domcontentloaded');
 
-    // Verify specific tags are visible
-    await expect(page.getByText('personal')).toBeVisible();
-    await expect(page.getByText('games')).toBeVisible();
+    // Verify filter chips are visible (derived from project tags)
+    await expect(page.locator('.filter-chip', { hasText: 'All' })).toBeVisible();
+    await expect(page.locator('.filter-chip', { hasText: 'games' })).toBeVisible();
   });
 
   test('should render markdown content as HTML', async ({ page }) => {

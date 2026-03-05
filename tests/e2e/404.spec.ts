@@ -26,14 +26,15 @@ test.describe('404 Page', () => {
     const links = page.locator('.links');
     await expect(links).toBeVisible();
 
-    // Check for all three links
+    // Check for all four links
     await expect(page.locator('.link-item a', { hasText: 'Home' })).toBeVisible();
+    await expect(page.locator('.link-item a', { hasText: 'My projects' })).toBeVisible();
     await expect(page.locator('.link-item a', { hasText: 'About me' })).toBeVisible();
     await expect(page.locator('.link-item a', { hasText: 'My writing' })).toBeVisible();
 
     // Each link should have an icon (rendered via CSS ::before pseudo-element)
     const linkItems = page.locator('.link-item');
-    await expect(linkItems).toHaveCount(3);
+    await expect(linkItems).toHaveCount(4);
   });
 
   test('should have correct link destinations', async ({ page }) => {
@@ -41,6 +42,9 @@ test.describe('404 Page', () => {
 
     const homeLink = page.locator('.link-item a', { hasText: 'Home' });
     await expect(homeLink).toHaveAttribute('href', '/');
+
+    const projectsLink = page.locator('.link-item a', { hasText: 'My projects' });
+    await expect(projectsLink).toHaveAttribute('href', '/projects');
 
     const aboutLink = page.locator('.link-item a', { hasText: 'About me' });
     await expect(aboutLink).toHaveAttribute('href', '/about');
@@ -66,7 +70,7 @@ test.describe('404 Page', () => {
     await aboutLink.click();
 
     await expect(page).toHaveURL('/about');
-    await expect(page).toHaveTitle(/About \| Roni Helppi/);
+    await expect(page).toHaveTitle(/About Roni Helppi/);
   });
 
   test('should navigate to posts when clicking My writing link', async ({ page }) => {
