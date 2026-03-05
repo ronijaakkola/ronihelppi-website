@@ -21,6 +21,8 @@ const { Content } = await item.render();
 const title = getTitle(item.id);
 
 const description = item.data.description || generateDescription(item.body || '');
+const playLinks = item.data.links?.filter((l) => l.label === 'Play') ?? [];
+const otherLinks = item.data.links?.filter((l) => l.label !== 'Play') ?? [];
 
 const projectURL = new URL(`/projects/${item.slug}/`, Astro.site).href;
 
@@ -106,30 +108,26 @@ const schemas = [
           </div>
         )}
 
-        {item.data.links && item.data.links.length > 0 && (() => {
-          const playLinks = item.data.links.filter((l) => l.label === 'Play');
-          const otherLinks = item.data.links.filter((l) => l.label !== 'Play');
-          return (
-            <div class="meta-links">
-              {playLinks.map((link) => (
-                <a href={link.url} class="meta-link meta-link-primary" target="_blank" rel="noopener noreferrer">
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                    <path d="M4.5 2.5L13 8L4.5 13.5V2.5Z"/>
-                  </svg>
-                  {link.label}
-                </a>
-              ))}
-              {otherLinks.map((link) => (
-                <a href={link.url} class="meta-link" target="_blank" rel="noopener noreferrer">
-                  {link.label}
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path d="M2.5 9.5L9.5 2.5M9.5 2.5V8.5M9.5 2.5H3.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </a>
-              ))}
-            </div>
-          );
-        })()}
+        {(playLinks.length > 0 || otherLinks.length > 0) && (
+          <div class="meta-links">
+            {playLinks.map((link) => (
+              <a href={link.url} class="meta-link meta-link-primary" target="_blank" rel="noopener noreferrer">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M4.5 2.5L13 8L4.5 13.5V2.5Z"/>
+                </svg>
+                {link.label}
+              </a>
+            ))}
+            {otherLinks.map((link) => (
+              <a href={link.url} class="meta-link" target="_blank" rel="noopener noreferrer">
+                {link.label}
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2.5 9.5L9.5 2.5M9.5 2.5V8.5M9.5 2.5H3.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        )}
 
         <time datetime={item.data.date.toISOString()} class="visually-hidden">
           {item.data.date.toLocaleDateString()}

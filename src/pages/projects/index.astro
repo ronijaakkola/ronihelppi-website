@@ -357,26 +357,24 @@ const filters = [
   }
 </style>
 
-<script is:inline>
+<script>
+  import { TextScramble } from '../../utils/text-scramble';
+
   // Filter functionality
-  function applyFilter(filter, filterChips, gridItems) {
-    // Update active state and aria-pressed
-    filterChips.forEach(function(c) {
+  function applyFilter(filter: string, filterChips: NodeListOf<HTMLElement>, gridItems: NodeListOf<HTMLElement>) {
+    filterChips.forEach((c) => {
       c.classList.remove('active');
       c.setAttribute('aria-pressed', 'false');
     });
 
-    var activeChip = Array.from(filterChips).find(function(c) {
-      return c.dataset.filter === filter;
-    });
+    const activeChip = Array.from(filterChips).find((c) => c.dataset.filter === filter);
     if (activeChip) {
       activeChip.classList.add('active');
       activeChip.setAttribute('aria-pressed', 'true');
     }
 
-    // Filter grid items
-    gridItems.forEach(function(item) {
-      var categories = item.dataset.categories ? item.dataset.categories.split(',') : [];
+    gridItems.forEach((item) => {
+      const categories = item.dataset.categories ? item.dataset.categories.split(',') : [];
       if (filter === 'all' || categories.includes(filter)) {
         item.classList.remove('hidden');
       } else {
@@ -386,29 +384,26 @@ const filters = [
   }
 
   function initFilters() {
-    var filterChips = document.querySelectorAll('.filter-chip');
-    var gridItems = document.querySelectorAll('.grid-item');
-    var filterStatus = document.getElementById('filter-status');
+    const filterChips = document.querySelectorAll<HTMLElement>('.filter-chip');
+    const gridItems = document.querySelectorAll<HTMLElement>('.grid-item');
+    const filterStatus = document.getElementById('filter-status');
 
-    // Restore filter from URL on load
-    var params = new URLSearchParams(window.location.search);
-    var initialFilter = params.get('filter') || 'all';
+    const params = new URLSearchParams(window.location.search);
+    const initialFilter = params.get('filter') || 'all';
     applyFilter(initialFilter, filterChips, gridItems);
 
-    filterChips.forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        var filter = chip.dataset.filter;
+    filterChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter!;
         applyFilter(filter, filterChips, gridItems);
 
-        // Announce filter result to screen readers
         if (filterStatus) {
-          var visibleCount = document.querySelectorAll('.grid-item:not(.hidden)').length;
-          var label = chip.querySelector('.filter-name')?.textContent || filter;
-          filterStatus.textContent = 'Showing ' + visibleCount + ' ' + (visibleCount === 1 ? 'project' : 'projects') + (filter !== 'all' ? ' in ' + label : '');
+          const visibleCount = document.querySelectorAll('.grid-item:not(.hidden)').length;
+          const label = chip.querySelector('.filter-name')?.textContent || filter;
+          filterStatus.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'project' : 'projects'}${filter !== 'all' ? ` in ${label}` : ''}`;
         }
 
-        // Sync to URL
-        var url = new URL(window.location);
+        const url = new URL(window.location.href);
         if (filter === 'all') {
           url.searchParams.delete('filter');
         } else {
@@ -419,103 +414,20 @@ const filters = [
     });
   }
 
-  // Initialize filters
-  initFilters();
-
-  // Re-initialize on view transitions
-  document.addEventListener('astro:page-load', initFilters);
-
-  // Text scramble for overlay
-  var TextScramble = /** @class */ (function () {
-    function TextScramble(el) {
-      this.el = el;
-      this.chars = '!<>-_\\/[]{}—=+*^?#';
-      this.queue = [];
-      this.frameRequest = null;
-      this.frame = 0;
-      this.resolve = null;
-    }
-
-    TextScramble.prototype.setText = function (newText) {
-      var self = this;
-      var oldText = this.el.textContent || '';
-      var length = Math.max(oldText.length, newText.length);
-      this.queue = [];
-
-      for (var i = 0; i < length; i++) {
-        var from = oldText[i] || '';
-        var to = newText[i] || '';
-        var start = Math.floor(Math.random() * 20);
-        var end = start + Math.floor(Math.random() * 20) + 20;
-        this.queue.push({ from: from, to: to, start: start, end: end, char: undefined });
-      }
-
-      if (this.frameRequest) {
-        cancelAnimationFrame(this.frameRequest);
-      }
-      this.frame = 0;
-
-      return new Promise(function (resolve) {
-        self.resolve = resolve;
-        self.update();
-      });
-    };
-
-    TextScramble.prototype.update = function () {
-      var self = this;
-      var output = '';
-      var complete = 0;
-
-      for (var i = 0; i < this.queue.length; i++) {
-        var item = this.queue[i];
-        var from = item.from;
-        var to = item.to;
-        var start = item.start;
-        var end = item.end;
-        var char = item.char;
-
-        if (this.frame >= end) {
-          complete++;
-          output += to;
-        } else if (this.frame >= start) {
-          if (!char || Math.random() < 0.28) {
-            char = this.chars[Math.floor(Math.random() * this.chars.length)];
-            this.queue[i].char = char;
-          }
-          output += char;
-        } else {
-          output += from;
-        }
-      }
-
-      this.el.textContent = output;
-      this.frame++;
-
-      if (complete < this.queue.length) {
-        this.frameRequest = requestAnimationFrame(function () {
-          self.update();
-        });
-      } else {
-        if (this.resolve) this.resolve();
-      }
-    };
-
-    return TextScramble;
-  })();
-
-  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var isTouchDevice = !window.matchMedia('(hover: hover)').matches;
+  // Text scramble overlay
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const isTouchDevice = !window.matchMedia('(hover: hover)').matches;
 
   function initOverlayScramble() {
-    var gridItems = document.querySelectorAll('.grid-item');
+    const gridItems = document.querySelectorAll<HTMLElement>('.grid-item');
 
-    gridItems.forEach(function (item) {
-      var titleEl = item.querySelector('.grid-item-title');
-      var yearEl = item.querySelector('.grid-item-year');
+    gridItems.forEach((item) => {
+      const titleEl = item.querySelector<HTMLElement>('.grid-item-title');
+      const yearEl = item.querySelector<HTMLElement>('.grid-item-year');
       if (!titleEl || !yearEl) return;
 
-      var titleText = titleEl.getAttribute('data-text') || '';
-      var yearText = yearEl.getAttribute('data-text') || '';
+      const titleText = titleEl.getAttribute('data-text') || '';
+      const yearText = yearEl.getAttribute('data-text') || '';
 
       if (isTouchDevice) {
         titleEl.textContent = titleText;
@@ -523,28 +435,35 @@ const filters = [
         return;
       }
 
-      function onEnter() {
-        if (prefersReducedMotion.matches) {
-          titleEl.textContent = titleText;
-          yearEl.textContent = yearText;
-        } else {
-          new TextScramble(titleEl).setText(titleText);
-          new TextScramble(yearEl).setText(yearText);
-        }
-      }
-
-      function onLeave() {
-        titleEl.textContent = '';
-        yearEl.textContent = '';
-      }
+      const titleScramble = new TextScramble(titleEl);
+      const yearScramble = new TextScramble(yearEl);
 
       item.addEventListener('mouseenter', onEnter);
       item.addEventListener('focusin', onEnter);
       item.addEventListener('mouseleave', onLeave);
       item.addEventListener('focusout', onLeave);
+
+      function onEnter() {
+        if (prefersReducedMotion.matches) {
+          titleEl.textContent = titleText;
+          yearEl.textContent = yearText;
+        } else {
+          titleScramble.setText(titleText);
+          yearScramble.setText(yearText);
+        }
+      }
+
+      function onLeave() {
+        titleScramble.cancel();
+        yearScramble.cancel();
+        titleEl.textContent = '';
+        yearEl.textContent = '';
+      }
     });
   }
 
+  initFilters();
   initOverlayScramble();
+  document.addEventListener('astro:page-load', initFilters);
   document.addEventListener('astro:page-load', initOverlayScramble);
 </script>

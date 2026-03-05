@@ -486,14 +486,9 @@ ol {
   display: block;
   border-radius: var(--radius-md);
   border: 0.5px solid var(--color-border);
-  margin: 1.5em 0;
-  width: calc(100vw - 2 * var(--page-gutter));
-  max-width: var(--layout-width);
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
+.prose-content img:not(.prose-figure img),
 .prose-content .prose-figure {
   margin: 1.5em 0;
   position: relative;
@@ -501,15 +496,6 @@ ol {
   transform: translateX(-50%);
   width: calc(100vw - 2 * var(--page-gutter));
   max-width: var(--layout-width);
-}
-
-.prose-content .prose-figure img {
-  margin: 0;
-  left: auto;
-  transform: none;
-  position: static;
-  width: 100%;
-  max-width: 100%;
 }
 
 .prose-content .prose-figure figcaption {
