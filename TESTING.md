@@ -93,25 +93,21 @@ npm run check
 | Stage | What Runs | Purpose |
 |-------|-----------|---------|
 | **Commit** | Type check + Unit tests | Fast feedback, catch obvious errors |
-| **Push** | Full CI (type check, unit, build, E2E) | Comprehensive validation |
-| **PR to master** | Full CI + Lighthouse CI | Quality gate with 100/100 score enforcement |
-| **Merge to master** | Full CI | Final validation |
+| **Push to master** | Full CI (type check, unit, build, E2E, Lighthouse) | Quality gate before deployment |
 
 ## CI/CD
 
-The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and pull request:
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push to master:
 
-1. Type checking (`npm run check`)
-2. Unit tests (`npm test`)
-3. Build (`npm run build`)
-4. Build validation tests (`npm run test:build`)
-5. E2E tests (`npx playwright test`)
+1. **test** job: Type checking, unit tests, build, build validation tests, E2E tests
+2. **lighthouse** job (after test passes): Lighthouse CI quality validation
+3. **deploy** job (future, after lighthouse passes): GitHub Pages deployment
 
-### Lighthouse CI (PRs to master only)
+### Lighthouse CI
 
-On pull requests to master, Lighthouse CI runs additionally to enforce quality standards:
+Lighthouse CI enforces quality standards on every push to master:
 
-- **Performance**: 100/100
+- **Performance**: >= 90/100 (threshold accommodates CI variance)
 - **Accessibility**: 100/100
 - **Best Practices**: 100/100
 - **SEO**: 100/100
@@ -127,6 +123,27 @@ npm run check && npm test
 ```
 
 This ensures type errors and unit test failures are caught before commits.
+
+## When Tests Fail
+
+When a test fails, **think before you act**:
+
+1. **Diagnose first** - Read the failure message and understand what the test is asserting. Is the test catching a real bug, or is the test outdated?
+2. **Fix the implementation, not the test** - The default assumption should be that the test is correct and the implementation is broken. Only update a test if:
+   - You are intentionally changing behavior as part of a feature
+   - The test is genuinely wrong (testing the wrong thing, flawed assertion)
+   - The test is testing implementation details that legitimately changed
+3. **Never silently weaken tests** - Do not lower thresholds, remove assertions, or broaden expected values just to make tests pass. If a threshold needs changing, justify it explicitly.
+
+### Red/Green Testing for New Features
+
+When building new features, follow the red/green approach where applicable:
+
+1. **Red** - Write or update tests that describe the expected behavior. Run them and confirm they fail.
+2. **Green** - Implement the feature until the tests pass.
+3. **Refactor** - Clean up the implementation while keeping tests green.
+
+This applies naturally to unit tests and E2E tests for well-defined behavior. Skip this for exploratory or visual work where the behavior isn't known upfront.
 
 ## Adding New Tests
 
@@ -173,3 +190,4 @@ test('should have no accessibility violations', async ({ page }) => {
 - Accessibility tests wait 700ms for cascade animations to complete
 - Mobile tests use viewport sizes: 375x667 (phone), 768x1024 (tablet)
 - All tests run in CI before deployment
+- CI only runs on pushes to master (pre-commit hook handles local validation)
