@@ -33,6 +33,7 @@
   --text-hero: clamp(28px, calc(28px + 8 * ((100vw - 600px) / 360)), 36px);
   --text-section: clamp(20px, calc(20px + 4 * ((100vw - 600px) / 360)), 24px);
   --text-nav: 16px;
+  --text-subheading: clamp(18px, calc(18px + 2 * ((100vw - 600px) / 360)), 20px);
   --text-body: clamp(16px, calc(16px + 2 * ((100vw - 600px) / 360)), 18px);
   --text-small: clamp(14px, calc(14px + 2 * ((100vw - 600px) / 360)), 16px);
   --text-code: 14px;
@@ -243,7 +244,8 @@ ol {
 
 .prose-content h3 {
   font-family: var(--font-serif);
-  font-size: var(--text-body);
+  font-size: var(--text-subheading);
+  font-weight: 500;
   letter-spacing: var(--tracking-body);
   margin-top: 1.5em;
   scroll-margin-top: calc(var(--header-height) + 1rem);
