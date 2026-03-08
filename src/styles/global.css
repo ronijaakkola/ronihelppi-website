@@ -301,6 +301,8 @@ ol {
   padding: 1rem;
   border-radius: var(--radius-md);
   overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
   margin: 1.5em 0;
 }
 
