@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('404 Page', () => {
   test('should load successfully for non-existent routes', async ({ page }) => {
     await page.goto('/nonexistent-page');
-    await expect(page).toHaveTitle(/Page Not Found \| Roni Helppi/);
+    await expect(page).toHaveTitle(/Page Not Found — Roni Helppi/);
   });
 
   test('should display the error heading', async ({ page }) => {
