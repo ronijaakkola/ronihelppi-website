@@ -4,7 +4,7 @@
 
 ## About
 
-Roni Helppi is a Senior UX Designer at Reaktor, working across design and engineering. Previously at Gofore, Leadin, and Atostek. Interests include AI, generative tools, game development, and the intersection of design and code.
+Roni Helppi is a Senior Product Designer at Reaktor, working across design and engineering. Previously at Gofore, Leadin, and Atostek. Interests include AI, generative tools, game development, and the intersection of design and code.
 
 - Site: https://www.ronihelppi.com
 - Email: hello@ronihelppi.com

@@ -38,7 +38,7 @@ test.describe('About Page', () => {
 
     // Check at least one row of experience data
     await expect(page.locator('td', { hasText: 'Reaktor' })).toBeVisible();
-    await expect(page.locator('td', { hasText: 'Senior UX Designer' })).toBeVisible();
+    await expect(page.locator('td', { hasText: 'Senior Product Designer' })).toBeVisible();
   });
 
   test('should display How to reach me section', async ({ page }) => {
@@ -100,7 +100,7 @@ test.describe('About Page', () => {
 
     // Experience data should still be visible
     await expect(page.locator('.company-cell', { hasText: 'Reaktor' })).toBeVisible();
-    await expect(page.locator('.role-cell', { hasText: 'Senior UX Designer' })).toBeVisible();
+    await expect(page.locator('.role-cell', { hasText: 'Senior Product Designer' })).toBeVisible();
     await expect(page.locator('.date-cell', { hasText: '2026-08' })).toBeVisible();
   });
 });

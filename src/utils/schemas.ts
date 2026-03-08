@@ -3,7 +3,7 @@ export const personSchema = {
   '@type': 'Person' as const,
   name: 'Roni Helppi',
   url: 'https://www.ronihelppi.com',
-  jobTitle: 'Senior UX Designer',
+  jobTitle: 'Senior Product Designer',
   worksFor: {
     '@type': 'Organization' as const,
     name: 'Reaktor',
