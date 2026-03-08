@@ -101,7 +101,7 @@ test.describe('Post Pages', () => {
 
   test('should be accessible via direct URL', async ({ page }) => {
     // Directly navigate to a known post URL
-    await page.goto('/writing/digital-tangibleness/');
+    await page.goto('/writing/a-practical-guide-to-writing-your-own-obsidian-skills/');
 
     // Should load successfully
     await expect(page.locator('h1.page-title')).toBeVisible();
@@ -109,7 +109,7 @@ test.describe('Post Pages', () => {
   });
 
   test('should display post ingress when description exists', async ({ page }) => {
-    await page.goto('/writing/digital-tangibleness/');
+    await page.goto('/writing/a-practical-guide-to-writing-your-own-obsidian-skills/');
 
     const ingress = page.locator('.post-ingress');
     await expect(ingress).toBeVisible();

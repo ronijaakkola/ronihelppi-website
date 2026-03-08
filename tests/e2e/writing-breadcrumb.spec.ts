@@ -16,7 +16,7 @@ test('breadcrumb should show when directly visiting /writing', async ({ page }) 
 
 test('breadcrumb should show when navigating from post to /writing', async ({ page }) => {
   // Start at a post page
-  await page.goto('/writing/digital-tangibleness');
+  await page.goto('/writing/a-practical-guide-to-writing-your-own-obsidian-skills');
   await page.waitForLoadState('networkidle');
 
   const breadcrumb = page.locator('#breadcrumb');
