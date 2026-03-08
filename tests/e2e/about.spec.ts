@@ -55,7 +55,7 @@ test.describe('About Page', () => {
     await expect(emailLink).toHaveAttribute('href', 'mailto:hello@ronihelppi.com');
 
     const linkedinLink = contactText.locator('a', { hasText: 'LinkedIn' });
-    await expect(linkedinLink).toHaveAttribute('href', 'https://linkedin.com/in/ronihelppi');
+    await expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/ronihelppi/');
   });
 
   test('should show breadcrumb on about page', async ({ page }) => {

@@ -10,8 +10,8 @@ export const personSchema = {
     url: 'https://reaktor.com',
   },
   sameAs: [
-    'https://twitter.com/ronihelppi',
-    'https://linkedin.com/in/ronihelppi',
+    'https://x.com/Nashtanir',
+    'https://www.linkedin.com/in/ronihelppi/',
     'https://github.com/ronijaakkola',
   ],
 };
