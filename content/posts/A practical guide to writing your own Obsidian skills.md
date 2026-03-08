@@ -23,7 +23,7 @@ In this post, I will share concrete and practical examples how you can create yo
 You will need:
 
 - An Obsidian vault.
-- An agentic tool of some sort. I will use [Claude Code](https://claude.com/product/claude-code) as an example, but other tools like [Codex](https://openai.com/codex/) and [Gemini CLI](https://geminicli.com/) also support skills just as well.
+- An agentic tool of some sort. I will use [Claude Code](https://claude.com/product/claude-code) as an example, but other tools like [Codex](https://openai.com/codex/) and [Gemini CLI](https://geminicli.com/) also support skills just as well. I will also expect that you have basic knowledge of using the agentic tool of your choice.
 
 And, before you do anything:
 
