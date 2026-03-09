@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('About Page', () => {
   test('should load successfully', async ({ page }) => {
     await page.goto('/about');
-    await expect(page).toHaveTitle(/About Roni Helppi/);
+    await expect(page).toHaveTitle(/About — Roni Helppi/);
   });
 
   test('should display About heading', async ({ page }) => {
@@ -76,7 +76,7 @@ test.describe('About Page', () => {
     await aboutLink.click();
 
     await expect(page).toHaveURL('/about');
-    await expect(page).toHaveTitle(/About Roni Helppi/);
+    await expect(page).toHaveTitle(/About — Roni Helppi/);
   });
 
   test('should have proper HTML structure', async ({ page }) => {
