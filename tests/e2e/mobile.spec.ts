@@ -167,7 +167,7 @@ test.describe('Mobile Layout', () => {
     await expect(heading).toContainText('Contact');
 
     // Contact methods should be visible (email is commented out, check LinkedIn instead)
-    const linkedin = page.locator('a[href*="linkedin.com"]');
+    const linkedin = page.locator('.contact-link[href*="linkedin.com"]');
     await expect(linkedin).toBeVisible();
   });
 
