@@ -58,29 +58,26 @@ const schemas = [
 >
   <main id="main-content" class="main">
     <article class="layout">
-      <div class="prose">
-        <header class="project-header">
-          <div class="project-title-group">
-            <h1 class="page-title">{title}</h1>
-            <p class="project-subtitle">{item.data.subtitle || 'Case study'}</p>
-          </div>
-        </header>
-      </div>
-
-      {item.data.coverImage && (
-        <div class="cover-image-container">
-          <Image
-            src={item.data.coverImage}
-            alt={item.data.coverImageAlt || `Cover image for ${title}`}
-            class="cover-image"
-            widths={[600, 920, 1200]}
-            sizes="(max-width: 960px) 100vw, 920px"
-            format="webp"
-            quality={85}
-            style={`view-transition-name: project-cover-${item.slug}`}
-          />
+      <header class="project-header">
+        <div class="project-title-group">
+          <h1 class="page-title">{title}</h1>
+          <p class="project-subtitle">{item.data.subtitle || 'Case study'}</p>
         </div>
-      )}
+        {item.data.coverImage && (
+          <div class="cover-image-container">
+            <Image
+              src={item.data.coverImage}
+              alt={item.data.coverImageAlt || `Cover image for ${title}`}
+              class="cover-image"
+              widths={[600, 920, 1200]}
+              sizes="(max-width: 960px) 100vw, 920px"
+              format="webp"
+              quality={85}
+              style={`view-transition-name: project-cover-${item.slug}`}
+            />
+          </div>
+        )}
+      </header>
 
       <div class="prose">
         {item.data.description && (
@@ -147,12 +144,16 @@ const schemas = [
   .project-header {
     display: flex;
     flex-direction: column;
+    gap: var(--gap-lg);
+    width: 100%;
+    max-width: var(--content-width);
   }
 
   .project-title-group {
     display: flex;
     flex-direction: column;
     gap: var(--gap-4xs);
+    text-align: center;
   }
 
   .project-subtitle {
@@ -165,8 +166,7 @@ const schemas = [
 
   .cover-image-container {
     width: 100%;
-    max-width: var(--layout-width);
-    margin-top: var(--gap-lg);
+    margin-top: calc(-1 * var(--gap-xs));
   }
 
   .cover-image {

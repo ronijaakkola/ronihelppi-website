@@ -85,27 +85,30 @@ const schemas = [
   <main id="main-content" class="main">
     <article class="layout">
       <!-- Post Heading -->
-      <div class="prose">
-        <header class="post-header">
-          <div class="post-title-group">
-            <h1 class="page-title">{title}</h1>
-            {post.data.description && (
-              <p class="post-ingress">{post.data.description}</p>
-            )}
-            <div class="post-meta-row">
-              <time class="post-meta" datetime={post.data.date.toISOString()}>{formattedDate} • {readTime}</time>
-              <span class="post-author visually-hidden">By <a href="/about" rel="author">Roni Helppi</a></span>
-              <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>
-            </div>
-          </div>
-        </header>
-      </div>
-
-      {heroImage && (
-        <div class="hero-image-container">
-          <img src={heroImage} alt={post.data.heroImageAlt || title} class="hero-image" width="920" height="518" fetchpriority="high" />
+      <header class="post-header">
+        <div class="post-title-group">
+          <h1 class="page-title">{title}</h1>
+          {post.data.description && (
+            <p class="post-ingress">{post.data.description}</p>
+          )}
         </div>
-      )}
+        <div class="post-meta-row">
+          <div class="post-meta">
+            <a href="/about" rel="author" class="post-author">Roni Helppi</a>
+            <span class="post-meta-details">
+              <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
+              <span class="post-meta-separator" aria-hidden="true">·</span>
+              <span>{readTime}</span>
+            </span>
+          </div>
+          <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>
+        </div>
+        {heroImage && (
+          <div class="hero-image-container">
+            <img src={heroImage} alt={post.data.heroImageAlt || title} class="hero-image" width="920" height="518" fetchpriority="high" />
+          </div>
+        )}
+      </header>
 
       <!-- Post Content -->
       <div class="prose">
@@ -148,6 +151,9 @@ const schemas = [
   .post-header {
     display: flex;
     flex-direction: column;
+    gap: var(--gap-lg);
+    width: 100%;
+    max-width: var(--content-width);
   }
 
   .post-title-group {
@@ -157,16 +163,39 @@ const schemas = [
 
   .post-meta-row {
     display: flex;
-    align-items: center;
-    gap: var(--gap-xs);
+    align-items: flex-end;
+    justify-content: space-between;
     flex-wrap: wrap;
-    margin-top: clamp(12px, calc(12px + 4 * ((100vw - 600px) / 360)), 16px);
+    gap: var(--gap-xs);
   }
 
   .post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     font-size: clamp(14px, calc(14px + 2 * ((100vw - 600px) / 360)), 16px);
     letter-spacing: var(--tracking-body-tight);
+  }
+
+  .post-meta-details {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-4xs);
     color: var(--color-text-secondary);
+  }
+
+  .post-meta-separator {
+    user-select: none;
+  }
+
+  .post-author {
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  .post-author:hover,
+  .post-author:focus-visible {
+    text-decoration: underline;
   }
 
   .copy-markdown-btn {
@@ -218,7 +247,7 @@ const schemas = [
 
   .hero-image-container {
     width: 100%;
-    margin-top: var(--gap-lg);
+    margin-top: calc(-1 * var(--gap-xs));
   }
 
   .hero-image {
@@ -231,6 +260,12 @@ const schemas = [
 
   .post-content {
     margin-top: var(--gap-lg);
+  }
+
+  @media (max-width: 600px) {
+    .post-content {
+      margin-top: var(--gap-sm);
+    }
   }
 
   .related-posts {

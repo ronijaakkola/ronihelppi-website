@@ -55,6 +55,7 @@
 
   /* Layout - Widths */
   --layout-width: 920px;
+  --content-width: 750px;
   --prose-width: 624px;
 
   /* Layout - Header */
@@ -419,8 +420,11 @@ ol {
 
 .code-block-wrapper {
   position: relative;
-  /* Extend slightly beyond prose width */
-  margin: 1.5em -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100vw - 2 * var(--page-gutter));
+  max-width: var(--content-width);
+  margin: 1.5em 0;
   border-radius: var(--radius-md);
   /* overflow:hidden clips the pre background to our border-radius */
   overflow: hidden;
@@ -493,12 +497,7 @@ ol {
   outline-offset: 2px;
 }
 
-/* Remove the extension on smaller viewports to prevent overflow */
-@media (max-width: 750px) {
-  .code-block-wrapper {
-    margin-inline: 0;
-  }
-}
+/* On small viewports the breakout is handled by the vw calc, no override needed */
 
 /* Show copy button on touch devices since there's no hover */
 @media (hover: none) {
@@ -599,7 +598,7 @@ ol {
   left: 50%;
   transform: translateX(-50%);
   width: calc(100vw - 2 * var(--page-gutter));
-  max-width: var(--layout-width);
+  max-width: var(--content-width);
 }
 
 .prose-content .prose-figure figcaption {

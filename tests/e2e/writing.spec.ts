@@ -28,7 +28,7 @@ test.describe('Post Pages', () => {
     await page.locator('a[href^="/writing/"]').first().click();
 
     // Should have a time element
-    const time = page.locator('time.post-meta');
+    const time = page.locator('.post-meta time');
     await expect(time).toBeVisible();
     await expect(time).toHaveAttribute('datetime');
   });
@@ -90,7 +90,7 @@ test.describe('Post Pages', () => {
     await page.locator('a[href^="/writing/"]').first().click();
 
     // Check that datetime attribute is a valid ISO date
-    const time = page.locator('time.post-meta');
+    const time = page.locator('.post-meta time');
     const datetime = await time.getAttribute('datetime');
     expect(datetime).toBeTruthy();
 
@@ -105,7 +105,7 @@ test.describe('Post Pages', () => {
 
     // Should load successfully
     await expect(page.locator('h1.page-title')).toBeVisible();
-    await expect(page.locator('time.post-meta')).toBeVisible();
+    await expect(page.locator('.post-meta time')).toBeVisible();
   });
 
   test('should display post ingress when description exists', async ({ page }) => {
