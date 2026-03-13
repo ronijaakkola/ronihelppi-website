@@ -166,9 +166,9 @@ test.describe('Mobile Layout', () => {
     const heading = page.locator('.page-title');
     await expect(heading).toContainText('Contact');
 
-    // Contact methods should be visible
-    const email = page.locator('a[href^="mailto:"]');
-    await expect(email).toBeVisible();
+    // Contact methods should be visible (email is commented out, check LinkedIn instead)
+    const linkedin = page.locator('a[href*="linkedin.com"]');
+    await expect(linkedin).toBeVisible();
   });
 
   test('post content is readable on mobile', async ({ page }) => {

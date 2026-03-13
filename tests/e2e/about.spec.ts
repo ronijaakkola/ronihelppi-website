@@ -50,10 +50,7 @@ test.describe('About Page', () => {
     const contactText = page.locator('.contact-text');
     await expect(contactText).toBeVisible();
 
-    // Check email and LinkedIn links
-    const emailLink = contactText.locator('a', { hasText: 'email' });
-    await expect(emailLink).toHaveAttribute('href', 'mailto:hello@ronihelppi.com');
-
+    // Check LinkedIn link (email is commented out)
     const linkedinLink = contactText.locator('a', { hasText: 'LinkedIn' });
     await expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/ronihelppi/');
   });
