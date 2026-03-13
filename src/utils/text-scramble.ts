@@ -5,14 +5,20 @@ export class TextScramble {
   private frameRequest: number | null;
   private frame: number;
   private resolve: (() => void) | null;
+  private startSpread: number;
+  private minDuration: number;
+  private durationSpread: number;
 
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLElement, { startSpread = 20, minDuration = 20, durationSpread = 20 } = {}) {
     this.el = el;
     this.chars = '!<>-_\\/[]{}—=+*^?#';
     this.queue = [];
     this.frameRequest = null;
     this.frame = 0;
     this.resolve = null;
+    this.startSpread = startSpread;
+    this.minDuration = minDuration;
+    this.durationSpread = durationSpread;
   }
 
   setText(newText: string): Promise<void> {
@@ -23,8 +29,8 @@ export class TextScramble {
     for (let i = 0; i < length; i++) {
       const from = oldText[i] || '';
       const to = newText[i] || '';
-      const start = Math.floor(Math.random() * 20);
-      const end = start + Math.floor(Math.random() * 20) + 20;
+      const start = Math.floor(Math.random() * this.startSpread);
+      const end = start + Math.floor(Math.random() * this.durationSpread) + this.minDuration;
       this.queue.push({ from, to, start, end });
     }
 

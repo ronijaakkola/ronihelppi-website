@@ -435,8 +435,9 @@ const filters = [
         return;
       }
 
-      const titleScramble = new TextScramble(titleEl);
-      const yearScramble = new TextScramble(yearEl);
+      const fastOpts = { startSpread: 9, minDuration: 11, durationSpread: 9 };
+      const titleScramble = new TextScramble(titleEl, fastOpts);
+      const yearScramble = new TextScramble(yearEl, fastOpts);
 
       item.addEventListener('mouseenter', onEnter);
       item.addEventListener('focusin', onEnter);
