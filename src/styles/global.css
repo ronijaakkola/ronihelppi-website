@@ -220,6 +220,106 @@ ol {
 }
 
 /* ==========================================================================
+   Table of Contents Card
+   ========================================================================== */
+
+.toc-card {
+  padding: var(--gap-4xs) 0;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.toc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-2xs) var(--gap-xs);
+  border-bottom: 0.5px solid var(--color-divider);
+}
+
+.toc-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
+  letter-spacing: var(--tracking-small);
+  color: var(--color-text-secondary);
+}
+
+.toc-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
+  letter-spacing: var(--tracking-small);
+  color: var(--color-text-secondary);
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-row {
+  border-bottom: 0.5px solid var(--color-divider);
+}
+
+.toc-row:last-child {
+  border-bottom: none;
+}
+
+.toc-link {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  padding: var(--gap-2xs) var(--gap-xs);
+  text-decoration: none;
+  color: inherit;
+}
+
+.toc-link:hover .toc-text,
+.toc-link:focus-visible .toc-text {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.toc-link:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.toc-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
+  letter-spacing: var(--tracking-small);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.toc-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-code);
+  letter-spacing: var(--tracking-small);
+  color: var(--color-text-primary);
+}
+
+/* Reset prose-content inherited styles inside TOC */
+.prose-content .toc-card ol {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose-content .toc-card li {
+  margin-bottom: 0;
+}
+
+.prose-content .toc-card a {
+  text-decoration: none;
+}
+
+.prose-content .toc-card {
+  margin-top: 2em;
+}
+
+/* ==========================================================================
    Prose Styles (Article Content)
    ========================================================================== */
 

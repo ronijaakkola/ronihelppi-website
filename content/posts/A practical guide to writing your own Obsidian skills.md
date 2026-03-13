@@ -8,6 +8,8 @@ Agentic skills have taken the AI world by storm. People are slowly starting to e
 
 Around two months ago, the Obsidian CEO kepano released a [GitHub repository](https://github.com/kepano/obsidian-skills) containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.
 
+[toc]
+
 ## Stop copying skills. Build your own.
 
 I divide agentic skills roughly to two categories. There are skills that teach the agent to **use a specific tool**, and there are skills that teach the agent to **follow a certain process**. The first category is a simple one as there are only so few ways to describe how a certain tool is used. In the context of Obsidian, these skills may teach the agent how to deal with Markdown and Bases files. Or, how to use the [Obsidian CLI](https://help.obsidian.md/cli). These are the skills you *should* copy, and you can find many of those in [kepano's repository](https://github.com/kepano/obsidian-skills).

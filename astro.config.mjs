@@ -6,6 +6,7 @@ import rehypeExternalLinks from 'rehype-external-links';
 import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
 import { rehypeImageFigure } from './src/utils/rehype-image-figure';
 import { remarkCodeTitle } from './src/utils/remark-code-title';
+import { remarkToc } from './src/utils/remark-toc';
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,7 +17,7 @@ export default defineConfig({
     shikiConfig: {
       theme: 'github-dark',
     },
-    remarkPlugins: [remarkObsidianImages, remarkCodeTitle],
+    remarkPlugins: [remarkObsidianImages, remarkCodeTitle, remarkToc],
     rehypePlugins: [
       rehypeCodeBlocks,
       rehypeImageFigure,
