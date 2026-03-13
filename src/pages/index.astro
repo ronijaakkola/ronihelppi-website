@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Divider from '../components/Divider.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import ProjectCard from '../components/ProjectCard.astro';
 import PostListItem from '../components/PostListItem.astro';
 import CascadeAnimation from '../components/CascadeAnimation.astro';
 import { getCollection } from 'astro:content';
@@ -52,10 +51,11 @@ const schemas = [
             <SectionHeading title="Recent projects" />
             <div class="projects-list">
               {projects.slice(0, 3).map((item) => (
-                <ProjectCard
+                <PostListItem
                   title={getTitle(item.id)}
-                  description={item.data.description || ''}
+                  date={item.data.date}
                   href={`/projects/${item.slug}`}
+                  layout="row"
                 />
               ))}
             </div>

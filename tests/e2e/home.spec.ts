@@ -23,6 +23,20 @@ test.describe('Home Page', () => {
     await expect(projectsHeading).toBeVisible();
   });
 
+  test('should display project items with dates and no descriptions', async ({ page }) => {
+    await page.goto('/');
+
+    // Projects section should contain items with dates (same layout as writing)
+    const projectsSection = page.locator('section', { has: page.locator('h2', { hasText: /projects/i }) });
+    const projectDates = projectsSection.locator('time');
+    const dateCount = await projectDates.count();
+    expect(dateCount).toBeGreaterThan(0);
+
+    // Project items should not have descriptions
+    const projectDescriptions = projectsSection.locator('.post-description');
+    await expect(projectDescriptions).toHaveCount(0);
+  });
+
   test('should have links to post pages', async ({ page }) => {
     await page.goto('/');
 
