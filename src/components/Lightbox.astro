@@ -278,7 +278,7 @@
     let isClosing = false;
 
     function collectImages(): LightboxImage[] {
-      const proseImages = document.querySelectorAll('.prose-content img, .hero-image, .cover-image');
+      const proseImages = document.querySelectorAll('.prose-content img');
       return Array.from(proseImages).map((img) => {
         const imgEl = img as HTMLImageElement;
         return {
@@ -396,7 +396,7 @@
 
     // Make images clickable by wrapping in a button
     function setupImageClicks() {
-      const proseImages = document.querySelectorAll('.prose-content img, .hero-image, .cover-image');
+      const proseImages = document.querySelectorAll('.prose-content img');
       proseImages.forEach((img, index) => {
         const imgEl = img as HTMLImageElement;
 

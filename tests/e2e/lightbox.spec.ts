@@ -1,16 +1,40 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Lightbox', () => {
-  test('opens when clicking cover image on project page', async ({ page }) => {
+  test('cover image is not clickable', async ({ page }) => {
     await page.goto('/projects/resokill');
-
-    // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle');
 
     const coverImage = page.locator('.cover-image');
     await expect(coverImage).toBeVisible();
 
-    await coverImage.click();
+    // Cover image should NOT be wrapped in a lightbox trigger
+    const parent = coverImage.locator('..');
+    const tagName = await parent.evaluate(el => el.tagName.toLowerCase());
+    expect(tagName).not.toBe('button');
+  });
+
+  test('hero image is not clickable', async ({ page }) => {
+    await page.goto('/writing/a-practical-guide-to-writing-your-own-obsidian-skills');
+    await page.waitForLoadState('networkidle');
+
+    const heroImage = page.locator('.hero-image');
+    await expect(heroImage).toBeVisible();
+
+    // Hero image should NOT be wrapped in a lightbox trigger
+    const parent = heroImage.locator('..');
+    const tagName = await parent.evaluate(el => el.tagName.toLowerCase());
+    expect(tagName).not.toBe('button');
+  });
+
+  test('opens when clicking prose content image', async ({ page }) => {
+    await page.goto('/projects/resokill');
+    await page.waitForLoadState('networkidle');
+
+    const proseImage = page.locator('.prose-content img').first();
+    await expect(proseImage).toBeVisible();
+
+    await proseImage.click();
 
     const lightbox = page.locator('#lightbox');
     await expect(lightbox).toHaveAttribute('open');
@@ -20,7 +44,7 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     await page.locator('.lightbox-close').click();
@@ -31,7 +55,7 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     await page.keyboard.press('Escape');
@@ -42,7 +66,7 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     // Click on the dialog backdrop (the dialog element itself, not content)
@@ -59,7 +83,7 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     await page.locator('.lightbox-image').click();
@@ -70,7 +94,7 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     const lightboxImage = page.locator('.lightbox-image');
@@ -81,10 +105,10 @@ test.describe('Lightbox', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    const altText = await coverImage.getAttribute('alt');
+    const proseImage = page.locator('.prose-content img').first();
+    const altText = await proseImage.getAttribute('alt');
 
-    await coverImage.click();
+    await proseImage.click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     // Image should be displayed
@@ -127,7 +151,7 @@ test.describe('Lightbox Keyboard Accessibility', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     // Wait for animation to complete and focus to be set
@@ -170,14 +194,11 @@ test.describe('Lightbox Keyboard Accessibility', () => {
 });
 
 test.describe('Lightbox Navigation', () => {
-  // These tests require a page with multiple images
-  // Testing navigation controls visibility
-
   test('navigation buttons exist', async ({ page }) => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     await expect(page.locator('.lightbox-prev')).toBeVisible();
@@ -189,7 +210,7 @@ test.describe('Lightbox Navigation', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     const prevBtn = page.locator('.lightbox-prev');
@@ -204,8 +225,8 @@ test.describe('Lightbox Mobile', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    const coverImage = page.locator('.cover-image');
-    await coverImage.click();
+    const proseImage = page.locator('.prose-content img').first();
+    await proseImage.click();
 
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
   });
@@ -214,7 +235,7 @@ test.describe('Lightbox Mobile', () => {
     await page.goto('/projects/resokill');
     await page.waitForLoadState('networkidle');
 
-    await page.locator('.cover-image').click();
+    await page.locator('.prose-content img').first().click();
     await expect(page.locator('#lightbox')).toHaveAttribute('open');
 
     const closeBtn = page.locator('.lightbox-close');
