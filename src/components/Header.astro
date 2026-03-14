@@ -55,6 +55,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     justify-content: center;
     height: var(--header-height);
     width: 100%;
+    padding: 0 var(--spacing-horizontal-tablet);
     view-transition-name: header;
   }
 
@@ -364,13 +365,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   .mobile-menu-rss:hover,
   .mobile-menu-rss:focus-visible {
     color: var(--color-text-primary);
-  }
-
-  /* Tablet */
-  @media (max-width: 960px) {
-    .header {
-      padding: 0 var(--spacing-horizontal-tablet);
-    }
   }
 
   /* Phone */
