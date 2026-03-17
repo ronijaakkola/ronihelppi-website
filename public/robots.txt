@@ -1,4 +1,4 @@
-# https://www.ronihelppi.com robots.txt
+# https://ronihelppi.com robots.txt
 
 User-agent: *
 Allow: /
@@ -31,4 +31,4 @@ Allow: /
 User-agent: cohere-ai
 Allow: /
 
-Sitemap: https://www.ronihelppi.com/sitemap-index.xml
+Sitemap: https://ronihelppi.com/sitemap-index.xml

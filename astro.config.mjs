@@ -10,7 +10,7 @@ import { remarkToc } from './src/utils/remark-toc';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.ronihelppi.com',
+  site: 'https://ronihelppi.com',
   devToolbar: { enabled: false },
   integrations: [sitemap()],
   markdown: {
