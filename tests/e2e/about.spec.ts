@@ -98,6 +98,9 @@ test.describe('About Page', () => {
     // Experience data should still be visible
     await expect(page.locator('.company-cell', { hasText: 'Reaktor' })).toBeVisible();
     await expect(page.locator('.role-cell', { hasText: 'Senior Product Designer' })).toBeVisible();
-    await expect(page.locator('.date-cell', { hasText: '2026-08' })).toBeVisible();
+    // Scope to the Reaktor row's date so the assertion stays unique
+    // (the Gofore row also ends in 08/2022)
+    const reaktorRow = page.locator('tr', { hasText: 'Reaktor' });
+    await expect(reaktorRow.locator('.date-cell time')).toHaveAttribute('datetime', '2022-08');
   });
 });
