@@ -72,6 +72,10 @@ const filters = [
             const title = getTitleFromEntry(item);
             const categories = item.data.tags?.map(getCategoryFromTag) || [];
             const coverImage = item.data.coverImage;
+            const isLcpCandidate = index === 0;
+            const imageSizes = isLcpCandidate
+              ? '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px'
+              : '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px';
 
             return (
               <a
@@ -85,11 +89,12 @@ const filters = [
                     src={coverImage}
                     alt={title}
                     class="grid-item-image"
-                    widths={[372, 584, 744, 1168]}
-                    sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                    widths={isLcpCandidate ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
+                    sizes={imageSizes}
                     format="webp"
                     quality={80}
-                    loading={index < 3 ? "eager" : "lazy"}
+                    loading={isLcpCandidate ? 'eager' : 'lazy'}
+                    fetchpriority={isLcpCandidate ? 'high' : 'auto'}
                     style={`view-transition-name: project-cover-${item.id}`}
                   />
                 ) : (
