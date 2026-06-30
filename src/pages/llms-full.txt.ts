@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { getTitle } from '../utils/title';
+import { getTitleFromEntry } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
 import type { APIContext } from 'astro';
 
@@ -42,9 +42,9 @@ export async function GET(context: APIContext) {
   lines.push('');
 
   for (const post of posts) {
-    const title = getTitle(post.id);
+    const title = getTitleFromEntry(post);
     const date = post.data.date.toISOString().split('T')[0];
-    const url = new URL(`/writing/${post.slug}/`, context.site).href;
+    const url = new URL(`/writing/${post.id}/`, context.site).href;
 
     lines.push(`### ${title}`);
     lines.push('');
@@ -65,9 +65,9 @@ export async function GET(context: APIContext) {
   lines.push('');
 
   for (const project of projects) {
-    const title = getTitle(project.id);
+    const title = getTitleFromEntry(project);
     const date = project.data.date.toISOString().split('T')[0];
-    const url = new URL(`/projects/${project.slug}/`, context.site).href;
+    const url = new URL(`/projects/${project.id}/`, context.site).href;
 
     lines.push(`### ${title}`);
     lines.push('');

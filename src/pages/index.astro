@@ -5,7 +5,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import PostListItem from '../components/PostListItem.astro';
 import CascadeAnimation from '../components/CascadeAnimation.astro';
 import { getCollection } from 'astro:content';
-import { getTitle } from '../utils/title';
+import { getTitleFromEntry } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
 import { personSchema } from '../utils/schemas';
 
@@ -52,9 +52,9 @@ const schemas = [
             <div class="projects-list">
               {projects.slice(0, 3).map((item) => (
                 <PostListItem
-                  title={getTitle(item.id)}
+                  title={getTitleFromEntry(item)}
                   date={item.data.date}
-                  href={`/projects/${item.slug}`}
+                  href={`/projects/${item.id}`}
                   layout="row"
                   dateFormat="short"
                 />
@@ -74,9 +74,9 @@ const schemas = [
             <div class="posts-list">
               {posts.slice(0, 3).map((post) => (
                 <PostListItem
-                  title={getTitle(post.id)}
+                  title={getTitleFromEntry(post)}
                   date={post.data.date}
-                  href={`/writing/${post.slug}`}
+                  href={`/writing/${post.id}`}
                   layout="row"
                   dateFormat="short"
                 />
