@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getTitle } from './title';
+import { getTitle, getTitleFromEntry } from './title';
 
 describe('getTitle', () => {
   it('removes .md extension from filename', () => {
@@ -41,5 +41,29 @@ describe('getTitle', () => {
 
   it('handles unicode characters', () => {
     expect(getTitle('\u00e4\u00f6\u00fc.md')).toBe('\u00e4\u00f6\u00fc');
+  });
+});
+
+describe('getTitleFromEntry', () => {
+  it('derives title from filePath basename, preserving original casing', () => {
+    expect(
+      getTitleFromEntry({ id: 'resokill', filePath: 'src/content/projects/RESOKILL.md' })
+    ).toBe('RESOKILL');
+  });
+
+  it('preserves spaces from the original filename', () => {
+    expect(
+      getTitleFromEntry({ id: 'clear-skies', filePath: 'src/content/projects/Clear Skies.md' })
+    ).toBe('Clear Skies');
+  });
+
+  it('strips the .md extension', () => {
+    expect(
+      getTitleFromEntry({ id: 'my-post', filePath: 'src/content/posts/My Post.md' })
+    ).toBe('My Post');
+  });
+
+  it('falls back to id when filePath is missing', () => {
+    expect(getTitleFromEntry({ id: 'fallback-id' })).toBe('fallback-id');
   });
 });
