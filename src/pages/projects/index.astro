@@ -72,29 +72,30 @@ const filters = [
             const title = getTitleFromEntry(item);
             const categories = item.data.tags?.map(getCategoryFromTag) || [];
             const coverImage = item.data.coverImage;
-            const isLcpCandidate = index === 0;
-            const imageSizes = isLcpCandidate
+            const isPrimaryLcpCandidate = index === 0;
+            const isAboveTheFoldCandidate = index < 2;
+            const imageSizes = isPrimaryLcpCandidate
               ? '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px'
               : '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px';
 
             return (
               <a
                 href={`/projects/${item.id}`}
-                class="grid-item cascade-item"
+                class:list={['grid-item', { 'cascade-item': !isAboveTheFoldCandidate }]}
                 data-categories={categories.join(',')}
-                style={`--cascade-delay: ${index * 60}ms`}
+                style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
               >
                 {coverImage ? (
                   <Image
                     src={coverImage}
                     alt={title}
                     class="grid-item-image"
-                    widths={isLcpCandidate ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
+                    widths={isPrimaryLcpCandidate ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
                     sizes={imageSizes}
                     format="webp"
-                    quality={80}
-                    loading={isLcpCandidate ? 'eager' : 'lazy'}
-                    fetchpriority={isLcpCandidate ? 'high' : 'auto'}
+                    quality={70}
+                    loading={isAboveTheFoldCandidate ? 'eager' : 'lazy'}
+                    fetchpriority={isPrimaryLcpCandidate ? 'high' : 'auto'}
                     style={`view-transition-name: project-cover-${item.id}`}
                   />
                 ) : (

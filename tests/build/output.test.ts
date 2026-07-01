@@ -111,20 +111,30 @@ describe('Build Output Validation', () => {
       }
     });
 
-    it('projects index prioritizes only the LCP cover image', async () => {
+    it('projects index prioritizes above-the-fold cover images correctly', async () => {
       const projectsIndexPath = join(distPath, 'projects', 'index.html');
       const content = await readFile(projectsIndexPath, 'utf-8');
 
       const gridImages = Array.from(content.matchAll(/<img[^>]+class="grid-item-image"[^>]*>/g)).map((match) => match[0]);
+      const cascadeItems = Array.from(content.matchAll(/<a[^>]+class="([^"]*grid-item[^"]*)"[^>]*>/g)).map((match) => match[1]);
 
-      expect(gridImages.length).toBeGreaterThan(0);
+      expect(gridImages.length).toBeGreaterThan(1);
       expect(gridImages[0]).toContain('loading="eager"');
       expect(gridImages[0]).toContain('fetchpriority="high"');
       expect(gridImages[0]).toContain('sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px"');
 
-      for (const image of gridImages.slice(1)) {
+      expect(gridImages[1]).toContain('loading="eager"');
+      expect(gridImages[1]).not.toContain('fetchpriority="high"');
+
+      for (const image of gridImages.slice(2)) {
         expect(image).toContain('loading="lazy"');
         expect(image).not.toContain('fetchpriority="high"');
+      }
+
+      expect(cascadeItems[0]).not.toContain('cascade-item');
+      expect(cascadeItems[1]).not.toContain('cascade-item');
+      for (const item of cascadeItems.slice(2)) {
+        expect(item).toContain('cascade-item');
       }
     });
   });
