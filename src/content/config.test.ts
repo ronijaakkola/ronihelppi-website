@@ -1,12 +1,21 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { z } from 'zod';
 
 // Replicate the schema definitions from config.ts for testing
 // These should match the schemas defined in src/content/config.ts
+const imageMetadataSchema = z.object({
+  src: z.string(),
+  width: z.number(),
+  height: z.number(),
+  format: z.enum(['png', 'jpg', 'jpeg', 'tiff', 'webp', 'gif', 'svg', 'avif']),
+});
+
 const postsSchema = z.object({
   date: z.coerce.date(),
   description: z.string().optional(),
-  heroImage: z.string().optional(),
+  heroImage: imageMetadataSchema.optional(),
   relatedPosts: z.array(z.string()).optional(),
 });
 
@@ -86,12 +95,22 @@ describe('Content Collection Schemas', () => {
       expect(result.date).toBeInstanceOf(Date);
     });
 
-    it('accepts optional heroImage string', () => {
+    it('accepts optional heroImage metadata', () => {
       const result = postsSchema.parse({
         date: '2026-01-30',
-        heroImage: '/images/hero.jpg',
+        heroImage: {
+          src: '/_astro/hero.webp',
+          width: 920,
+          height: 518,
+          format: 'webp',
+        },
       });
-      expect(result.heroImage).toBe('/images/hero.jpg');
+      expect(result.heroImage).toEqual({
+        src: '/_astro/hero.webp',
+        width: 920,
+        height: 518,
+        format: 'webp',
+      });
     });
 
     it('works without heroImage field', () => {
@@ -101,7 +120,16 @@ describe('Content Collection Schemas', () => {
       expect(result.heroImage).toBeUndefined();
     });
 
-    it('rejects invalid heroImage (not a string)', () => {
+    it('rejects string heroImage paths so post images must use Astro image metadata', () => {
+      expect(() =>
+        postsSchema.parse({
+          date: '2026-01-30',
+          heroImage: '/images/hero.jpg',
+        })
+      ).toThrow();
+    });
+
+    it('rejects invalid heroImage metadata shape', () => {
       expect(() =>
         postsSchema.parse({
           date: '2026-01-30',
@@ -161,13 +189,35 @@ describe('Content Collection Schemas', () => {
       const result = postsSchema.parse({
         date: '2026-01-30',
         description: 'A post description.',
-        heroImage: '/images/hero.jpg',
+        heroImage: {
+          src: '/_astro/hero.webp',
+          width: 920,
+          height: 518,
+          format: 'webp',
+        },
         relatedPosts: ['related-post'],
       });
       expect(result.date).toBeInstanceOf(Date);
       expect(result.description).toBe('A post description.');
-      expect(result.heroImage).toBe('/images/hero.jpg');
+      expect(result.heroImage).toEqual({
+        src: '/_astro/hero.webp',
+        width: 920,
+        height: 518,
+        format: 'webp',
+      });
       expect(result.relatedPosts).toEqual(['related-post']);
+    });
+  });
+
+  describe('Posts content authoring', () => {
+    it('post heroImage frontmatter uses relative image paths so Astro can manage them', () => {
+      const postFile = readFileSync(
+        join(process.cwd(), 'content/posts/A practical guide to writing your own Obsidian skills.md'),
+        'utf-8'
+      );
+
+      expect(postFile).not.toContain('heroImage: /images/');
+      expect(postFile).toContain('heroImage: ../images/');
     });
   });
 

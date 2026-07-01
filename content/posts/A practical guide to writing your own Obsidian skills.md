@@ -1,7 +1,7 @@
 ---
 date: 2026-03-10
 description: Stop copying skills. Build your own.
-heroImage: /images/obsidian-skills-banner.png
+heroImage: ../images/obsidian-skills-banner.png
 heroImageAlt: A cover image of the post, decipting the Obsidian logo rendered with ASCII characters.
 ---
 Agentic skills have taken the AI world by storm. People are slowly starting to experiment on using them on other tasks than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.

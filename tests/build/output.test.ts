@@ -193,27 +193,43 @@ describe('Build Output Validation', () => {
   });
 
   describe('Image Paths', () => {
-    it('images use valid paths (/images/ or /_astro/)', async () => {
-      // Check if any project or post content contains image references
-      const projectsPath = join(distPath, 'projects');
-      const entries = await readdir(projectsPath, { withFileTypes: true });
-      const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
+    it('content images use Astro-optimized asset paths', async () => {
+      const htmlFiles = [
+        join(distPath, 'projects', 'resokill', 'index.html'),
+        join(distPath, 'projects', 'clear-skies', 'index.html'),
+        join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html'),
+      ];
 
-      for (const projectDir of projectDirs) {
-        const projectIndexPath = join(projectsPath, projectDir, 'index.html');
-        const content = await readFile(projectIndexPath, 'utf-8');
+      for (const htmlFile of htmlFiles) {
+        const content = await readFile(htmlFile, 'utf-8');
+        const imageSources = Array.from(content.matchAll(/<img[^>]+src=["']([^"']+)["']/g))
+          .map((match) => match[1])
+          .filter((src) => src.startsWith('/'));
 
-        if (content.includes('<img')) {
-          // Images should use /images/ path (static) or /_astro/ path (optimized)
-          const imgMatch = content.match(/<img[^>]+src=["']([^"']+)["']/);
-          if (imgMatch) {
-            expect(imgMatch[1]).toMatch(/^\/(images|_astro)\//);
-          }
-        }
+        expect(imageSources.length).toBeGreaterThan(0);
+        expect(imageSources.every((src) => src.startsWith('/_astro/'))).toBe(true);
       }
+    });
 
-      // If no images found, that's okay - the test would just pass
-      // The important thing is that IF images exist, they use the right path
+    it('writing hero images use Astro-optimized asset paths', async () => {
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const content = await readFile(postPath, 'utf-8');
+      const heroImageTag = content.match(/<img[^>]+class="hero-image"[^>]*>|<img[^>]*class="hero-image"[^>]+>/)?.[0];
+
+      expect(heroImageTag).toBeDefined();
+      expect(heroImageTag).toContain('class="hero-image"');
+      expect(heroImageTag).toMatch(/src="\/_astro\//);
+      expect(heroImageTag).not.toContain('/images/');
+    });
+
+    it('writing markdown body images use Astro-optimized asset paths', async () => {
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const content = await readFile(postPath, 'utf-8');
+      const bodyImageTag = content.match(/<img[^>]+alt="An example where Claude Code automatically invokes a skill based on my messages\."[^>]*>|<img[^>]*alt="An example where Claude Code automatically invokes a skill based on my messages\."[^>]+>/)?.[0];
+
+      expect(bodyImageTag).toBeDefined();
+      expect(bodyImageTag).toMatch(/src="\/_astro\//);
+      expect(bodyImageTag).not.toContain('/images/');
     });
   });
 
