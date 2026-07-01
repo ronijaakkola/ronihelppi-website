@@ -33,7 +33,7 @@ const schemas = [
       <div class="prose">
         <div class="content">
           <!-- Hero Section -->
-          <section class="hero-section cascade-item">
+          <section class="hero-section">
             <h1 class="hero-title">
               Speaking all sides of digital<span class="hero-period">.</span>
             </h1>
@@ -252,11 +252,10 @@ const schemas = [
     animation: cascade-in 0.4s ease-out forwards;
   }
 
-  .cascade-animate :global(.cascade-item:nth-child(1)) { animation-delay: 0ms; }
-  .cascade-animate :global(.cascade-item:nth-child(2)) { animation-delay: 60ms; }
-  .cascade-animate :global(.cascade-item:nth-child(3)) { animation-delay: 120ms; }
-  .cascade-animate :global(.cascade-item:nth-child(4)) { animation-delay: 180ms; }
-  .cascade-animate :global(.cascade-item:nth-child(5)) { animation-delay: 240ms; }
+  .cascade-animate :global(.cascade-item:nth-child(2)) { animation-delay: 0ms; }
+  .cascade-animate :global(.cascade-item:nth-child(3)) { animation-delay: 60ms; }
+  .cascade-animate :global(.cascade-item:nth-child(4)) { animation-delay: 120ms; }
+  .cascade-animate :global(.cascade-item:nth-child(5)) { animation-delay: 180ms; }
 
   @media (prefers-reduced-motion: reduce) {
     .cascade-animate :global(.cascade-item) {

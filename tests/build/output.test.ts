@@ -137,6 +137,16 @@ describe('Build Output Validation', () => {
         expect(item).toContain('cascade-item');
       }
     });
+
+    it('home page keeps the hero out of the cascade while preserving lower sections', async () => {
+      const indexPath = join(distPath, 'index.html');
+      const content = await readFile(indexPath, 'utf-8');
+
+      expect(content).toMatch(/<section class="hero-section"[^>]*>/);
+      expect(content).not.toContain('hero-section cascade-item');
+      expect(content).toContain('<section class="section cascade-item"');
+      expect(content).toContain('<hr class="divider cascade-item"');
+    });
   });
 
   describe('Content Rendering', () => {
