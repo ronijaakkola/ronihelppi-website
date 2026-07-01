@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import { remarkObsidianImages } from './src/utils/remark-obsidian-images';
 import rehypeExternalLinks from 'rehype-external-links';
@@ -17,20 +18,22 @@ export default defineConfig({
     shikiConfig: {
       theme: 'github-dark',
     },
-    remarkPlugins: [remarkObsidianImages, remarkCodeTitle, remarkToc],
-    rehypePlugins: [
-      rehypeCodeBlocks,
-      rehypeImageFigure,
-      [rehypeExternalLinks, {
-        target: '_blank',
-        rel: ['noopener', 'noreferrer'],
-        content: {
-          type: 'element',
-          tagName: 'span',
-          properties: { className: ['visually-hidden'] },
-          children: [{ type: 'text', value: ' (opens in new tab)' }],
-        },
-      }],
-    ],
+    processor: unified({
+      remarkPlugins: [remarkObsidianImages, remarkCodeTitle, remarkToc],
+      rehypePlugins: [
+        rehypeCodeBlocks,
+        rehypeImageFigure,
+        [rehypeExternalLinks, {
+          target: '_blank',
+          rel: ['noopener', 'noreferrer'],
+          content: {
+            type: 'element',
+            tagName: 'span',
+            properties: { className: ['visually-hidden'] },
+            children: [{ type: 'text', value: ' (opens in new tab)' }],
+          },
+        }],
+      ],
+    }),
   },
 });
