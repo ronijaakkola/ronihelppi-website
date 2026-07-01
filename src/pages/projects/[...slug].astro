@@ -40,7 +40,7 @@ const schemas = [
     author: {
       '@type': 'Person',
       name: 'Roni Helppi',
-      url: 'https://www.ronihelppi.com',
+      url: 'https://ronihelppi.com',
     },
     ...(item.data.coverImage && { image: new URL(item.data.coverImage.src, Astro.site).href }),
     ...(item.data.tags && { keywords: item.data.tags }),

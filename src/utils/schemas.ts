@@ -2,7 +2,7 @@ export const personSchema = {
   '@context': 'https://schema.org' as const,
   '@type': 'Person' as const,
   name: 'Roni Helppi',
-  url: 'https://www.ronihelppi.com',
+  url: 'https://ronihelppi.com',
   jobTitle: 'Senior Product Designer',
   worksFor: {
     '@type': 'Organization' as const,

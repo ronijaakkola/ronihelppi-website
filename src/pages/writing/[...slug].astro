@@ -61,12 +61,12 @@ const schemas = [
     author: {
       '@type': 'Person',
       name: 'Roni Helppi',
-      url: 'https://www.ronihelppi.com',
+      url: 'https://ronihelppi.com',
     },
     publisher: {
       '@type': 'Person',
       name: 'Roni Helppi',
-      url: 'https://www.ronihelppi.com',
+      url: 'https://ronihelppi.com',
     },
     ...(heroImage && { image: new URL(heroImage, Astro.site).href }),
     ...(post.data.tags && { keywords: post.data.tags }),
