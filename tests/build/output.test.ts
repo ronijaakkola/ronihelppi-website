@@ -215,6 +215,17 @@ describe('Build Output Validation', () => {
       // If no images found, that's okay - the test would just pass
       // The important thing is that IF images exist, they use the right path
     });
+
+    it('writing hero images use Astro-optimized asset paths', async () => {
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const content = await readFile(postPath, 'utf-8');
+      const heroImageTag = content.match(/<img[^>]+class="hero-image"[^>]*>|<img[^>]*class="hero-image"[^>]+>/)?.[0];
+
+      expect(heroImageTag).toBeDefined();
+      expect(heroImageTag).toContain('class="hero-image"');
+      expect(heroImageTag).toMatch(/src="\/_astro\//);
+      expect(heroImageTag).not.toContain('/images/');
+    });
   });
 
   describe('Static Assets', () => {
