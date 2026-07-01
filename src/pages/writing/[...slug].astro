@@ -19,27 +19,6 @@ export async function getStaticPaths() {
 const { post, allPosts } = Astro.props;
 const { Content } = await render(post);
 
-type LocalImageAsset = {
-  src: string;
-  width: number;
-  height: number;
-  format: 'png' | 'jpg' | 'jpeg' | 'tiff' | 'webp' | 'gif' | 'svg' | 'avif';
-};
-
-const localContentImages = import.meta.glob(
-  '../../content/images/*.{png,jpg,jpeg,webp,avif}',
-  { eager: true }
-) as Record<string, { default: LocalImageAsset }>;
-
-function resolveLocalHeroImage(imagePath?: string) {
-  if (!imagePath?.startsWith('/images/')) {
-    return undefined;
-  }
-
-  const filename = imagePath.slice('/images/'.length);
-  return localContentImages[`../../content/images/${filename}`]?.default;
-}
-
 // Derive title from the original filename (preserves casing)
 const title = getTitleFromEntry(post);
 
@@ -61,8 +40,7 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
 
 // Get hero image from frontmatter
 const heroImage = post.data.heroImage;
-const heroImageAsset = resolveLocalHeroImage(heroImage);
-const heroImageUrl = heroImageAsset?.src ?? heroImage;
+const heroImageUrl = heroImage?.src;
 
 const description = post.data.description || generateDescription(post.body || '');
 
@@ -129,21 +107,17 @@ const schemas = [
         </div>
         {heroImage && (
           <div class="hero-image-container">
-            {heroImageAsset ? (
-              <Image
-                src={heroImageAsset}
-                alt={post.data.heroImageAlt || title}
-                class="hero-image"
-                widths={[920, 1380, 1843]}
-                sizes="(max-width: 960px) 100vw, 920px"
-                format="webp"
-                quality={78}
-                loading="eager"
-                fetchpriority="high"
-              />
-            ) : (
-              <img src={heroImage} alt={post.data.heroImageAlt || title} class="hero-image" width="920" height="518" fetchpriority="high" />
-            )}
+            <Image
+              src={heroImage}
+              alt={post.data.heroImageAlt || title}
+              class="hero-image"
+              widths={[920, 1380, 1843]}
+              sizes="(max-width: 960px) 100vw, 920px"
+              format="webp"
+              quality={78}
+              loading="eager"
+              fetchpriority="high"
+            />
           </div>
         )}
       </header>

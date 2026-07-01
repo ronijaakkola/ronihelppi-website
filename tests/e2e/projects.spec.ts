@@ -100,24 +100,19 @@ test.describe('Project Pages', () => {
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should transform Obsidian images to HTML img tags', async ({ page }) => {
+  test('should transform Obsidian images to Astro-optimized img tags', async ({ page }) => {
     await page.goto('/');
     await page.locator('a[href^="/projects/"]').first().click();
 
-    // Check for images with /images/ path
-    const images = page.locator('img[src^="/images/"]');
+    const images = page.locator('article .prose img');
     const imageCount = await images.count();
 
-    // The RESOKILL project has images
     if (imageCount > 0) {
-      // At least one image should be visible
       await expect(images.first()).toBeVisible();
 
-      // Image should have proper src
       const src = await images.first().getAttribute('src');
-      expect(src).toMatch(/^\/images\/.+/);
+      expect(src).toMatch(/^\/_astro\/.+/);
 
-      // Image should have alt text
       const alt = await images.first().getAttribute('alt');
       expect(alt).toBeTruthy();
     }
