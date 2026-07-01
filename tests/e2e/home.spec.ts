@@ -97,6 +97,7 @@ test.describe('Home Page', () => {
   });
 
   test('should show breadcrumb when navigating to section page', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
 
     // No breadcrumb on home
@@ -107,11 +108,11 @@ test.describe('Home Page', () => {
     const firstPostLink = page.locator('a[href^="/writing/"]').first();
     await firstPostLink.click();
 
-    // Wait for navigation and animation
+    // Wait for navigation
     await page.waitForURL(/\/writing\//);
 
-    // Breadcrumb should show "Posts" (allow time for scramble animation)
-    await expect(breadcrumb).toHaveText('Writing', { timeout: 2000 });
+    // Breadcrumb should show Writing deterministically with reduced motion
+    await expect(breadcrumb).toHaveText('Writing');
 
     // Separator should be visible
     const separator = page.locator('#breadcrumb-separator');
@@ -119,6 +120,7 @@ test.describe('Home Page', () => {
   });
 
   test('should hide breadcrumb when navigating back to home', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     // Start on home and navigate to a post first
     await page.goto('/');
 
@@ -128,13 +130,13 @@ test.describe('Home Page', () => {
     await page.waitForURL(/\/writing\//);
 
     const breadcrumb = page.locator('#breadcrumb');
-    await expect(breadcrumb).toHaveText('Writing', { timeout: 2000 });
+    await expect(breadcrumb).toHaveText('Writing');
 
     // Navigate home via logo
     await page.locator('.logo').click();
     await page.waitForURL('/');
 
-    // Breadcrumb should be empty (allow time for animation)
-    await expect(breadcrumb).toBeEmpty({ timeout: 2000 });
+    // Breadcrumb should be empty
+    await expect(breadcrumb).toBeEmpty();
   });
 });

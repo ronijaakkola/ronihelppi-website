@@ -47,11 +47,12 @@ test.describe('About Page', () => {
     const heading = page.locator('h2', { hasText: 'How to reach me' });
     await expect(heading).toBeVisible();
 
-    const contactText = page.locator('.contact-text');
-    await expect(contactText).toBeVisible();
+    const contactSection = page.locator('section.section', { has: heading });
+    const primaryContactText = contactSection.locator('.contact-text').first();
+    await expect(primaryContactText).toBeVisible();
 
     // Check LinkedIn link (email is commented out)
-    const linkedinLink = contactText.locator('a', { hasText: 'LinkedIn' });
+    const linkedinLink = primaryContactText.locator('a', { hasText: 'LinkedIn' });
     await expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/ronihelppi/');
   });
 
