@@ -17,7 +17,15 @@ const profilePageSchema = {
   mainEntity: personSchema,
 };
 
-const schemas = [personSchema, profilePageSchema];
+const aboutPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About Roni Helppi',
+  url: 'https://ronihelppi.com/about/',
+  about: personSchema,
+};
+
+const schemas = [personSchema, profilePageSchema, aboutPageSchema];
 ---
 
 <BaseLayout
@@ -36,6 +44,9 @@ const schemas = [personSchema, profilePageSchema];
               I design things, build things, and occasionally convince people they're the same thing.
               At <a href="https://reaktor.com" target="_blank" rel="noopener noreferrer">Reaktor<span class="visually-hidden"> (opens in new tab)</span></a> I work as a consultant across design and engineering.
               On my own time, I'm deep in AI, generative tools, and pushing the edges of what design and code can do together.
+            </p>
+            <p class="intro-secondary">
+              This site is where that overlap ends up: <a href="/projects">projects</a> when the work wants a case study, and <a href="/writing">writing</a> when it wants a longer argument. If you're trying to figure out what I actually do, that's the shortest honest answer.
             </p>
           </section>
 
@@ -75,6 +86,9 @@ const schemas = [personSchema, profilePageSchema];
               You can also find some of my work on{' '}
               <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>.
             </p>
+            <p class="contact-text contact-text-secondary">
+              For the quick version, the <a href="/contact">contact page</a> has the relevant links in one place.
+            </p>
           </section>
         </div>
       </div>
@@ -104,8 +118,26 @@ const schemas = [personSchema, profilePageSchema];
     max-width: 100%;
   }
 
+  .intro-secondary {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+    max-width: 100%;
+  }
+
   .intro a {
     text-decoration-line: underline;
+  }
+
+  .intro-secondary a {
+    color: var(--color-text-secondary);
+    text-decoration-line: underline;
+  }
+
+  .intro-secondary a:hover,
+  .intro-secondary a:focus-visible {
+    color: var(--color-text-primary);
   }
 
   /* Sections */
@@ -229,5 +261,9 @@ const schemas = [personSchema, profilePageSchema];
 
   .contact-text a {
     text-decoration-line: underline;
+  }
+
+  .contact-text-secondary {
+    color: var(--color-text-secondary);
   }
 </style>

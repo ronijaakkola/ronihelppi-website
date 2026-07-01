@@ -1,10 +1,21 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact Roni Helppi',
+    url: 'https://ronihelppi.com/contact/',
+    description: 'How to reach Roni Helppi on LinkedIn, X, and GitHub.',
+  },
+];
 ---
 
 <BaseLayout
   title="Contact — Roni Helppi"
   description="Get in touch with Roni Helppi. Connect on LinkedIn for design collaboration, speaking opportunities, or just to say hello."
+  schemas={schemas}
 >
   <main id="main-content" class="main">
     <div class="layout">
@@ -14,6 +25,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="contact-info">
             <p>
               I'm always up for a chat. Whether you have a project in mind, want to collaborate, or just want to say hello.
+            </p>
+            <p>
+              The easiest way to get a feel for my work before reaching out is to skim the <a href="/about">about page</a>, a few <a href="/projects">projects</a>, or the latest pieces in <a href="/writing">writing</a>.
             </p>
             <dl class="contact-methods">
               <!-- <div class="contact-method">
@@ -59,6 +73,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     line-height: var(--leading-body);
     color: var(--color-text-primary);
     max-width: 468px;
+  }
+
+  .contact-info a {
+    text-decoration-line: underline;
   }
 
   .contact-methods {

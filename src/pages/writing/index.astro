@@ -1,32 +1,60 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostListItem from '../../components/PostListItem.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
 import { getCollection } from 'astro:content';
 import { getTitleFromEntry } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
 
 const posts = sortByDateDesc(await getCollection('posts'));
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Writing',
+    url: 'https://ronihelppi.com/writing/',
+    description: 'Articles by Roni Helppi on design, technology, AI, and creative work.',
+    hasPart: posts.map((post) => ({
+      '@type': 'BlogPosting',
+      headline: getTitleFromEntry(post),
+      url: new URL(`/writing/${post.id}/`, Astro.site).href,
+    })),
+  },
+];
 ---
 
 <BaseLayout
   title="Writing — Roni Helppi"
   description="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."
+  schemas={schemas}
 >
   <main id="main-content" class="main">
     <div class="layout">
       <div class="prose">
         <div class="content">
           <h1 class="page-title">Writing<span class="visually-hidden"> on Design & Technology</span></h1>
-          <div class="posts-list">
-            {posts.map((post) => (
-              <PostListItem
-                title={getTitleFromEntry(post)}
-                date={post.data.date}
-                href={`/writing/${post.id}`}
-                description={post.data.description}
-              />
-            ))}
+          <div class="intro">
+            <p>
+              This is the part of the site where I work ideas out in public. Expect notes on design, software, AI tooling, and the weirdly productive space where those overlap.
+            </p>
+            <p>
+              If you prefer feeds to social apps, you can follow along via <a href="/rss.xml">RSS</a>. If you're new here, the <a href="/about">about page</a> gives the broader context.
+            </p>
           </div>
+          <section class="posts-section">
+            <SectionHeading title={`Posts [${posts.length}]`} />
+            <div class="posts-list">
+              {posts.map((post) => (
+                <PostListItem
+                  title={getTitleFromEntry(post)}
+                  date={post.data.date}
+                  href={`/writing/${post.id}`}
+                  description={post.data.description}
+                />
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -35,6 +63,33 @@ const posts = sortByDateDesc(await getCollection('posts'));
 
 <style>
   .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+    max-width: 40rem;
+  }
+
+  .intro a {
+    color: var(--color-text-secondary);
+    text-decoration-line: underline;
+  }
+
+  .intro a:hover,
+  .intro a:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .posts-section {
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
