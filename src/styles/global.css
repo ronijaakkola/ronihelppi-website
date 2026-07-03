@@ -51,7 +51,7 @@
 
   /* Typography - Line Heights */
   --leading-normal: normal;
-  --leading-body: 1.5;
+  --leading-body: 1.65;
 
   /* Layout - Widths */
   --layout-width: 920px;
@@ -648,6 +648,7 @@ ol {
 @media (max-width: 600px) {
   :root {
     --page-gutter: var(--spacing-horizontal-phone);
+    --leading-body: 1.5;
   }
 
   .main {
