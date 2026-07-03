@@ -147,6 +147,18 @@ describe('Build Output Validation', () => {
       expect(content).toContain('<section class="section cascade-item"');
       expect(content).toContain('<hr class="divider cascade-item"');
     });
+
+    it('uses preloaded local font assets to avoid about-page layout shifts from late web font swaps', async () => {
+      const aboutPath = join(distPath, 'about', 'index.html');
+      const content = await readFile(aboutPath, 'utf-8');
+
+      expect(content).toContain('/fonts/rethink-sans-400-600-latin.woff2');
+      expect(content).toContain('/fonts/spectral-400-latin.woff2');
+      expect(content).toContain('/fonts/spectral-500-latin.woff2');
+      expect(content).toContain('/fonts/jetbrains-mono-400-latin.woff2');
+      expect(content).not.toContain('fonts.googleapis.com');
+      expect(content).not.toContain('fonts.gstatic.com');
+    });
   });
 
   describe('Content Rendering', () => {
