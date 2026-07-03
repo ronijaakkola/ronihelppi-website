@@ -44,15 +44,22 @@ test.describe('About Page', () => {
   test('should display How to reach me section', async ({ page }) => {
     await page.goto('/about');
 
-    const heading = page.locator('h2', { hasText: 'How to reach me' });
-    await expect(heading).toBeVisible();
+    const section = page.locator('.section', {
+      has: page.locator('h2', { hasText: 'How to reach me' }),
+    });
+    await expect(section).toBeVisible();
 
-    const contactText = page.locator('.contact-text');
-    await expect(contactText).toBeVisible();
+    const primaryContactText = section.locator('.contact-text').first();
+    await expect(primaryContactText).toBeVisible();
 
-    // Check LinkedIn link (email is commented out)
-    const linkedinLink = contactText.locator('a', { hasText: 'LinkedIn' });
+    const linkedinLink = primaryContactText.locator('a', { hasText: 'LinkedIn' });
     await expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/ronihelppi/');
+
+    const githubLink = primaryContactText.locator('a', { hasText: 'GitHub' });
+    await expect(githubLink).toHaveAttribute('href', 'https://github.com/ronijaakkola');
+
+    const contactPageLink = section.locator('.contact-text-secondary a', { hasText: 'contact page' });
+    await expect(contactPageLink).toHaveAttribute('href', '/contact');
   });
 
   test('should show breadcrumb on about page', async ({ page }) => {

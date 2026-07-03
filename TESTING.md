@@ -93,19 +93,25 @@ npm run check
 | Stage | What Runs | Purpose |
 |-------|-----------|---------|
 | **Commit** | Type check + Unit tests | Fast feedback, catch obvious errors |
-| **Push to master** | Full CI (type check, unit, build, E2E, Lighthouse) | Quality gate before deployment |
+| **Pull request to master** | Type check, unit, build, build validation, E2E | Required CI gate before merge |
+| **Pull request to master (optional)** | Lighthouse CI | Early signal for performance/accessibility/SEO regressions without blocking merge on flaky runs |
+| **Push to master** | Type check, unit, build, build validation, E2E, deploy | Final verification before GitHub Pages deployment |
 
 ## CI/CD
 
-The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push to master:
+The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pull requests and pushes to `master`:
 
 1. **test** job: Type checking, unit tests, build, build validation tests, E2E tests
-2. **lighthouse** job (after test passes): Lighthouse CI quality validation
-3. **deploy** job (future, after lighthouse passes): GitHub Pages deployment
+2. **lighthouse** job (pull requests only, optional): Lighthouse CI quality validation
+3. **deploy** job (pushes to `master` only, after test passes): GitHub Pages deployment
+
+### Branch protection
+
+To actually stop broken E2E suites from landing on `master`, require the `test` job in GitHub branch protection for `master`. The workflow now exposes that same required test job on pull requests before merge and on pushes before deploy.
 
 ### Lighthouse CI
 
-Lighthouse CI enforces quality standards on every push to master:
+Lighthouse CI now runs during PR validation instead of deploy-time verification:
 
 - **Performance**: >= 90/100 (threshold accommodates CI variance)
 - **Accessibility**: 100/100
