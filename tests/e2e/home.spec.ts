@@ -97,6 +97,7 @@ test.describe('Home Page', () => {
   });
 
   test('should show breadcrumb when navigating to section page', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');
 
     // No breadcrumb on home
@@ -119,6 +120,7 @@ test.describe('Home Page', () => {
   });
 
   test('should hide breadcrumb when navigating back to home', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     // Start on home and navigate to a post first
     await page.goto('/');
 

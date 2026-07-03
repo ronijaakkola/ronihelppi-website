@@ -47,7 +47,8 @@ test.describe('About Page', () => {
     const heading = page.locator('h2', { hasText: 'How to reach me' });
     await expect(heading).toBeVisible();
 
-    const contactText = page.locator('.contact-text');
+    const section = page.locator('section.section', { has: heading });
+    const contactText = section.locator('.contact-text').first();
     await expect(contactText).toBeVisible();
 
     // Check LinkedIn link (email is commented out)
