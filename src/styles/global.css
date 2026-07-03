@@ -648,6 +648,7 @@ ol {
 @media (max-width: 600px) {
   :root {
     --page-gutter: var(--spacing-horizontal-phone);
+    --leading-body: 1.5;
   }
 
   .main {
