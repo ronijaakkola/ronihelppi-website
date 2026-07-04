@@ -8,7 +8,7 @@ test.describe('About Page', () => {
 
   test('should display About heading', async ({ page }) => {
     await page.goto('/about');
-    const heading = page.locator('h1', { hasText: 'About Roni Helppi' });
+    const heading = page.locator('h1', { hasText: 'About me' });
     await expect(heading).toBeVisible();
   });
 
@@ -87,8 +87,9 @@ test.describe('About Page', () => {
     await page.goto('/about');
 
     await expect(page.locator('main.main')).toBeVisible();
-    await expect(page.locator('.layout')).toBeVisible();
-    await expect(page.locator('.prose')).toBeVisible();
+    await expect(page.locator('.about-layout')).toBeVisible();
+    await expect(page.locator('.about-layout .hero')).toBeVisible();
+    await expect(page.locator('.section').first()).toBeVisible();
   });
 
   test('should display experience table in stacked layout on narrow mobile', async ({ page }) => {

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
+import HeroBand from '../components/about/HeroBand.astro';
 import { personSchema } from '../utils/schemas';
 
 const experience = [
@@ -34,114 +35,84 @@ const schemas = [personSchema, profilePageSchema, aboutPageSchema];
   schemas={schemas}
 >
   <main id="main-content" class="main">
-    <div class="layout">
-      <div class="prose">
-        <div class="content">
-          <!-- About Section -->
-          <section class="about-section">
-            <h1 class="page-title">About<span class="visually-hidden"> Roni Helppi</span></h1>
-            <p class="intro">
-              I design things, build things, and occasionally convince people they're the same thing.
-              At <a href="https://reaktor.com" target="_blank" rel="noopener noreferrer">Reaktor<span class="visually-hidden"> (opens in new tab)</span></a> I work as a consultant across design and engineering.
-              On my own time, I'm deep in AI, generative tools, and pushing the edges of what design and code can do together.
-            </p>
-            <p class="intro-secondary">
-              If you are interested in my work, check the <a href="/projects">projects</a> page. My posts and notes you can find from the <a href="/writing">writing</a> page.
-            </p>
-          </section>
+    <div class="about-layout">
+      <!-- Intro + portrait -->
+      <HeroBand />
 
-          <!-- Experience Section -->
-          <section class="section">
-            <SectionHeading title="Experience" />
-            <div class="experience-table-wrapper">
-              <table class="experience-table">
-                <caption class="visually-hidden">Work experience history</caption>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Company</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {experience.map((item) => (
-                    <tr>
-                      <td class="date-cell" data-label="Date"><time datetime={item.datetime}>{item.date}</time></td>
-                      <td class="company-cell" data-label="Company">{item.company}</td>
-                      <td class="role-cell" data-label="Role">{item.role}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- How to Reach Me Section -->
-          <section class="section">
-            <SectionHeading title="How to reach me" />
-            <p class="contact-text">
-              <!-- Reach me out via <a href="mailto:hello@ronihelppi.com">email</a> or -->
-              Reach me out via{' '}
-              <a href="https://www.linkedin.com/in/ronihelppi/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>.
-              You can also find some of my work on{' '}
-              <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>.
-            </p>
-            <p class="contact-text contact-text-secondary">
-              For the quick version, the <a href="/contact">contact page</a> has the relevant links in one place.
-            </p>
-          </section>
+      <!-- Experience Section -->
+      <section class="section">
+        <SectionHeading title="Experience" />
+        <div class="experience-table-wrapper">
+          <table class="experience-table">
+            <caption class="visually-hidden">Work experience history</caption>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Company</th>
+                <th>Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {experience.map((item) => (
+                <tr>
+                  <td class="date-cell" data-label="Date"><time datetime={item.datetime}>{item.date}</time></td>
+                  <td class="company-cell" data-label="Company">{item.company}</td>
+                  <td class="role-cell" data-label="Role">{item.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </section>
+
+      <!-- How to Reach Me Section -->
+      <section class="section">
+        <SectionHeading title="How to reach me" />
+        <p class="contact-text">
+          Reach me out via{' '}
+          <a href="https://www.linkedin.com/in/ronihelppi/" target="_blank" rel="noopener noreferrer">LinkedIn<span class="visually-hidden"> (opens in new tab)</span></a>.
+          You can also find some of my work on{' '}
+          <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>.
+        </p>
+        <p class="contact-text contact-text-secondary">
+          For the quick version, the <a href="/contact">contact page</a> has the relevant links in one place.
+        </p>
+      </section>
     </div>
   </main>
 </BaseLayout>
 
 <style>
-  .content {
+  /* Left-aligned column: the hero portrait can breathe into the wide layout while
+     the reading content (intro, experience, contact) shares one left edge in the
+     prose column — the same nesting the writing & project pages use. */
+  .about-layout {
+    width: 100%;
+    max-width: var(--layout-width);
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: var(--gap-section);
   }
 
-  /* About Section */
-  .about-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-sm);
+  @media (max-width: 960px) {
+    .about-layout {
+      padding-left: var(--spacing-horizontal-tablet);
+      padding-right: var(--spacing-horizontal-tablet);
+    }
   }
 
-  .intro {
-    font-size: var(--text-body);
-    letter-spacing: var(--tracking-body);
-    line-height: var(--leading-body);
-    color: var(--color-text-primary);
-    max-width: 100%;
+  @media (max-width: 600px) {
+    .about-layout {
+      padding-left: var(--spacing-horizontal-phone);
+      padding-right: var(--spacing-horizontal-phone);
+    }
   }
 
-  .intro-secondary {
-    font-size: var(--text-body);
-    letter-spacing: var(--tracking-body-tight);
-    line-height: var(--leading-body);
-    color: var(--color-text-secondary);
-    max-width: 100%;
-  }
-
-  .intro a {
-    text-decoration-line: underline;
-  }
-
-  .intro-secondary a {
-    color: var(--color-text-secondary);
-    text-decoration-line: underline;
-  }
-
-  .intro-secondary a:hover,
-  .intro-secondary a:focus-visible {
-    color: var(--color-text-primary);
-  }
-
-  /* Sections */
+  /* Reading sections stay in the prose column */
   .section {
+    width: 100%;
+    max-width: var(--prose-width);
     display: flex;
     flex-direction: column;
     gap: var(--gap-md);
