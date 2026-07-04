@@ -116,3 +116,101 @@ test.describe('Post Pages', () => {
     await expect(ingress).not.toBeEmpty();
   });
 });
+
+test.describe('Post heading anchor links', () => {
+  const POST = '/writing/a-practical-guide-to-writing-your-own-obsidian-skills/';
+
+  test('every content heading has an anchor link matching its id', async ({ page }) => {
+    await page.goto(POST);
+
+    const headings = page.locator('.prose-content :is(h1, h2, h3, h4, h5, h6)');
+    const count = await headings.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const heading = headings.nth(i);
+      const id = await heading.getAttribute('id');
+      expect(id).toBeTruthy();
+
+      const anchor = heading.locator('a.heading-anchor');
+      await expect(anchor).toHaveAttribute('href', `#${id}`);
+      // The icon is decorative, so the link must carry an accessible name.
+      await expect(anchor).toHaveAttribute('aria-label', /.+/);
+    }
+  });
+
+  test('anchor is hidden until the heading is hovered', async ({ page }) => {
+    await page.goto(POST);
+
+    const heading = page.locator('.prose-content h2').first();
+    const anchor = heading.locator('a.heading-anchor');
+
+    await expect(anchor).toHaveCSS('opacity', '0');
+    await heading.hover();
+    await expect(anchor).toHaveCSS('opacity', '1');
+  });
+
+  test('anchor is keyboard focusable and revealed on focus', async ({ page }) => {
+    await page.goto(POST);
+
+    const anchor = page.locator('.prose-content h2').first().locator('a.heading-anchor');
+    await anchor.focus();
+
+    await expect(anchor).toBeFocused();
+    await expect(anchor).toHaveCSS('opacity', '1');
+  });
+
+  test('clicking an anchor updates the URL hash and scrolls to the heading', async ({ page }) => {
+    await page.goto(POST);
+
+    const heading = page.locator('.prose-content h2').nth(1);
+    const id = await heading.getAttribute('id');
+    await heading.locator('a.heading-anchor').click();
+
+    await expect(page).toHaveURL(new RegExp(`#${id}$`));
+
+    // Heading should be scrolled into view, clear of the sticky header.
+    const topInViewport = await heading.evaluate(
+      (el) => el.getBoundingClientRect().top,
+    );
+    expect(topInViewport).toBeGreaterThanOrEqual(0);
+    expect(topInViewport).toBeLessThan(200);
+  });
+
+  test('clicking an anchor does not write to the clipboard', async ({ page }) => {
+    await page.goto(POST);
+
+    // Track any clipboard writes; heading anchors must never trigger one.
+    await page.addInitScript(() => {
+      (window as unknown as { __clipboardWrites: number }).__clipboardWrites = 0;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText = () => {
+          (window as unknown as { __clipboardWrites: number }).__clipboardWrites++;
+          return Promise.resolve();
+        };
+      }
+    });
+    await page.reload();
+
+    await page.locator('.prose-content h2').first().locator('a.heading-anchor').click();
+
+    const writes = await page.evaluate(
+      () => (window as unknown as { __clipboardWrites: number }).__clipboardWrites,
+    );
+    expect(writes).toBe(0);
+  });
+
+  test('table-of-contents links resolve to real heading ids', async ({ page }) => {
+    await page.goto(POST);
+
+    const tocLinks = page.locator('.toc-link');
+    const count = await tocLinks.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const href = await tocLinks.nth(i).getAttribute('href');
+      expect(href).toMatch(/^#.+/);
+      await expect(page.locator(`[id="${href!.slice(1)}"]`)).toHaveCount(1);
+    }
+  });
+});

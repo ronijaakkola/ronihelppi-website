@@ -388,6 +388,60 @@ ol {
   scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
+/* Keep every deep-linkable heading clear of the sticky header on jump */
+.prose-content :is(h1, h4, h5, h6) {
+  scroll-margin-top: calc(var(--header-height) + 1rem);
+}
+
+/* Heading anchor links — reveal a link icon on hover / keyboard focus */
+.prose-content :is(h1, h2, h3, h4, h5, h6) .heading-anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.3em;
+  vertical-align: middle;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1), color 100ms;
+}
+
+.prose-content :is(h1, h2, h3, h4, h5, h6):hover .heading-anchor,
+.prose-content .heading-anchor:hover,
+.prose-content .heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+.prose-content .heading-anchor:hover,
+.prose-content .heading-anchor:focus-visible {
+  color: var(--color-text-primary);
+}
+
+.prose-content .heading-anchor:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.heading-anchor-icon {
+  width: 0.72em;
+  height: 0.72em;
+  display: block;
+}
+
+/* Touch devices have no hover — keep anchors discoverable */
+@media (hover: none) {
+  .prose-content :is(h1, h2, h3, h4, h5, h6) .heading-anchor {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose-content :is(h1, h2, h3, h4, h5, h6) .heading-anchor {
+    transition: none;
+  }
+}
+
 .prose-content p {
   margin-bottom: 0;
 }
