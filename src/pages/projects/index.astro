@@ -64,17 +64,15 @@ const schemas = [
   <main id="main-content" class="main">
     <div class="layout projects-layout">
       <div class="content">
-        <h1 class="visually-hidden">UX Design Projects & Case Studies</h1>
-        <div class="intro">
-          <p>
-            A mix of shipped client work, experiments, and games. Some are polished case studies, some are smaller builds that were worth documenting because they taught me something specific.
-          </p>
-          <p>
-            If you want the broader throughline behind the work, start with <a href="/about">about</a>. If you want the written version of the same thinking, head to <a href="/writing">writing</a>.
-          </p>
-        </div>
+        <header class="page-header">
+          <h1 class="page-title">Projects<span class="visually-hidden"> — UX Design & Case Studies</span></h1>
+          <div class="intro">
+            <p>
+              A mix of shipped client work, experiments, and games. Some are polished case studies, some are smaller builds that were worth documenting because they taught me something specific.
+            </p>
+          </div>
+        </header>
         <section class="projects-section">
-          <SectionHeading title={`Projects [${projects.length}]`} />
         <!-- Filters -->
         <div class="filters" role="group" aria-label="Filter projects by category">
           {filters.map((filter, index) => (
@@ -151,8 +149,14 @@ const schemas = [
   .content {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-md);
+    gap: var(--gap-lg);
     width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
   }
 
   .intro {
