@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../../assets/roni-portrait-cutout.png';
+
+const alt =
+  'Portrait of Roni Helppi — a studio headshot with glasses, a short beard, and a black hoodie against a dark background.';
+---
+
+<section class="hero">
+  <h1 class="page-title hero-title">
+    About me<span class="visually-hidden"> — Roni Helppi</span>
+  </h1>
+
+  <!-- Placed after the heading so on mobile it floats beside the intro paragraph
+       (heading stays full-width above). On desktop the grid places it by area. -->
+  <div class="hero-photo">
+    <Image
+      src={portrait}
+      alt={alt}
+      widths={[320, 640]}
+      sizes="(max-width: 720px) 130px, 320px"
+      format="webp"
+      quality={82}
+      loading="eager"
+    />
+  </div>
+  <p class="intro">
+    I design things, build things, and occasionally convince people they're the same thing.
+    At <a href="https://reaktor.com" target="_blank" rel="noopener noreferrer">Reaktor<span class="visually-hidden"> (opens in new tab)</span></a> I work as a consultant across design and engineering.
+    On my own time, I'm deep in AI, generative tools, and pushing the edges of what design and code can do together.
+  </p>
+  <p class="intro-secondary">
+    If you are interested in my work, check the <a href="/projects">projects</a> page. My posts and notes you can find from the <a href="/writing">writing</a> page.
+  </p>
+</section>
+
+<style>
+  /* ---- Desktop: portrait beside the whole text block, fading into the page ---- */
+  .hero {
+    width: 100%;
+    display: grid;
+    /* Text column is sized to the copy (not 1fr) and the group packs left, so the
+       portrait sits just past the paragraph instead of at the far layout edge. */
+    grid-template-columns: minmax(0, 31rem) 320px;
+    grid-template-areas:
+      'title      photo'
+      'intro      photo'
+      'secondary  photo';
+    column-gap: var(--gap-lg);
+    row-gap: var(--gap-sm);
+    justify-content: start;
+    /* Top-align, then nudge the photo down so the top of the head sits around the
+       baseline of the "About me" heading rather than floating above it. */
+    align-items: start;
+  }
+
+  /* Typography comes from the global .page-title utility; this only handles layout. */
+  .hero-title {
+    grid-area: title;
+  }
+
+  .intro {
+    grid-area: intro;
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-primary);
+  }
+
+  .intro-secondary {
+    grid-area: secondary;
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+  }
+
+  .intro a,
+  .intro-secondary a {
+    text-decoration-line: underline;
+  }
+
+  .intro-secondary a {
+    color: var(--color-text-secondary);
+  }
+
+  .intro-secondary a:hover,
+  .intro-secondary a:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .hero-photo {
+    grid-area: photo;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin-top: var(--gap-xs);
+    /* Bottom fade melts the hoodie into the page; the horizontal fade dissolves
+       both shoulders. Intersected so the centred head and face stay fully opaque. */
+    -webkit-mask-image:
+      linear-gradient(to bottom, #000 58%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 20%, #000 80%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to bottom, #000 58%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 20%, #000 80%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  .hero-photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 15%;
+  }
+
+  /* ---- Mobile: a compact framed print floated beside the heading; the intro
+         wraps around it and continues full-width below. Heading reads first. ---- */
+  @media (max-width: 720px) {
+    .hero {
+      display: flow-root; /* establishes a BFC so the float is contained */
+    }
+
+    .hero-photo {
+      float: right;
+      width: 130px;
+      aspect-ratio: 4 / 5;
+      margin: var(--gap-4xs) 0 var(--gap-sm) var(--gap-md);
+      /* Framed, not faded. Transparent so the cutout sits on the body colour,
+         with just the hairline border defining the frame. */
+      -webkit-mask-image: none;
+      mask-image: none;
+      background: transparent;
+      border-radius: var(--radius-md);
+      box-shadow: 0 0 0 0.5px var(--color-border);
+      overflow: hidden;
+    }
+
+    .hero-photo :global(img) {
+      object-position: 50% 20%;
+    }
+
+    .hero-title {
+      margin-bottom: var(--gap-sm);
+    }
+
+    .intro {
+      margin-bottom: var(--gap-sm);
+      max-width: none;
+    }
+
+    .intro-secondary {
+      max-width: none;
+    }
+  }
+</style>
