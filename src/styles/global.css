@@ -18,7 +18,7 @@
   --color-button-text-muted: #494949;
   --color-keystroke-bg: #c0b3b3;
   --color-border: #aaa1a1;
-  --color-overlay: rgba(0, 0, 0, 0.75);
+  --color-overlay: rgba(0, 0, 0, 0.88);
   --color-overlay-light: rgba(0, 0, 0, 0.55);
   --color-surface-hover: rgba(255, 255, 255, 0.05);
   --color-surface-active: rgba(255, 255, 255, 0.1);
@@ -124,7 +124,7 @@
   --color-button-text-muted: #9a908c;
   --color-keystroke-bg: #4d4643;
   --color-border: #c9c1be;
-  --color-overlay: rgba(246, 244, 243, 0.85);
+  --color-overlay: rgba(246, 244, 243, 0.94);
   --color-overlay-light: rgba(246, 244, 243, 0.6);
   --color-surface-hover: rgba(0, 0, 0, 0.04);
   --color-surface-active: rgba(0, 0, 0, 0.07);

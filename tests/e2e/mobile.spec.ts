@@ -10,6 +10,36 @@ test.describe('Mobile Menu', () => {
     await expect(menuButton).toBeVisible();
   });
 
+  test('theme toggle is visible in the top row next to the menu button', async ({ page }) => {
+    await page.goto('/');
+
+    const toggle = page.locator('#theme-toggle');
+    const menuButton = page.locator('#menu-button');
+
+    // Both live in the top header row without opening the menu.
+    await expect(toggle).toBeVisible();
+    await expect(menuButton).toBeVisible();
+
+    // The toggle sits immediately to the left of the menu button on the same row.
+    const toggleBox = await toggle.boundingBox();
+    const menuBox = await menuButton.boundingBox();
+    expect(toggleBox).not.toBeNull();
+    expect(menuBox).not.toBeNull();
+    // Same row (vertical centres roughly aligned).
+    expect(Math.abs(
+      (toggleBox!.y + toggleBox!.height / 2) - (menuBox!.y + menuBox!.height / 2)
+    )).toBeLessThan(8);
+    // Toggle is left of the menu button.
+    expect(toggleBox!.x).toBeLessThan(menuBox!.x);
+  });
+
+  test('top-row theme toggle switches the theme on mobile', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.locator('#theme-toggle').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  });
+
   test('opens when clicking menu button', async ({ page }) => {
     await page.goto('/');
     await page.click('#menu-button');
