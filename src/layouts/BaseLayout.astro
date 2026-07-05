@@ -54,11 +54,108 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
 ---
 
 <!doctype html>
-<html lang="en" style="color-scheme: dark">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b0b0b" />
+
+    <!-- Theme init: runs before first paint to avoid a flash of the wrong theme.
+         Dark is the default until the user makes an explicit choice. Keeps the
+         theme correct across Astro View Transitions and updates the browser UI
+         theme-color. Exposes window.__setTheme / __getTheme for the toggle. -->
+    <script is:inline>
+      (function () {
+        if (window.__themeReady) return;
+        window.__themeReady = true;
+
+        var STORAGE_KEY = 'theme';
+        var THEME_COLORS = { dark: '#0b0b0b', light: '#f6f4f3' };
+
+        function stored() {
+          try {
+            var v = localStorage.getItem(STORAGE_KEY);
+            return v === 'light' || v === 'dark' ? v : null;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        // Explicit choice wins; default to dark when none has been made.
+        function resolve() {
+          return stored() || 'dark';
+        }
+
+        function applyTo(doc, theme) {
+          doc.documentElement.setAttribute('data-theme', theme);
+          var meta = doc.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+        }
+
+        function apply(theme) {
+          applyTo(document, theme);
+          window.dispatchEvent(
+            new CustomEvent('themechange', { detail: { theme: theme } })
+          );
+        }
+
+        window.__getTheme = function () {
+          return document.documentElement.getAttribute('data-theme') || resolve();
+        };
+
+        window.__setTheme = function (theme) {
+          if (theme !== 'light' && theme !== 'dark') return;
+          try {
+            localStorage.setItem(STORAGE_KEY, theme);
+          } catch (e) {}
+
+          // iOS-style circular reveal wipe. The toggle click handler stamps the
+          // click point (--reveal-x/y/r) on <html>; the reveal CSS reads those.
+          // Scoped by the temporary `theme-transition` class so it never
+          // collides with Astro's page-navigation view transitions.
+          var reduceMotion = false;
+          try {
+            reduceMotion = window.matchMedia(
+              '(prefers-reduced-motion: reduce)'
+            ).matches;
+          } catch (e) {}
+
+          if (
+            typeof document.startViewTransition !== 'function' ||
+            reduceMotion
+          ) {
+            // Fallback: instant flip, no animation.
+            apply(theme);
+            return;
+          }
+
+          var root = document.documentElement;
+          root.classList.add('theme-transition');
+          var vt = document.startViewTransition(function () {
+            apply(theme);
+          });
+          var done = function () {
+            root.classList.remove('theme-transition');
+          };
+          vt.finished.then(done, done);
+        };
+
+        // Initial application (before body paints -> no flash).
+        apply(resolve());
+
+        // Stamp the incoming document before it swaps in, so there's no flash
+        // during a View Transition navigation.
+        document.addEventListener('astro:before-swap', function (e) {
+          applyTo(e.newDocument, resolve());
+        });
+
+        // The <html> element is reused across swaps; reassert and notify the
+        // toggle control so its label stays in sync.
+        document.addEventListener('astro:after-swap', function () {
+          apply(resolve());
+        });
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -218,6 +315,17 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     background-color: var(--color-bg);
   }
 
+  /* During a theme toggle (html.theme-transition), fold any element carrying an
+     inline view-transition-name — e.g. the project cover images that power the
+     shared-element navigation animation — into the single root snapshot, so the
+     circular reveal wipes across them uniformly instead of morphing their own
+     snapshots (which flickers their rounded corners). !important is required to
+     beat the inline style. Page navigation never sets this class, so the cover
+     transition between the projects pages is unaffected. */
+  html.theme-transition [style*="view-transition-name"] {
+    view-transition-name: none !important;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     @keyframes dissolve-in {
       from {
@@ -243,6 +351,30 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
 
     ::view-transition-new(root) {
       animation: dissolve-in 0.3s ease-in;
+    }
+
+    /* Theme toggle only (html.theme-transition): iOS-style circular reveal.
+       The old snapshot (previous theme) holds still underneath while the new
+       snapshot (next theme) is clipped in from a growing circle centred on the
+       toggle button. This overrides the cross-fade above so only the wipe
+       shows. Page navigation never sets this class, so its dissolve is intact. */
+    @keyframes theme-reveal {
+      from {
+        clip-path: circle(0 at var(--reveal-x, 50%) var(--reveal-y, 50%));
+      }
+      to {
+        clip-path: circle(
+          var(--reveal-r, 150vmax) at var(--reveal-x, 50%) var(--reveal-y, 50%)
+        );
+      }
+    }
+
+    html.theme-transition::view-transition-old(root) {
+      animation: none;
+    }
+
+    html.theme-transition::view-transition-new(root) {
+      animation: theme-reveal 0.5s ease-in-out;
     }
   }
 </style>

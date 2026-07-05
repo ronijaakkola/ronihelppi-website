@@ -3,6 +3,10 @@
    ========================================================================== */
 
 :root {
+  /* Dark is the default theme (also the no-JS fallback). The theme init script
+     in BaseLayout sets data-theme="light" on <html> to switch palettes. */
+  color-scheme: dark;
+
   /* Colors */
   --color-bg: #0b0b0b;
   --color-text-primary: #e8e6e6;
@@ -14,15 +18,21 @@
   --color-button-text-muted: #494949;
   --color-keystroke-bg: #c0b3b3;
   --color-border: #aaa1a1;
-  --color-code-bg: #131313;
-  --color-code-bg-translucent: rgba(19, 19, 19, 0.9);
-  --color-code-header: #0f0f0f;
-  --color-overlay: rgba(0, 0, 0, 0.75);
+  --color-overlay: rgba(0, 0, 0, 0.88);
   --color-overlay-light: rgba(0, 0, 0, 0.55);
   --color-surface-hover: rgba(255, 255, 255, 0.05);
   --color-surface-active: rgba(255, 255, 255, 0.1);
   --color-highlight-end: rgba(255, 255, 255, 0.85);
   --color-highlight-glow: rgba(255, 255, 255, 0.15);
+
+  /* Code surface — intentionally constant across themes so the github-dark
+     Shiki syntax colors stay legible. Code blocks read as dark in both modes. */
+  --color-code-bg: #131313;
+  --color-code-bg-translucent: rgba(19, 19, 19, 0.9);
+  --color-code-header: #0f0f0f;
+  --color-code-border: #4a3e3e;
+  --color-code-chrome-text: #aaa1a1;
+  --color-code-chrome-text-strong: #e8e6e6;
 
   /* Typography - Font Families */
   --font-sans: 'Rethink Sans', system-ui, sans-serif;
@@ -91,6 +101,35 @@
   --radius-sm: 2px;
   --radius-md: 8px;
   --radius-keystroke: 1px;
+}
+
+/* ==========================================================================
+   Light Theme
+   A coherent warm-neutral light palette that mirrors the dark theme's tones.
+   Only color tokens are overridden — typography, spacing and layout are shared.
+   ========================================================================== */
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #f6f4f3;
+  --color-text-primary: #1a1615;
+  --color-text-secondary: #655b58;
+  /* "Inverted" here means high-contrast text over the current overlay scrim.
+     In light mode the scrim is light, so this reads dark. */
+  --color-text-inverted: #1a1615;
+  --color-divider: #ded6d3;
+  --color-button-bg: #1a1615;
+  --color-button-text: #f6f4f3;
+  --color-button-text-muted: #9a908c;
+  --color-keystroke-bg: #4d4643;
+  --color-border: #c9c1be;
+  --color-overlay: rgba(246, 244, 243, 0.94);
+  --color-overlay-light: rgba(246, 244, 243, 0.6);
+  --color-surface-hover: rgba(0, 0, 0, 0.04);
+  --color-surface-active: rgba(0, 0, 0, 0.07);
+  --color-highlight-end: rgba(26, 22, 21, 0.5);
+  --color-highlight-glow: rgba(0, 0, 0, 0.06);
 }
 
 @font-face {
@@ -518,7 +557,7 @@ ol {
   border-radius: var(--radius-md);
   /* overflow:hidden clips the pre background to our border-radius */
   overflow: hidden;
-  border: 1px solid var(--color-divider);
+  border: 1px solid var(--color-code-border);
 }
 
 /* Reset pre margin/radius/background when inside wrapper */
@@ -533,9 +572,9 @@ ol {
   font-family: var(--font-mono);
   font-size: var(--text-code);
   letter-spacing: var(--tracking-small);
-  color: var(--color-text-secondary);
+  color: var(--color-code-chrome-text);
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-code-border);
   background: var(--color-code-header);
 }
 
@@ -556,12 +595,12 @@ ol {
   align-items: center;
   padding: 4px 8px;
   background: var(--color-code-bg-translucent);
-  border: 1px solid var(--color-text-secondary);
+  border: 1px solid var(--color-code-chrome-text);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: var(--tracking-mono);
-  color: var(--color-text-secondary);
+  color: var(--color-code-chrome-text);
   cursor: pointer;
   line-height: 1;
   min-height: 24px;
@@ -576,14 +615,14 @@ ol {
 
 .code-copy-btn:hover,
 .code-copy-btn:focus-visible {
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
+  color: var(--color-code-chrome-text-strong);
+  border-color: var(--color-code-chrome-text-strong);
   outline: none;
 }
 
 .code-copy-btn:focus-visible {
   opacity: 1;
-  outline: 2px solid var(--color-text-primary);
+  outline: 2px solid var(--color-code-chrome-text-strong);
   outline-offset: 2px;
 }
 
@@ -594,7 +633,7 @@ ol {
   .code-block-filename ~ .code-block-body .code-copy-btn {
     opacity: 1;
     background: transparent;
-    border-color: var(--color-divider);
+    border-color: var(--color-code-border);
   }
 
   /* Without filename, place button above code */
@@ -614,7 +653,7 @@ ol {
     align-self: flex-end;
     margin: 0.25rem 0.5rem 0;
     background: transparent;
-    border-color: var(--color-divider);
+    border-color: var(--color-code-border);
   }
 }
 

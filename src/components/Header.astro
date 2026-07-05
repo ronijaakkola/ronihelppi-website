@@ -16,21 +16,45 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       <a href="/writing" class="nav-link">Writing</a>
     </nav>
 
-    <a href="/contact" class="contact-button">
-      <span>Contact</span>
-      <KeyboardShortcut key="C" label="Press C to go to contact page" />
-    </a>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="theme-toggle"
+        id="theme-toggle"
+        aria-label="Switch to light theme"
+      >
+        <svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M3 11.5066C3 16.7497 7.25034 21 12.4934 21C16.2209 21 19.4466 18.8518 21 15.7259C12.4934 15.7259 8.27411 11.5066 8.27411 3C5.14821 4.55344 3 7.77915 3 11.5066Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
 
-    <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-      <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M13 5H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M8 12H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M3 19H21" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M6.75827 17.2426L12.0009 12M12.0009 12L17.2435 6.75736M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+      <a href="/contact" class="contact-button">
+        <span>Contact</span>
+        <KeyboardShortcut key="C" label="Press C to go to contact page" />
+      </a>
+
+      <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M13 5H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 12H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 19H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M6.75827 17.2426L12.0009 12M12.0009 12L17.2435 6.75736M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -66,6 +90,17 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     animation: none !important;
     opacity: 1 !important;
     mix-blend-mode: normal !important;
+  }
+
+  /* During a theme toggle (html.theme-transition) drop the named snapshots for
+     the persisted header and breadcrumb so the whole viewport is captured as a
+     single `root` snapshot and the circular reveal wipes across it uniformly.
+     Page navigation never sets this class, so header persistence and the
+     breadcrumb fade-out below stay exactly as before. */
+  :global(html.theme-transition) .header,
+  :global(html.theme-transition) .breadcrumb-separator,
+  :global(html.theme-transition) .breadcrumb {
+    view-transition-name: none;
   }
 
   .nav {
@@ -202,6 +237,59 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     color: var(--color-text-primary);
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  /* Theme toggle (shared by desktop header and mobile menu) */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .theme-toggle:hover,
+  .theme-toggle:focus-visible {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-hover);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  /* Show the icon for the theme the toggle switches TO. Dark shows the sun
+     (switch to light); light shows the moon (switch to dark). */
+  .theme-icon-moon {
+    display: none;
+  }
+
+  .theme-icon-sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='light']) .theme-icon-sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .theme-icon-moon {
+    display: block;
+  }
+
   .contact-button {
     display: flex;
     align-items: center;
@@ -215,8 +303,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: var(--tracking-mono);
     color: var(--color-button-text);
     text-decoration: none;
-    grid-column: 3;
-    justify-self: end;
   }
 
   .contact-button {
@@ -237,8 +323,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--color-text-primary);
-    grid-column: 3;
-    justify-self: end;
   }
 
   .menu-button .close-icon {
@@ -253,8 +337,12 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     display: block;
   }
 
-  /* Header background when menu is open */
-  .header.menu-open {
+  /* Keep the header stacked above the mobile menu while it's open AND while it
+     fades out (.menu-closing). Removing the elevation instantly on close would
+     let the dismissing (still-blurred) overlay pass over the top-bar items for
+     a frame, flashing them. */
+  .header.menu-open,
+  .header.menu-closing {
     position: relative;
     z-index: 101;
     background-color: transparent;
@@ -345,11 +433,15 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     transition-delay: 0ms;
   }
 
-  /* Mobile menu footer with RSS link */
+  /* Mobile menu footer with theme toggle and RSS link */
   .mobile-menu-footer {
     position: absolute;
     bottom: 24px;
+    left: var(--spacing-horizontal-phone);
     right: var(--spacing-horizontal-phone);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 
   .mobile-menu-rss {
@@ -377,8 +469,19 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       display: none;
     }
 
+    /* Keep the actions row for the theme toggle, but drop the contact button —
+       Contact lives in the mobile menu instead. */
     .contact-button {
       display: none;
+    }
+
+    /* Match the theme toggle's tap target to the menu button on touch. Touch
+       has no hover state, so show it at full contrast (like the menu button)
+       rather than the muted secondary colour used on tablet/desktop. */
+    .header-actions .theme-toggle {
+      width: 40px;
+      height: 40px;
+      color: var(--color-text-primary);
     }
 
     .menu-button {
@@ -468,6 +571,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const hdr = header;
 
     function openMenu() {
+      // Cancel any in-flight close so a rapid re-open doesn't strand the class.
+      hdr.classList.remove('menu-closing');
       menu.classList.add('open');
       menu.setAttribute('aria-hidden', 'false');
       hdr.classList.add('menu-open');
@@ -482,7 +587,16 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     function closeMenu() {
       menu.classList.remove('open');
       menu.setAttribute('aria-hidden', 'true');
+      // Swap the icon back to the hamburger immediately, but hold the header's
+      // z-index elevation until the overlay finishes fading (menu-closing), so
+      // the top-bar items aren't covered by the dismissing overlay mid-fade.
       hdr.classList.remove('menu-open');
+      hdr.classList.add('menu-closing');
+      menu.addEventListener('transitionend', function onFadeEnd(e) {
+        if (e.target !== menu || e.propertyName !== 'opacity') return;
+        hdr.classList.remove('menu-closing');
+        menu.removeEventListener('transitionend', onFadeEnd);
+      });
       btn.setAttribute('aria-expanded', 'false');
       btn.setAttribute('aria-label', 'Open menu');
       document.body.classList.remove('scroll-lock');
@@ -529,6 +643,65 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   // Re-initialize after Astro view transitions
   document.addEventListener('astro:after-swap', initMobileMenu);
+
+  // Theme toggle: the palette itself is applied by the inline script in
+  // BaseLayout (which owns localStorage + View Transition reapplication).
+  // Here we only wire the controls and keep their labels in sync. The Header
+  // is transition:persist, so this runs once and the buttons/listeners persist.
+  interface ThemeWindow extends Window {
+    __getTheme?: () => 'light' | 'dark';
+    __setTheme?: (theme: 'light' | 'dark') => void;
+  }
+
+  function initThemeToggle() {
+    const w = window as ThemeWindow;
+
+    const getTheme = (): 'light' | 'dark' => w.__getTheme?.() ?? 'dark';
+    const labelFor = (theme: 'light' | 'dark') =>
+      theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+
+    const sync = (theme: 'light' | 'dark') => {
+      document
+        .querySelectorAll<HTMLButtonElement>('.theme-toggle')
+        .forEach((btn) => btn.setAttribute('aria-label', labelFor(theme)));
+    };
+
+    // Event delegation on document survives both transition:persist and full
+    // DOM swaps, so the control keeps working after any navigation.
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      const toggle = target?.closest('.theme-toggle') as HTMLElement | null;
+      if (!toggle) return;
+
+      // Stamp the click point on <html> so the circular-reveal view-transition
+      // CSS (in BaseLayout) can grow the wipe from the button. Radius = distance
+      // to the farthest viewport corner, so the circle always fills the screen.
+      const rect = toggle.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const r = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+      const root = document.documentElement;
+      root.style.setProperty('--reveal-x', `${x}px`);
+      root.style.setProperty('--reveal-y', `${y}px`);
+      root.style.setProperty('--reveal-r', `${r}px`);
+
+      w.__setTheme?.(getTheme() === 'light' ? 'dark' : 'light');
+    });
+
+    // Re-sync labels: on explicit toggle + after each View Transition swap
+    // (inline script fires 'themechange'), and on every page load as a backstop.
+    window.addEventListener('themechange', (e) => {
+      sync((e as CustomEvent<{ theme: 'light' | 'dark' }>).detail.theme);
+    });
+    document.addEventListener('astro:page-load', () => sync(getTheme()));
+
+    sync(getTheme());
+  }
+
+  initThemeToggle();
 
   document.addEventListener('keydown', async (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
