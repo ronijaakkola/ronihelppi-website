@@ -16,10 +16,27 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       <a href="/writing" class="nav-link">Writing</a>
     </nav>
 
-    <a href="/contact" class="contact-button">
-      <span>Contact</span>
-      <KeyboardShortcut key="C" label="Press C to go to contact page" />
-    </a>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="theme-toggle"
+        id="theme-toggle"
+        aria-label="Switch to light theme"
+      >
+        <svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2.5V4.5M12 19.5V21.5M4.5 12H2.5M21.5 12H19.5M5.6 5.6L7 7M17 17L18.4 18.4M18.4 5.6L17 7M7 17L5.6 18.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <a href="/contact" class="contact-button">
+        <span>Contact</span>
+        <KeyboardShortcut key="C" label="Press C to go to contact page" />
+      </a>
+    </div>
 
     <button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -44,6 +61,20 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     <a href="/contact" class="mobile-menu-link">Contact</a>
   </nav>
   <div class="mobile-menu-footer">
+    <button
+      type="button"
+      class="theme-toggle mobile-theme-toggle"
+      id="mobile-theme-toggle"
+      aria-label="Switch to light theme"
+    >
+      <svg class="theme-icon theme-icon-sun" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 2.5V4.5M12 19.5V21.5M4.5 12H2.5M21.5 12H19.5M5.6 5.6L7 7M17 17L18.4 18.4M18.4 5.6L17 7M7 17L5.6 18.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <svg class="theme-icon theme-icon-moon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </button>
     <a href="/rss.xml" class="mobile-menu-rss">RSS</a>
   </div>
 </div>
@@ -202,6 +233,59 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     color: var(--color-text-primary);
   }
 
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-xs);
+    grid-column: 3;
+    justify-self: end;
+  }
+
+  /* Theme toggle (shared by desktop header and mobile menu) */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .theme-toggle:hover,
+  .theme-toggle:focus-visible {
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-hover);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  /* Show the icon for the theme the toggle switches TO. Dark shows the sun
+     (switch to light); light shows the moon (switch to dark). */
+  .theme-icon-moon {
+    display: none;
+  }
+
+  .theme-icon-sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='light']) .theme-icon-sun {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .theme-icon-moon {
+    display: block;
+  }
+
   .contact-button {
     display: flex;
     align-items: center;
@@ -215,8 +299,6 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: var(--tracking-mono);
     color: var(--color-button-text);
     text-decoration: none;
-    grid-column: 3;
-    justify-self: end;
   }
 
   .contact-button {
@@ -345,11 +427,22 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     transition-delay: 0ms;
   }
 
-  /* Mobile menu footer with RSS link */
+  /* Mobile menu footer with theme toggle and RSS link */
   .mobile-menu-footer {
     position: absolute;
     bottom: 24px;
+    left: var(--spacing-horizontal-phone);
     right: var(--spacing-horizontal-phone);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-theme-toggle {
+    width: 44px;
+    height: 44px;
+    margin-left: -10px;
+    color: var(--color-text-secondary);
   }
 
   .mobile-menu-rss {
@@ -377,7 +470,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       display: none;
     }
 
-    .contact-button {
+    .header-actions {
       display: none;
     }
 
@@ -529,6 +622,48 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
   // Re-initialize after Astro view transitions
   document.addEventListener('astro:after-swap', initMobileMenu);
+
+  // Theme toggle: the palette itself is applied by the inline script in
+  // BaseLayout (which owns localStorage + View Transition reapplication).
+  // Here we only wire the controls and keep their labels in sync. The Header
+  // is transition:persist, so this runs once and the buttons/listeners persist.
+  interface ThemeWindow extends Window {
+    __getTheme?: () => 'light' | 'dark';
+    __setTheme?: (theme: 'light' | 'dark') => void;
+  }
+
+  function initThemeToggle() {
+    const w = window as ThemeWindow;
+
+    const getTheme = (): 'light' | 'dark' => w.__getTheme?.() ?? 'dark';
+    const labelFor = (theme: 'light' | 'dark') =>
+      theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+
+    const sync = (theme: 'light' | 'dark') => {
+      document
+        .querySelectorAll<HTMLButtonElement>('.theme-toggle')
+        .forEach((btn) => btn.setAttribute('aria-label', labelFor(theme)));
+    };
+
+    // Event delegation on document survives both transition:persist and full
+    // DOM swaps, so the control keeps working after any navigation.
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest('.theme-toggle')) return;
+      w.__setTheme?.(getTheme() === 'light' ? 'dark' : 'light');
+    });
+
+    // Re-sync labels: on explicit toggle + after each View Transition swap
+    // (inline script fires 'themechange'), and on every page load as a backstop.
+    window.addEventListener('themechange', (e) => {
+      sync((e as CustomEvent<{ theme: 'light' | 'dark' }>).detail.theme);
+    });
+    document.addEventListener('astro:page-load', () => sync(getTheme()));
+
+    sync(getTheme());
+  }
+
+  initThemeToggle();
 
   document.addEventListener('keydown', async (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
