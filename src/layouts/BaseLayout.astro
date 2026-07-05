@@ -315,6 +315,17 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     background-color: var(--color-bg);
   }
 
+  /* During a theme toggle (html.theme-transition), fold any element carrying an
+     inline view-transition-name — e.g. the project cover images that power the
+     shared-element navigation animation — into the single root snapshot, so the
+     circular reveal wipes across them uniformly instead of morphing their own
+     snapshots (which flickers their rounded corners). !important is required to
+     beat the inline style. Page navigation never sets this class, so the cover
+     transition between the projects pages is unaffected. */
+  html.theme-transition [style*="view-transition-name"] {
+    view-transition-name: none !important;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     @keyframes dissolve-in {
       from {
