@@ -30,6 +30,57 @@ test.describe('Theme switching', () => {
     expect(bg).toBe('rgb(246, 244, 243)');
   });
 
+  test('circular-reveal wipe stamps click-point vars and flips without errors', async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') errors.push(msg.text());
+    });
+    page.on('pageerror', (err) => errors.push(err.message));
+
+    await page.goto('/');
+
+    const toggle = page.locator('#theme-toggle');
+    await toggle.click();
+
+    // Theme still flips.
+    await expect(html(page)).toHaveAttribute('data-theme', 'light');
+
+    // The click handler stamped the reveal geometry on <html> for the CSS wipe.
+    const vars = await page.evaluate(() => {
+      const s = document.documentElement.style;
+      return {
+        x: s.getPropertyValue('--reveal-x').trim(),
+        y: s.getPropertyValue('--reveal-y').trim(),
+        r: s.getPropertyValue('--reveal-r').trim(),
+      };
+    });
+    expect(vars.x).toMatch(/^[\d.]+px$/);
+    expect(vars.y).toMatch(/^[\d.]+px$/);
+    expect(vars.r).toMatch(/^[\d.]+px$/);
+    expect(parseFloat(vars.r)).toBeGreaterThan(0);
+
+    // The transient transition class is cleaned up once the wipe finishes.
+    await expect(html(page)).not.toHaveClass(/theme-transition/);
+
+    expect(errors).toEqual([]);
+  });
+
+  test('does not animate the theme flip under reduced motion', async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: 'reduce' });
+    const page = await context.newPage();
+
+    await page.goto('/');
+    await page.locator('#theme-toggle').click();
+
+    await expect(html(page)).toHaveAttribute('data-theme', 'light');
+    // No view transition is started, so the transient class is never added.
+    await expect(html(page)).not.toHaveClass(/theme-transition/);
+
+    await context.close();
+  });
+
   test('persists the choice across a full reload without flashing', async ({ page }) => {
     await page.goto('/');
     await page.locator('#theme-toggle').click();

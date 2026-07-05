@@ -108,7 +108,36 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
           try {
             localStorage.setItem(STORAGE_KEY, theme);
           } catch (e) {}
-          apply(theme);
+
+          // iOS-style circular reveal wipe. The toggle click handler stamps the
+          // click point (--reveal-x/y/r) on <html>; the reveal CSS reads those.
+          // Scoped by the temporary `theme-transition` class so it never
+          // collides with Astro's page-navigation view transitions.
+          var reduceMotion = false;
+          try {
+            reduceMotion = window.matchMedia(
+              '(prefers-reduced-motion: reduce)'
+            ).matches;
+          } catch (e) {}
+
+          if (
+            typeof document.startViewTransition !== 'function' ||
+            reduceMotion
+          ) {
+            // Fallback: instant flip, no animation.
+            apply(theme);
+            return;
+          }
+
+          var root = document.documentElement;
+          root.classList.add('theme-transition');
+          var vt = document.startViewTransition(function () {
+            apply(theme);
+          });
+          var done = function () {
+            root.classList.remove('theme-transition');
+          };
+          vt.finished.then(done, done);
         };
 
         // Initial application (before body paints -> no flash).
@@ -311,6 +340,30 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
 
     ::view-transition-new(root) {
       animation: dissolve-in 0.3s ease-in;
+    }
+
+    /* Theme toggle only (html.theme-transition): iOS-style circular reveal.
+       The old snapshot (previous theme) holds still underneath while the new
+       snapshot (next theme) is clipped in from a growing circle centred on the
+       toggle button. This overrides the cross-fade above so only the wipe
+       shows. Page navigation never sets this class, so its dissolve is intact. */
+    @keyframes theme-reveal {
+      from {
+        clip-path: circle(0 at var(--reveal-x, 50%) var(--reveal-y, 50%));
+      }
+      to {
+        clip-path: circle(
+          var(--reveal-r, 150vmax) at var(--reveal-x, 50%) var(--reveal-y, 50%)
+        );
+      }
+    }
+
+    html.theme-transition::view-transition-old(root) {
+      animation: none;
+    }
+
+    html.theme-transition::view-transition-new(root) {
+      animation: theme-reveal 0.5s ease-in-out;
     }
   }
 </style>

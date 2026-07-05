@@ -99,6 +99,17 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     mix-blend-mode: normal !important;
   }
 
+  /* During a theme toggle (html.theme-transition) drop the named snapshots for
+     the persisted header and breadcrumb so the whole viewport is captured as a
+     single `root` snapshot and the circular reveal wipes across it uniformly.
+     Page navigation never sets this class, so header persistence and the
+     breadcrumb fade-out below stay exactly as before. */
+  :global(html.theme-transition) .header,
+  :global(html.theme-transition) .breadcrumb-separator,
+  :global(html.theme-transition) .breadcrumb {
+    view-transition-name: none;
+  }
+
   .nav {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -649,7 +660,24 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     // DOM swaps, so the control keeps working after any navigation.
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
-      if (!target?.closest('.theme-toggle')) return;
+      const toggle = target?.closest('.theme-toggle') as HTMLElement | null;
+      if (!toggle) return;
+
+      // Stamp the click point on <html> so the circular-reveal view-transition
+      // CSS (in BaseLayout) can grow the wipe from the button. Radius = distance
+      // to the farthest viewport corner, so the circle always fills the screen.
+      const rect = toggle.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const r = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+      const root = document.documentElement;
+      root.style.setProperty('--reveal-x', `${x}px`);
+      root.style.setProperty('--reveal-y', `${y}px`);
+      root.style.setProperty('--reveal-r', `${r}px`);
+
       w.__setTheme?.(getTheme() === 'light' ? 'dark' : 'light');
     });
 
