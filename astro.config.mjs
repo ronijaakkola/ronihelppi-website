@@ -6,6 +6,7 @@ import { remarkObsidianImages } from './src/utils/remark-obsidian-images';
 import rehypeExternalLinks from 'rehype-external-links';
 import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
 import { rehypeImageFigure } from './src/utils/rehype-image-figure';
+import { rehypeHeadingLinks } from './src/utils/rehype-heading-links';
 import { remarkCodeTitle } from './src/utils/remark-code-title';
 import { remarkToc } from './src/utils/remark-toc';
 
@@ -23,6 +24,7 @@ export default defineConfig({
       rehypePlugins: [
         rehypeCodeBlocks,
         rehypeImageFigure,
+        rehypeHeadingLinks,
         [rehypeExternalLinks, {
           target: '_blank',
           rel: ['noopener', 'noreferrer'],
