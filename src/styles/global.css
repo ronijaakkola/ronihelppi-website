@@ -395,6 +395,17 @@ ol {
   margin-top: 2em;
 }
 
+/* On wide, hover-capable screens the left-edge heading rail takes over section
+   navigation, so hide the inline table-of-contents card to avoid duplicate nav.
+   Kept in sync with the rail's own visibility query in HeadingRail.astro. The
+   `[data-has-heading-rail]` marker means only pages that actually render the
+   rail hide their card — a single-section post keeps its inline card. */
+@media (min-width: 1200px) and (hover: hover) {
+  [data-has-heading-rail] .toc-card {
+    display: none;
+  }
+}
+
 /* ==========================================================================
    Prose Styles (Article Content)
    ========================================================================== */

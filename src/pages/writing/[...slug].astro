@@ -4,9 +4,11 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import HeadingRail from '../../components/HeadingRail.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 import { getTitleFromEntry } from '../../utils/title';
 import { generateDescription } from '../../utils/description';
+import { extractH2Headings } from '../../utils/extract-headings';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -48,6 +50,13 @@ const postURL = new URL(`/writing/${post.id}/`, Astro.site).href;
 
 const dateModified = post.data.dateModified || post.data.date;
 
+// Left-edge heading navigator: built from the post's h2 headings. Only shown
+// when there are at least two sections to move between. When present, the inline
+// [toc] card is hidden on wide screens (via `[data-has-heading-rail]` in
+// global.css) so the two navigators never duplicate each other.
+const headingRailItems = extractH2Headings(post.body || '');
+const hasHeadingRail = headingRailItems.length >= 2;
+
 const schemas = [
   {
     '@context': 'https://schema.org',
@@ -85,7 +94,8 @@ const schemas = [
   schemas={schemas}
 >
   <main id="main-content" class="main">
-    <article class="layout">
+    {hasHeadingRail && <HeadingRail headings={headingRailItems} />}
+    <article class="layout" data-has-heading-rail={hasHeadingRail ? '' : undefined}>
       <!-- Post Heading -->
       <header class="post-header">
         <div class="post-title-group">

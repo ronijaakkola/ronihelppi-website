@@ -1,0 +1,258 @@
+---
+import type { TocHeading } from '../utils/extract-headings';
+
+interface Props {
+  headings: TocHeading[];
+}
+
+const { headings } = Astro.props;
+---
+
+{
+  headings.length > 0 && (
+    <nav class="heading-rail" aria-label="On this page" data-heading-rail>
+      <ol class="heading-rail-list" role="list">
+        {headings.map((heading) => (
+          <li class="heading-rail-item">
+            <a
+              href={`#${heading.slug}`}
+              class="heading-rail-link"
+              data-rail-link={heading.slug}
+            >
+              <span class="heading-rail-tick" aria-hidden="true" />
+              <span class="heading-rail-text">{heading.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  /* Left-edge article heading navigator.
+
+     Progressive enhancement: the markup is server-rendered, so with no JS the
+     rail still shows one tick per section, expands on hover/focus via CSS, and
+     its links are plain fragment anchors that jump to the heading. JS only adds
+     the scroll-spy highlight of the in-view section.
+
+     Shown only on wide, hover-capable viewports. On narrower or touch screens it
+     stays hidden and the inline `[toc]` card (or the heading anchors) provides
+     navigation instead — see the `.toc-card` rule in global.css. */
+  .heading-rail {
+    display: none;
+    position: fixed;
+    left: var(--gap-lg);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    max-height: 80vh;
+  }
+
+  @media (min-width: 1200px) and (hover: hover) {
+    .heading-rail {
+      display: block;
+    }
+  }
+
+  .heading-rail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: var(--gap-2xs);
+    list-style: none;
+    max-height: 80vh;
+    overflow: hidden;
+    border: 0.5px solid transparent;
+    border-radius: var(--radius-md);
+    background: transparent;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .heading-rail:hover .heading-rail-list,
+  .heading-rail:focus-within .heading-rail-list {
+    background: var(--color-bg);
+    border-color: var(--color-border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    overflow-y: auto;
+  }
+
+  .heading-rail-item {
+    margin: 0;
+  }
+
+  .heading-rail-link {
+    display: flex;
+    align-items: center;
+    padding: var(--gap-4xs) var(--gap-3xs);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--color-text-secondary);
+  }
+
+  .heading-rail-tick {
+    flex-shrink: 0;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--color-divider);
+    transition:
+      width 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .heading-rail-text {
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    opacity: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-code);
+    letter-spacing: var(--tracking-small);
+    line-height: 1.4;
+    color: inherit;
+    transition:
+      max-width 0.25s ease,
+      margin-left 0.25s ease,
+      opacity 0.2s ease;
+  }
+
+  .heading-rail:hover .heading-rail-text,
+  .heading-rail:focus-within .heading-rail-text {
+    max-width: 220px;
+    margin-left: var(--gap-2xs);
+    opacity: 1;
+  }
+
+  /* In-view section (set by the scroll-spy script) */
+  .heading-rail-link[aria-current='true'] {
+    color: var(--color-text-primary);
+  }
+
+  .heading-rail-link[aria-current='true'] .heading-rail-tick {
+    width: 24px;
+    background: var(--color-text-primary);
+  }
+
+  /* Match the site's hover/focus feedback convention */
+  .heading-rail-link:hover,
+  .heading-rail-link:focus-visible {
+    color: var(--color-text-primary);
+  }
+
+  .heading-rail-link:hover .heading-rail-tick,
+  .heading-rail-link:focus-visible .heading-rail-tick {
+    background: var(--color-text-primary);
+  }
+
+  .heading-rail-link:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .heading-rail-list,
+    .heading-rail-tick,
+    .heading-rail-text {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { pickActiveHeadingId, type HeadingPosition } from '../utils/heading-rail';
+
+  // Roughly the reading focus line: a section becomes "current" once its heading
+  // has scrolled to within this many pixels of the viewport top. The header is
+  // not sticky on desktop, so a small offset is enough.
+  const ACTIVATION_OFFSET = 140;
+
+  interface TrackedHeading {
+    id: string;
+    heading: HTMLElement;
+    link: HTMLAnchorElement;
+  }
+
+  let cleanup: (() => void) | null = null;
+  const pageLoadHandlerKey = '__headingRailPageLoadHandler__';
+
+  function initHeadingRail() {
+    // Tear down listeners from the previous page (the DOM is swapped on
+    // View Transitions navigation, so old element references are stale).
+    if (cleanup) {
+      cleanup();
+      cleanup = null;
+    }
+
+    const rail = document.querySelector<HTMLElement>('[data-heading-rail]');
+    if (!rail) return;
+
+    const links = Array.from(
+      rail.querySelectorAll<HTMLAnchorElement>('[data-rail-link]')
+    );
+    const tracked: TrackedHeading[] = [];
+    for (const link of links) {
+      const id = link.dataset.railLink;
+      const heading = id ? document.getElementById(id) : null;
+      if (id && heading) tracked.push({ id, heading, link });
+    }
+    if (tracked.length === 0) return;
+
+    let activeId: string | null = null;
+    function setActive(id: string | null) {
+      if (id === activeId) return;
+      activeId = id;
+      for (const item of tracked) {
+        if (item.id === id) item.link.setAttribute('aria-current', 'location');
+        else item.link.removeAttribute('aria-current');
+      }
+    }
+
+    let ticking = false;
+    function update() {
+      ticking = false;
+      const positions: HeadingPosition[] = tracked.map((item) => ({
+        id: item.id,
+        top: item.heading.getBoundingClientRect().top,
+      }));
+      setActive(pickActiveHeadingId(positions, ACTIVATION_OFFSET));
+    }
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    update();
+
+    cleanup = () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }
+
+  initHeadingRail();
+
+  const previousPageLoadHandler = (window as typeof window & {
+    [pageLoadHandlerKey]?: () => void;
+  })[pageLoadHandlerKey];
+  if (previousPageLoadHandler) {
+    document.removeEventListener('astro:page-load', previousPageLoadHandler);
+  }
+
+  (window as typeof window & {
+    [pageLoadHandlerKey]?: () => void;
+  })[pageLoadHandlerKey] = initHeadingRail;
+
+  document.addEventListener('astro:page-load', initHeadingRail);
+</script>
