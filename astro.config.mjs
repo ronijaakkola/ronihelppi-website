@@ -14,6 +14,13 @@ import { remarkToc } from './src/utils/remark-toc';
 export default defineConfig({
   site: 'https://ronihelppi.com',
   devToolbar: { enabled: false },
+  // Prefetch pages as their links enter the viewport (the default prefetches
+  // on tap, which can't hide network latency on touch devices where there's
+  // no hover). Pages are small static HTML, so the bandwidth cost is tiny.
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   integrations: [sitemap()],
   markdown: {
     shikiConfig: {

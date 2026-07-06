@@ -400,6 +400,20 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
       animation: dissolve-in 0.25s var(--ease-out);
     }
 
+    /* Touch devices: keep the dissolve brief. Without hover there is no
+       hover-prefetch to hide network latency, so the tap-to-paint delay is
+       already longer than on desktop — a long fade on top makes navigation
+       feel sluggish. (Theme reveal below is unaffected.) */
+    @media (hover: none) {
+      ::view-transition-old(root) {
+        animation-duration: 0.15s;
+      }
+
+      ::view-transition-new(root) {
+        animation-duration: 0.15s;
+      }
+    }
+
     /* Theme toggle only (html.theme-transition): iOS-style circular reveal.
        The old snapshot (previous theme) holds still underneath while the new
        snapshot (next theme) is clipped in from a growing circle centred on the
