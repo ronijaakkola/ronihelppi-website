@@ -169,12 +169,21 @@ test.describe('Post heading anchor links', () => {
 
     await expect(page).toHaveURL(new RegExp(`#${id}$`));
 
-    // Heading should be scrolled into view, clear of the sticky header.
+    // Heading should end up scrolled into view, clear of the sticky header.
+    // In-page jumps animate (CSS scroll-behavior: smooth), so poll until the
+    // scroll settles instead of sampling mid-animation. The scroll approaches
+    // from below toward a positive offset (scroll-margin-top), so once the
+    // top is under 200px it is also non-negative.
+    await expect
+      .poll(
+        () => heading.evaluate((el) => el.getBoundingClientRect().top),
+        { timeout: 5000 },
+      )
+      .toBeLessThan(200);
     const topInViewport = await heading.evaluate(
       (el) => el.getBoundingClientRect().top,
     );
     expect(topInViewport).toBeGreaterThanOrEqual(0);
-    expect(topInViewport).toBeLessThan(200);
   });
 
   test('clicking an anchor does not write to the clipboard', async ({ page }) => {

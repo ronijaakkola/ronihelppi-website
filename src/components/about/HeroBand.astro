@@ -113,6 +113,35 @@ const alt =
     object-position: 50% 15%;
   }
 
+  /* Portrait entrance — a photographic focus-pull: fade + the cascade's 8px
+     rise while the blur resolves to sharp, delayed 100ms so the copy lands
+     first. Pure CSS so it replays whenever the element enters the DOM: full
+     page loads AND View Transitions navigations alike. `backwards` holds the
+     hidden from-state through the delay. Total stays within the 700ms
+     animation window the accessibility tests wait for. */
+  @keyframes photo-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .hero-photo {
+    animation: photo-reveal 0.6s var(--ease-out) 100ms backwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-photo {
+      animation: none;
+    }
+  }
+
   /* ---- Mobile: a compact framed print floated beside the heading; the intro
          wraps around it and continues full-width below. Heading reads first. ---- */
   @media (max-width: 720px) {

@@ -214,7 +214,7 @@ const schemas = [
   .arrow-icon {
     flex-shrink: 0;
     color: var(--color-text-secondary);
-    transition: transform 200ms cubic-bezier(0.25, 1, 0.5, 1);
+    transition: transform 200ms var(--ease-out);
   }
 
   .view-all-link:hover .arrow-icon,
@@ -237,19 +237,22 @@ const schemas = [
     text-decoration-line: underline;
   }
 
-  /* Cascade Animation - global to work with child components */
+  /* Cascade Animation - global to work with child components.
+     Same personality as the projects grid: fade + a small 8px rise. */
   @keyframes cascade-in {
     from {
       opacity: 0;
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
+      transform: translateY(0);
     }
   }
 
   .cascade-animate :global(.cascade-item) {
     opacity: 0;
-    animation: cascade-in 0.4s ease-out forwards;
+    animation: cascade-in 0.4s var(--ease-out) forwards;
   }
 
   .cascade-animate :global(.cascade-item:nth-child(2)) { animation-delay: 0ms; }

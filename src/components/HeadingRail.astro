@@ -84,6 +84,13 @@ const { headings } = Astro.props;
     overflow-y: auto;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .heading-rail-number,
+    .heading-rail-text {
+      transform: none;
+    }
+  }
+
   .heading-rail-item {
     margin: 0;
   }
@@ -99,32 +106,41 @@ const { headings } = Astro.props;
 
   .heading-rail-tick {
     flex-shrink: 0;
-    width: 14px;
+    /* Layout width is the ACTIVE size; inactive ticks paint at half width via
+       scaleX so the grow/shrink runs on the GPU (animating `width` re-runs
+       layout on every scroll-spy change) and labels align across rows. */
+    width: 28px;
     height: 2px;
     border-radius: 1px;
     background: var(--color-divider);
+    transform: scaleX(0.5);
+    transform-origin: left center;
     transition:
-      width 0.3s ease,
+      transform 0.2s var(--ease-out),
       background-color 0.25s ease;
   }
 
   /* The section number ("01", "02" …), mirroring the inline TOC. Like the text
      it is clipped away when collapsed and revealed on hover/focus. */
+  /* The label reveal: max-width/margin-left SNAP (no transition — animating
+     them runs layout every frame) while opacity + a small translateX slide do
+     the visible entrance on the GPU. Collapse on mouse-leave is instant,
+     which is right anyway: dismissals should snap. */
   .heading-rail-number {
     flex-shrink: 0;
     max-width: 0;
     margin-left: 0;
     overflow: hidden;
     opacity: 0;
+    transform: translateX(-4px);
     font-family: var(--font-mono);
     font-size: var(--text-code);
     letter-spacing: var(--tracking-small);
     line-height: 1.4;
     color: var(--color-text-secondary);
     transition:
-      max-width 0.25s ease,
-      margin-left 0.25s ease,
-      opacity 0.2s ease;
+      opacity 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out);
   }
 
   .heading-rail:hover .heading-rail-number,
@@ -132,6 +148,7 @@ const { headings } = Astro.props;
     max-width: 3ch;
     margin-left: var(--gap-2xs);
     opacity: 1;
+    transform: translateX(0);
   }
 
   .heading-rail-text {
@@ -141,15 +158,15 @@ const { headings } = Astro.props;
     white-space: nowrap;
     text-overflow: ellipsis;
     opacity: 0;
+    transform: translateX(-4px);
     font-family: var(--font-sans);
     font-size: var(--text-code);
     letter-spacing: var(--tracking-small);
     line-height: 1.4;
     color: inherit;
     transition:
-      max-width 0.25s ease,
-      margin-left 0.25s ease,
-      opacity 0.2s ease;
+      opacity 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out);
   }
 
   .heading-rail:hover .heading-rail-text,
@@ -157,6 +174,7 @@ const { headings } = Astro.props;
     max-width: 220px;
     margin-left: var(--gap-2xs);
     opacity: 1;
+    transform: translateX(0);
   }
 
   /* In-view section (the scroll-spy script sets aria-current="location").
@@ -166,7 +184,7 @@ const { headings } = Astro.props;
   }
 
   .heading-rail-link[aria-current='location'] .heading-rail-tick {
-    width: 28px;
+    transform: scaleX(1);
     background: var(--color-text-primary);
   }
 

@@ -101,6 +101,11 @@
   --radius-sm: 2px;
   --radius-md: 8px;
   --radius-keystroke: 1px;
+
+  /* Motion — strong custom curves for entrances/movement. Plain `ease` stays
+     the right choice for simple hover color changes. */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* ==========================================================================
@@ -187,6 +192,19 @@ html {
   /* Prevent layout shift when scrollbar appears/disappears */
   scrollbar-gutter: stable;
   background-color: var(--color-bg);
+}
+
+/* Smooth in-page jumps (heading rail, TOC card, heading anchors). The
+   `is-navigating` class is toggled by BaseLayout around Astro router
+   navigations so history back/forward scroll restoration stays instant. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+html.is-navigating {
+  scroll-behavior: auto;
 }
 
 body {
@@ -397,8 +415,8 @@ ol {
 
 /* The left-edge heading rail supplements the inline table-of-contents card
    rather than replacing it: the card stays in the article flow near the top,
-   and the rail (see HeadingRail.astro) only fades in once the reader scrolls
-   past the card. So the inline `[toc]` card is always shown. */
+   and the rail (see HeadingRail.astro) is always available on wide,
+   hover-capable screens. So the inline `[toc]` card is always shown. */
 
 /* ==========================================================================
    Prose Styles (Article Content)
@@ -447,7 +465,7 @@ ol {
   color: var(--color-text-secondary);
   text-decoration: none;
   opacity: 0;
-  transition: opacity 150ms cubic-bezier(0.25, 1, 0.5, 1), color 100ms;
+  transition: opacity 150ms var(--ease-out), color 100ms;
 }
 
 .prose-content :is(h1, h2, h3, h4, h5, h6):hover .heading-anchor,
@@ -514,7 +532,7 @@ ol {
   mask-repeat: no-repeat;
   mask-size: contain;
   flex-shrink: 0;
-  transition: transform 150ms cubic-bezier(0.25, 1, 0.5, 1), background-color 100ms;
+  transition: transform 150ms var(--ease-out), background-color 100ms;
 }
 
 .prose-content a[href^="http"]:hover::after,
@@ -598,6 +616,7 @@ ol {
   right: 0.5rem;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 4px 8px;
   background: var(--color-code-bg-translucent);
   border: 1px solid var(--color-code-chrome-text);
@@ -609,8 +628,19 @@ ol {
   cursor: pointer;
   line-height: 1;
   min-height: 24px;
+  /* Wide enough for "Copied!" so the label swap never shifts the button */
+  min-width: calc(7ch + 18px);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, transform 150ms var(--ease-out), filter 100ms ease;
+}
+
+.code-copy-btn:active {
+  transform: scale(0.97);
+}
+
+/* Blur-morph between "Copy" and "Copied!" (class toggled by the copy script) */
+.code-copy-btn.label-swapping {
+  filter: blur(2px);
 }
 
 .code-block-wrapper:hover .code-copy-btn,

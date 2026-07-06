@@ -207,7 +207,11 @@ const schemas = [
     font-size: 12px;
     letter-spacing: var(--tracking-mono);
     line-height: normal;
-    transition: background-color 100ms ease, color 100ms ease;
+    transition: background-color 100ms ease, color 100ms ease, transform 150ms var(--ease-out);
+  }
+
+  .filter-chip:active {
+    transform: scale(0.97);
   }
 
   .filter-chip .filter-name {
@@ -260,7 +264,7 @@ const schemas = [
     overflow: hidden;
     border: 0.5px solid var(--color-border);
     background: var(--color-overlay-light);
-    transition: opacity 300ms ease, transform 300ms ease, border-color 150ms ease;
+    transition: border-color 150ms ease;
     text-decoration: none;
   }
 
@@ -276,6 +280,31 @@ const schemas = [
 
   .grid-item.hidden {
     display: none;
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  /* Filtering: cards fade/scale in and out. `data-filtering` is stamped by the
+     filter script on the first user interaction, so the initial render and the
+     cascade entrance are unaffected (`animation: none` cancels the long-done
+     cascade fill so transitions can drive opacity/transform). Interruptible by
+     design — rapid re-filtering retargets mid-fade. Browsers without
+     allow-discrete support snap display, exactly as before. */
+  .bento-grid[data-filtering] .grid-item {
+    animation: none;
+    transition:
+      opacity 150ms var(--ease-out),
+      transform 150ms var(--ease-out),
+      display 150ms,
+      border-color 150ms ease;
+    transition-behavior: allow-discrete;
+  }
+
+  @starting-style {
+    .bento-grid[data-filtering] .grid-item:not(.hidden) {
+      opacity: 0;
+      transform: scale(0.98);
+    }
   }
 
   .grid-item-image {
@@ -283,7 +312,7 @@ const schemas = [
     height: 100%;
     object-fit: cover;
     transform: scale(1);
-    transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
+    transition: transform 400ms var(--ease-out);
   }
 
   .grid-item-overlay {
@@ -351,13 +380,18 @@ const schemas = [
   }
 
   .cascade-animate .cascade-item {
-    animation: cascade-in 0.4s ease-out both;
+    animation: cascade-in 0.4s var(--ease-out) both;
     animation-delay: var(--cascade-delay, 0ms);
   }
 
   @media (prefers-reduced-motion: reduce) {
     .cascade-animate .cascade-item {
       animation: none;
+    }
+
+    /* Filtering snaps: keep only the hover border feedback */
+    .bento-grid[data-filtering] .grid-item {
+      transition: border-color 150ms ease;
     }
 
     .grid-item-image {
@@ -460,6 +494,9 @@ const schemas = [
     filterChips.forEach((chip) => {
       chip.addEventListener('click', () => {
         const filter = chip.dataset.filter!;
+        // Enable filter transitions only after a real interaction, so the
+        // initial render (and its cascade entrance) stays untouched.
+        document.querySelector('.bento-grid')?.setAttribute('data-filtering', '');
         applyFilter(filter, filterChips, gridItems);
 
         if (filterStatus) {
