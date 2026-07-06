@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import { getTitleFromEntry } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
+import { bio, experience, contact } from '../data/profile';
 import type { APIContext } from 'astro';
 
 function stripMarkdownToPlainText(body: string): string {
@@ -30,9 +31,28 @@ export async function GET(context: APIContext) {
   lines.push('# Roni Helppi — Full Site Content');
   lines.push('');
   lines.push('> This file contains all writing and project content from ronihelppi.com in plain text, intended for LLM ingestion.');
-  lines.push('> For a summary, see https://www.ronihelppi.com/llms.txt');
+  lines.push('> For a summary, see https://ronihelppi.com/llms.txt');
   lines.push('');
   lines.push(`> Generated: ${new Date().toISOString().split('T')[0]}`);
+  lines.push('');
+
+  // About section
+  lines.push('---');
+  lines.push('');
+  lines.push('## About');
+  lines.push('');
+  lines.push(bio);
+  lines.push('');
+  lines.push('### Experience');
+  lines.push('');
+  for (const entry of experience) {
+    lines.push(`- ${entry.date} — ${entry.role}, ${entry.company}`);
+  }
+  lines.push('');
+  lines.push(`Contact: ${contact.email}`);
+  lines.push(`LinkedIn: ${contact.linkedin}`);
+  lines.push(`GitHub: ${contact.github}`);
+  lines.push(`X: ${contact.x}`);
   lines.push('');
 
   // Writing section

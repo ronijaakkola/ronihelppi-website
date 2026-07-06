@@ -55,6 +55,7 @@ const schemas = [
   type="article"
   publishedTime={item.data.date.toISOString()}
   schemas={schemas}
+  mdPath={`/projects/${item.id}.md`}
 >
   <main id="main-content" class="main">
     <article class="layout">

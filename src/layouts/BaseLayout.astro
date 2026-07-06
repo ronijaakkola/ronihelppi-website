@@ -11,6 +11,8 @@ interface Props {
   type?: 'website' | 'article';
   publishedTime?: string;
   schemas?: Record<string, unknown>[];
+  /** Site-root-relative path to a plain-markdown twin of this page, if any. */
+  mdPath?: string;
 }
 
 const SITE_NAME = 'Roni Helppi';
@@ -23,6 +25,7 @@ const {
   type = 'website',
   publishedTime,
   schemas = [],
+  mdPath,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -197,6 +200,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     <!-- SEO -->
     <link rel="alternate" type="application/rss+xml" title="Roni Helppi" href="/rss.xml" />
     <link rel="alternate" type="text/plain" title="LLM content" href="/llms.txt" />
+    {mdPath && <link rel="alternate" type="text/markdown" title="Markdown source" href={mdPath} />}
     <link rel="canonical" href={canonicalURL} />
     <meta name="description" content={description} />
     <meta name="author" content="Roni Helppi" />
