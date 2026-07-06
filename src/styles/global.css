@@ -395,6 +395,11 @@ ol {
   margin-top: 2em;
 }
 
+/* The left-edge heading rail supplements the inline table-of-contents card
+   rather than replacing it: the card stays in the article flow near the top,
+   and the rail (see HeadingRail.astro) only fades in once the reader scrolls
+   past the card. So the inline `[toc]` card is always shown. */
+
 /* ==========================================================================
    Prose Styles (Article Content)
    ========================================================================== */
