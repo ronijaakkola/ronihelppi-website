@@ -274,8 +274,11 @@ const schemas = [
     width: fit-content;
   }
 
+  /* opacity:1 suppresses the global touch link dip — these buttons use scale
+     as their sole press feedback. */
   .meta-link:active {
     transform: scale(0.97);
+    opacity: 1;
   }
 
   .meta-link:hover,

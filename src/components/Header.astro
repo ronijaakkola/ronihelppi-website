@@ -318,8 +318,11 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     filter: brightness(0.85);
   }
 
+  /* opacity:1 suppresses the global touch link dip — this filled button uses
+     scale as its sole press feedback. */
   .contact-button:active {
     transform: scale(0.97);
+    opacity: 1;
   }
 
   .menu-button {

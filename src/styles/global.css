@@ -242,12 +242,24 @@ a {
   text-decoration-line: underline;
   text-decoration-color: var(--color-text-secondary);
   text-underline-offset: 2px;
-  transition: color 100ms, text-decoration-color 100ms;
+  transition: color 100ms, text-decoration-color 100ms, opacity 100ms;
 }
 
 a:hover,
 a:focus-visible {
   text-decoration-color: var(--color-text-primary);
+}
+
+/* Touch devices have no hover and we disable the native tap highlight above,
+   so a tapped link otherwise gives no acknowledgment while the router fetches
+   the next page. Dip opacity on press to restore that feedback. Opacity (not
+   scale) is used for inline text: scaling a run of text slides its ends and
+   shifts baselines; a dip matches the iOS convention and survives reduced
+   motion. Boundaried elements (cards) override this with scale below. */
+@media (hover: none) {
+  a:active {
+    opacity: 0.6;
+  }
 }
 
 a:focus-visible {

@@ -264,13 +264,24 @@ const schemas = [
     overflow: hidden;
     border: 0.5px solid var(--color-border);
     background: var(--color-overlay-light);
-    transition: border-color 150ms ease;
+    transition: border-color 150ms ease, transform 150ms var(--ease-out);
     text-decoration: none;
   }
 
   .grid-item:hover,
   .grid-item:focus-visible {
     border-color: var(--color-text-primary);
+  }
+
+  /* Touch press feedback: a card has a boundary and an image, so scale reads as
+     a physical press (0.99 — gentle, since a full-width card moves its edges
+     several px even at a small factor). opacity:1 overrides the global text
+     link dip, which would otherwise flash the cover image. */
+  @media (hover: none) {
+    .grid-item:active {
+      opacity: 1;
+      transform: scale(0.99);
+    }
   }
 
   .grid-item:hover .grid-item-image,
@@ -400,6 +411,16 @@ const schemas = [
 
     .grid-item-overlay {
       transition: none;
+    }
+
+    /* Drop the touch press scale (movement). Cards forgo press feedback under
+       reduced motion; they still navigate, and the reader opted out of motion. */
+    .grid-item {
+      transition: border-color 150ms ease;
+    }
+
+    .grid-item:active {
+      transform: none;
     }
   }
 
