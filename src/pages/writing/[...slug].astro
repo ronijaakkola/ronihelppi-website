@@ -92,6 +92,7 @@ const schemas = [
   type="article"
   publishedTime={post.data.date.toISOString()}
   schemas={schemas}
+  mdPath={`/writing/${post.id}.md`}
 >
   <main id="main-content" class="main">
     <article class="layout">

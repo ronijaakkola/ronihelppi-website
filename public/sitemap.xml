@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The @astrojs/sitemap integration emits sitemap-index.xml + sitemap-0.xml,
+     and robots.txt points crawlers there. This static file exists only so the
+     conventional /sitemap.xml path returns a valid sitemap index instead of the
+     SPA HTML shell (a soft-404) for tools that probe it directly. It mirrors
+     sitemap-index.xml; this site is small enough to only ever have one shard. -->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://ronihelppi.com/sitemap-0.xml</loc>
+  </sitemap>
+</sitemapindex>

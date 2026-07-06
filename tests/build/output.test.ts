@@ -252,6 +252,104 @@ describe('Build Output Validation', () => {
     });
   });
 
+  describe('Agent-friendly outputs', () => {
+    it('serves a valid XML sitemap index at the conventional /sitemap.xml path', async () => {
+      const sitemapPath = join(distPath, 'sitemap.xml');
+      const content = await readFile(sitemapPath, 'utf-8');
+
+      // Must be real XML, not the HTML app shell (the previous soft-404)
+      expect(content).toContain('<?xml');
+      expect(content).not.toContain('<!DOCTYPE html>');
+      expect(content).toContain('<sitemapindex');
+      expect(content).toContain('https://ronihelppi.com/sitemap-0.xml');
+    });
+
+    it('generates a plain-markdown twin for every post', async () => {
+      const postsPath = join(distPath, 'writing');
+      const entries = await readdir(postsPath, { withFileTypes: true });
+      const postDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+
+      expect(postDirs.length).toBeGreaterThan(0);
+
+      for (const postDir of postDirs) {
+        const mdPath = join(postsPath, `${postDir}.md`);
+        await expect(access(mdPath)).resolves.not.toThrow();
+
+        const content = await readFile(mdPath, 'utf-8');
+        // Markdown source, not HTML: starts with the title as an H1
+        expect(content.startsWith('# ')).toBe(true);
+        expect(content).not.toContain('<!DOCTYPE html>');
+      }
+    });
+
+    it('generates a plain-markdown twin for every project', async () => {
+      const projectsPath = join(distPath, 'projects');
+      const entries = await readdir(projectsPath, { withFileTypes: true });
+      const projectDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+
+      expect(projectDirs.length).toBeGreaterThan(0);
+
+      for (const projectDir of projectDirs) {
+        const mdPath = join(projectsPath, `${projectDir}.md`);
+        await expect(access(mdPath)).resolves.not.toThrow();
+
+        const content = await readFile(mdPath, 'utf-8');
+        expect(content.startsWith('# ')).toBe(true);
+        expect(content).not.toContain('<!DOCTYPE html>');
+      }
+    });
+
+    it('links each post page to its markdown twin via rel=alternate', async () => {
+      const postPath = join(
+        distPath,
+        'writing',
+        'a-practical-guide-to-writing-your-own-obsidian-skills',
+        'index.html'
+      );
+      const content = await readFile(postPath, 'utf-8');
+
+      expect(content).toContain('type="text/markdown"');
+      expect(content).toContain('/writing/a-practical-guide-to-writing-your-own-obsidian-skills.md');
+    });
+
+    it('generates the llms.txt index with bio, sections, and apex-host links', async () => {
+      const llmsPath = join(distPath, 'llms.txt');
+      const content = await readFile(llmsPath, 'utf-8');
+
+      expect(content).toContain('# Roni Helppi');
+      expect(content).toContain('## About');
+      expect(content).toContain('## Sections');
+      expect(content).toContain('## Content Feeds');
+      // Bio + contact sourced from src/data/profile.ts
+      expect(content).toContain('Senior Product Designer at Reaktor');
+      expect(content).toContain('hello@ronihelppi.com');
+      // Internal links use the apex host, never www
+      expect(content).toContain('https://ronihelppi.com/writing');
+      expect(content).toContain('https://ronihelppi.com/llms-full.txt');
+      expect(content).not.toContain('www.ronihelppi.com');
+    });
+
+    it('includes the About section and apex host in llms-full.txt', async () => {
+      const llmsFullPath = join(distPath, 'llms-full.txt');
+      const content = await readFile(llmsFullPath, 'utf-8');
+
+      expect(content).toContain('## About');
+      expect(content).toContain('### Experience');
+      expect(content).toContain('Reaktor');
+      // Host must be the apex, never www (matches canonical)
+      expect(content).toContain('https://ronihelppi.com/llms.txt');
+      expect(content).not.toContain('www.ronihelppi.com');
+    });
+
+    it('exposes an enriched Person schema on the home page', async () => {
+      const indexPath = join(distPath, 'index.html');
+      const content = await readFile(indexPath, 'utf-8');
+
+      expect(content).toContain('"knowsAbout"');
+      expect(content).toContain('"alumniOf"');
+    });
+  });
+
   describe('HTML Validation', () => {
     it('all HTML files have proper DOCTYPE', async () => {
       const checkHTMLFiles = async (dir: string) => {

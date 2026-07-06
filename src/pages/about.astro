@@ -3,14 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import HeroBand from '../components/about/HeroBand.astro';
 import { personSchema } from '../utils/schemas';
-
-const experience = [
-  { date: '08/2022–', datetime: '2022-08', company: 'Reaktor', role: 'Senior Product Designer' },
-  { date: '12/2017–08/2022', datetime: '2017-12/2022-08', company: 'Gofore', role: 'UX Designer' },
-  { date: '02/2017–12/2017', datetime: '2017-02/2017-12', company: 'Leadin', role: 'UX Developer' },
-  { date: '01/2016–02/2017', datetime: '2016-01/2017-02', company: 'Atostek', role: 'Software Designer' },
-  { date: '01/2015–06/2015', datetime: '2015-01/2015-06', company: 'Tampere University', role: 'Research Assistant' },
-];
+import { experience } from '../data/profile';
 
 const profilePageSchema = {
   '@context': 'https://schema.org',
