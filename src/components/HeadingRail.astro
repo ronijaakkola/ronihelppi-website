@@ -3,16 +3,29 @@ import type { TocHeading } from '../utils/extract-headings';
 
 interface Props {
   headings: TocHeading[];
+  /**
+   * When true, the rail stays hidden until the reader scrolls past the inline
+   * `[toc]` card (or the first section, on pages without one), then fades in.
+   * When false (the default) it is simply visible whenever the viewport is wide
+   * and hover-capable — useful on pages with no table of contents to defer to,
+   * like project case studies.
+   */
+  revealOnScroll?: boolean;
 }
 
-const { headings } = Astro.props;
+const { headings, revealOnScroll = false } = Astro.props;
 ---
 
 {
   headings.length > 0 && (
-    <nav class="heading-rail" aria-label="On this page" data-heading-rail>
+    <nav
+      class="heading-rail"
+      aria-label="On this page"
+      data-heading-rail
+      data-reveal-on-scroll={revealOnScroll ? '' : undefined}
+    >
       <ol class="heading-rail-list" role="list">
-        {headings.map((heading) => (
+        {headings.map((heading, i) => (
           <li class="heading-rail-item">
             <a
               href={`#${heading.slug}`}
@@ -20,6 +33,7 @@ const { headings } = Astro.props;
               data-rail-link={heading.slug}
             >
               <span class="heading-rail-tick" aria-hidden="true" />
+              <span class="heading-rail-number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
               <span class="heading-rail-text">{heading.text}</span>
             </a>
           </li>
@@ -32,14 +46,16 @@ const { headings } = Astro.props;
 <style>
   /* Left-edge article heading navigator.
 
-     Progressive enhancement: the markup is server-rendered, so with no JS the
-     rail still shows one tick per section, expands on hover/focus via CSS, and
-     its links are plain fragment anchors that jump to the heading. JS only adds
-     the scroll-spy highlight of the in-view section.
+     Progressive enhancement: the markup is server-rendered, so its links are
+     plain fragment anchors that jump to the heading and it expands on
+     hover/focus via CSS. JS only adds the scroll-spy highlight of the in-view
+     section (and, in opt-in `revealOnScroll` mode, reveals the rail once the
+     reader scrolls past the inline `[toc]` card).
 
      Shown only on wide, hover-capable viewports. On narrower or touch screens it
-     stays hidden and the inline `[toc]` card (or the heading anchors) provides
-     navigation instead — see the `.toc-card` rule in global.css. */
+     stays hidden and the inline `[toc]` card (or the heading anchors) provide
+     navigation instead — so the rail supplements that card rather than replacing
+     it. Currently used on writing posts only. */
   .heading-rail {
     display: none;
     position: fixed;
@@ -54,12 +70,36 @@ const { headings } = Astro.props;
     .heading-rail {
       display: block;
     }
+
+    /* Opt-in reveal mode (`revealOnScroll`): hidden until the reader scrolls
+       past the inline table of contents, at which point it fades and slides in.
+       The scroll-spy script toggles `is-visible`; `visibility` keeps it out of
+       the a11y tree and unfocusable while hidden. */
+    .heading-rail[data-reveal-on-scroll] {
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-50%) translateX(-8px);
+      transition:
+        opacity 0.35s ease,
+        transform 0.35s ease,
+        visibility 0s linear 0.35s;
+    }
+
+    .heading-rail[data-reveal-on-scroll].is-visible {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+      transition:
+        opacity 0.35s ease,
+        transform 0.35s ease,
+        visibility 0s;
+    }
   }
 
   .heading-rail-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
     margin: 0;
     padding: var(--gap-2xs);
     list-style: none;
@@ -89,7 +129,7 @@ const { headings } = Astro.props;
   .heading-rail-link {
     display: flex;
     align-items: center;
-    padding: var(--gap-4xs) var(--gap-3xs);
+    padding: 2px var(--gap-3xs);
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--color-text-secondary);
@@ -97,13 +137,39 @@ const { headings } = Astro.props;
 
   .heading-rail-tick {
     flex-shrink: 0;
-    width: 16px;
+    width: 14px;
     height: 2px;
     border-radius: 1px;
     background: var(--color-divider);
     transition:
-      width 0.2s ease,
-      background-color 0.2s ease;
+      width 0.3s ease,
+      background-color 0.25s ease;
+  }
+
+  /* The section number ("01", "02" …), mirroring the inline TOC. Like the text
+     it is clipped away when collapsed and revealed on hover/focus. */
+  .heading-rail-number {
+    flex-shrink: 0;
+    max-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    opacity: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-code);
+    letter-spacing: var(--tracking-small);
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+    transition:
+      max-width 0.25s ease,
+      margin-left 0.25s ease,
+      opacity 0.2s ease;
+  }
+
+  .heading-rail:hover .heading-rail-number,
+  .heading-rail:focus-within .heading-rail-number {
+    max-width: 3ch;
+    margin-left: var(--gap-2xs);
+    opacity: 1;
   }
 
   .heading-rail-text {
@@ -131,13 +197,14 @@ const { headings } = Astro.props;
     opacity: 1;
   }
 
-  /* In-view section (set by the scroll-spy script) */
-  .heading-rail-link[aria-current='true'] {
+  /* In-view section (the scroll-spy script sets aria-current="location").
+     The active line turns white and gently grows in length. */
+  .heading-rail-link[aria-current='location'] {
     color: var(--color-text-primary);
   }
 
-  .heading-rail-link[aria-current='true'] .heading-rail-tick {
-    width: 24px;
+  .heading-rail-link[aria-current='location'] .heading-rail-tick {
+    width: 28px;
     background: var(--color-text-primary);
   }
 
@@ -158,8 +225,11 @@ const { headings } = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .heading-rail[data-reveal-on-scroll],
+    .heading-rail[data-reveal-on-scroll].is-visible,
     .heading-rail-list,
     .heading-rail-tick,
+    .heading-rail-number,
     .heading-rail-text {
       transition: none;
     }
@@ -205,6 +275,20 @@ const { headings } = Astro.props;
     }
     if (tracked.length === 0) return;
 
+    // In opt-in reveal mode the rail supplements the inline table of contents:
+    // it stays hidden until the reader has scrolled past the `[toc]` card (or,
+    // on pages without one, past the first section heading), then fades in.
+    // Otherwise the rail is simply always visible and CSS handles it.
+    const revealAnchor = rail.hasAttribute('data-reveal-on-scroll')
+      ? document.querySelector<HTMLElement>('.toc-card') ?? tracked[0].heading
+      : null;
+
+    function updateVisibility() {
+      if (!revealAnchor) return;
+      const scrolledPast = revealAnchor.getBoundingClientRect().bottom < 0;
+      rail!.classList.toggle('is-visible', scrolledPast);
+    }
+
     let activeId: string | null = null;
     function setActive(id: string | null) {
       if (id === activeId) return;
@@ -218,11 +302,17 @@ const { headings } = Astro.props;
     let ticking = false;
     function update() {
       ticking = false;
+      updateVisibility();
       const positions: HeadingPosition[] = tracked.map((item) => ({
         id: item.id,
         top: item.heading.getBoundingClientRect().top,
       }));
-      setActive(pickActiveHeadingId(positions, ACTIVATION_OFFSET));
+      // At the bottom of the page the final section may be too short to have
+      // scrolled its heading up to the activation line — force it active there.
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+      setActive(pickActiveHeadingId(positions, ACTIVATION_OFFSET, atBottom));
     }
     function onScroll() {
       if (!ticking) {

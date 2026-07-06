@@ -52,4 +52,15 @@ describe('pickActiveHeadingId', () => {
     ];
     expect(pickActiveHeadingId(items, 0)).toBe('a');
   });
+
+  it('activates the last heading at the bottom of the page even if it never crossed the line', () => {
+    // The final section is short, so `wrap-up` (top 900) never scrolls above the
+    // activation line — but once the reader hits the bottom of the page it is the
+    // section they are looking at, so it must win.
+    expect(pickActiveHeadingId(headings, 120, true)).toBe('wrap-up');
+  });
+
+  it('ignores the bottom flag when there are no headings', () => {
+    expect(pickActiveHeadingId([], 120, true)).toBeNull();
+  });
 });

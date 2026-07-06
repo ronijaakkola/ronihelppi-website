@@ -51,9 +51,9 @@ const postURL = new URL(`/writing/${post.id}/`, Astro.site).href;
 const dateModified = post.data.dateModified || post.data.date;
 
 // Left-edge heading navigator: built from the post's h2 headings. Only shown
-// when there are at least two sections to move between. When present, the inline
-// [toc] card is hidden on wide screens (via `[data-has-heading-rail]` in
-// global.css) so the two navigators never duplicate each other.
+// when there are at least two sections to move between. It supplements the
+// inline [toc] card rather than replacing it (see HeadingRail.astro), so both
+// are shown on wide screens.
 const headingRailItems = extractH2Headings(post.body || '');
 const hasHeadingRail = headingRailItems.length >= 2;
 
@@ -94,8 +94,7 @@ const schemas = [
   schemas={schemas}
 >
   <main id="main-content" class="main">
-    {hasHeadingRail && <HeadingRail headings={headingRailItems} />}
-    <article class="layout" data-has-heading-rail={hasHeadingRail ? '' : undefined}>
+    <article class="layout">
       <!-- Post Heading -->
       <header class="post-header">
         <div class="post-title-group">
@@ -131,6 +130,11 @@ const schemas = [
           </div>
         )}
       </header>
+
+      {/* Rendered after the header (and its "Copy post" button) so the rail's
+          jump links fall after it in tab order; it is position:fixed, so its
+          DOM location here does not affect where it appears on screen. */}
+      {hasHeadingRail && <HeadingRail headings={headingRailItems} />}
 
       <!-- Post Content -->
       <div class="prose">
