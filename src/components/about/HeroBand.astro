@@ -113,13 +113,12 @@ const alt =
     object-position: 50% 15%;
   }
 
-  /* Portrait entrance — plays on full page loads only (CascadeAnimation stamps
-     .cascade-animate; client-side navigations already dissolve the page in).
-     A photographic focus-pull: fade + the cascade's 8px rise while the blur
-     resolves to sharp, delayed 100ms so the copy lands first. `backwards`
-     holds the hidden from-state through the delay. Total stays within the
-     700ms animation window the accessibility tests wait for. Without JS the
-     class is never added and the photo simply shows. */
+  /* Portrait entrance — a photographic focus-pull: fade + the cascade's 8px
+     rise while the blur resolves to sharp, delayed 100ms so the copy lands
+     first. Pure CSS so it replays whenever the element enters the DOM: full
+     page loads AND View Transitions navigations alike. `backwards` holds the
+     hidden from-state through the delay. Total stays within the 700ms
+     animation window the accessibility tests wait for. */
   @keyframes photo-reveal {
     from {
       opacity: 0;
@@ -133,12 +132,12 @@ const alt =
     }
   }
 
-  .hero.cascade-animate .hero-photo {
+  .hero-photo {
     animation: photo-reveal 0.6s var(--ease-out) 100ms backwards;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero.cascade-animate .hero-photo {
+    .hero-photo {
       animation: none;
     }
   }
