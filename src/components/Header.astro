@@ -141,7 +141,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: var(--tracking-nav);
     color: var(--color-text-secondary);
     opacity: 0;
-    transition: opacity 0.4s ease-out;
+    transition: opacity 0.2s var(--ease-out);
     view-transition-name: breadcrumb-separator;
   }
 
@@ -258,13 +258,17 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     border-radius: var(--radius-sm);
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: color 150ms, background-color 150ms;
+    transition: color 150ms, background-color 150ms, transform 150ms var(--ease-out);
   }
 
   .theme-toggle:hover,
   .theme-toggle:focus-visible {
     color: var(--color-text-primary);
     background-color: var(--color-surface-hover);
+  }
+
+  .theme-toggle:active {
+    transform: scale(0.95);
   }
 
   .theme-toggle:focus-visible {
@@ -306,12 +310,16 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   }
 
   .contact-button {
-    transition: filter 150ms;
+    transition: filter 150ms, transform 150ms var(--ease-out);
   }
 
   .contact-button:hover {
     text-decoration: none;
     filter: brightness(0.85);
+  }
+
+  .contact-button:active {
+    transform: scale(0.97);
   }
 
   .menu-button {
@@ -323,6 +331,11 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     border-radius: var(--radius-sm);
     cursor: pointer;
     color: var(--color-text-primary);
+    transition: transform 150ms var(--ease-out);
+  }
+
+  .menu-button:active {
+    transform: scale(0.95);
   }
 
   .menu-button .close-icon {
@@ -364,7 +377,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     z-index: 100;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    /* Transitions resolve from the destination state: this rule times the
+       CLOSE (dismissal snaps faster than entrance). */
+    transition: opacity 0.2s var(--ease-out), visibility 0.2s var(--ease-out);
   }
 
   .mobile-menu.open {
@@ -372,6 +387,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     opacity: 1;
     visibility: visible;
     overscroll-behavior: contain;
+    /* ...and this rule times the OPEN. */
+    transition: opacity 0.3s var(--ease-out), visibility 0.3s var(--ease-out);
   }
 
   .mobile-menu-nav {
@@ -389,7 +406,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     text-decoration: none;
     opacity: 0;
     transform: translateY(-20px);
-    transition: opacity 0.3s ease, transform 0.3s ease, color 0.2s ease;
+    /* Destination state when closing — links exit faster than they enter */
+    transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out), color 0.2s ease;
   }
 
   .mobile-menu-link:hover,
@@ -405,6 +423,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   .mobile-menu.open .mobile-menu-link {
     opacity: 1;
     transform: translateY(0);
+    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out), color 0.2s ease;
   }
 
   /* Cascading animation delays */
@@ -721,6 +740,15 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     if (mobileMenu?.classList.contains('open')) return;
 
     if (e.key === 'c' || e.key === 'C') {
+      // Keyboard-initiated navigation should feel instant: suppress the page
+      // dissolve for this navigation only (CSS hook lives in BaseLayout).
+      const root = document.documentElement;
+      root.classList.add('vt-instant');
+      document.addEventListener(
+        'astro:page-load',
+        () => root.classList.remove('vt-instant'),
+        { once: true }
+      );
       const { navigate } = await import('astro:transitions/client');
       navigate('/contact');
     }
@@ -797,8 +825,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         separator.classList.add('visible');
         breadcrumb.textContent = sectionName;
       } else {
-        // Always create fresh scramble instance to avoid stale state
-        textScramble = new TextScramble(breadcrumb);
+        // Always create fresh scramble instance to avoid stale state.
+        // Spreads tuned so the effect resolves in ~0.9s — the near-1s scramble
+        // is a deliberate signature moment, just a touch tighter than default.
+        textScramble = new TextScramble(breadcrumb, {
+          startSpread: 18,
+          minDuration: 18,
+          durationSpread: 18,
+        });
         // Force browser to render opacity:0 before transitioning
         void separator.offsetWidth;
         requestAnimationFrame(() => {

@@ -53,7 +53,13 @@
   }
 
   .lightbox.is-animating {
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s var(--ease-out);
+  }
+
+  /* Dismissal snaps faster than the entrance */
+  .lightbox.is-closing,
+  .lightbox.is-closing .lightbox-image {
+    transition-duration: 0.2s;
   }
 
   .lightbox.is-open {
@@ -115,13 +121,17 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm);
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, transform 150ms var(--ease-out);
     z-index: 10;
   }
 
   .lightbox-close:hover,
   .lightbox-close:focus-visible {
     background-color: var(--color-surface-active);
+  }
+
+  .lightbox-close:active {
+    transform: scale(0.95);
   }
 
   .lightbox-image {
@@ -138,12 +148,21 @@
   }
 
   .lightbox.is-animating .lightbox-image {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
   }
 
   .lightbox.is-open .lightbox-image {
     opacity: 1;
     transform: scale(1);
+  }
+
+  /* Prev/next crossfade: fade out, swap src, fade back in */
+  .lightbox.is-open .lightbox-image.is-swapping {
+    opacity: 0;
+  }
+
+  .lightbox.is-animating .lightbox-image.is-swapping {
+    transition-duration: 150ms;
   }
 
   .lightbox-controls {
@@ -166,13 +185,17 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm);
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, transform 150ms var(--ease-out);
     flex-shrink: 0;
   }
 
   .lightbox-nav:hover,
   .lightbox-nav:focus-visible {
     background-color: var(--color-surface-active);
+  }
+
+  .lightbox-nav:active {
+    transform: scale(0.95);
   }
 
   .lightbox-nav:disabled {
@@ -226,7 +249,8 @@
     }
 
     .lightbox-image,
-    .lightbox.is-animating .lightbox-image {
+    .lightbox.is-animating .lightbox-image,
+    .lightbox.is-open .lightbox-image.is-swapping {
       transition: none;
       opacity: 1;
       transform: scale(1);
@@ -276,6 +300,8 @@
     let currentIndex = 0;
     let triggerElement: HTMLElement | null = null;
     let isClosing = false;
+    let swapToken = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     function collectImages(): LightboxImage[] {
       const proseImages = document.querySelectorAll('.prose-content img');
@@ -288,17 +314,55 @@
       });
     }
 
-    function updateDisplay() {
+    // Preload neighbours so arrow navigation feels instant
+    function preloadNeighbors() {
+      [currentIndex - 1, currentIndex + 1].forEach((i) => {
+        const neighbor = images[i];
+        if (neighbor) {
+          const preload = new Image();
+          preload.src = neighbor.src;
+        }
+      });
+    }
+
+    function updateDisplay(animate = false) {
       if (images.length === 0) return;
 
       const current = images[currentIndex];
-      image.src = current.src;
-      image.alt = current.alt;
-      caption.textContent = current.alt;
+      const applyImage = () => {
+        image.src = current.src;
+        image.alt = current.alt;
+        caption.textContent = current.alt;
+      };
 
       // Update nav button visibility (hide if at boundary)
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex === images.length - 1;
+
+      if (!animate || reducedMotion.matches) {
+        applyImage();
+        preloadNeighbors();
+        return;
+      }
+
+      // Crossfade: fade out (150ms via .is-swapping), swap, fade back in.
+      // The token invalidates pending swaps when arrows are pressed rapidly,
+      // so the image stays faded until the final destination is ready.
+      const token = ++swapToken;
+      image.classList.add('is-swapping');
+      setTimeout(() => {
+        if (token !== swapToken) return;
+        applyImage();
+        const reveal = () => {
+          if (token === swapToken) image.classList.remove('is-swapping');
+        };
+        if (image.decode) {
+          image.decode().then(reveal, reveal);
+        } else {
+          reveal();
+        }
+        preloadNeighbors();
+      }, 150);
     }
 
     function openLightbox(index: number, trigger: HTMLElement) {
@@ -308,8 +372,10 @@
       currentIndex = Math.max(0, Math.min(index, images.length - 1));
       triggerElement = trigger;
 
-      // Reset animation state
-      dialog.classList.remove('is-open', 'is-animating');
+      // Reset animation state (including a swap that was mid-flight on close)
+      swapToken++;
+      image.classList.remove('is-swapping');
+      dialog.classList.remove('is-open', 'is-animating', 'is-closing');
 
       updateDisplay();
 
@@ -332,12 +398,13 @@
     function closeLightbox() {
       if (isClosing) return;
       isClosing = true;
+      dialog.classList.add('is-closing');
       dialog.classList.remove('is-open');
 
-      // Wait for animation to complete before closing
+      // Wait for the (faster) exit transition to complete before closing
       setTimeout(() => {
         dialog.close();
-        dialog.classList.remove('is-animating');
+        dialog.classList.remove('is-animating', 'is-closing');
         isClosing = false;
         // Restore body scroll
         document.body.classList.remove('scroll-lock');
@@ -346,20 +413,20 @@
           triggerElement.focus();
           triggerElement = null;
         }
-      }, 300);
+      }, 200);
     }
 
     function showPrev() {
       if (currentIndex > 0) {
         currentIndex--;
-        updateDisplay();
+        updateDisplay(true);
       }
     }
 
     function showNext() {
       if (currentIndex < images.length - 1) {
         currentIndex++;
-        updateDisplay();
+        updateDisplay(true);
       }
     }
 

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CascadeAnimation from '../components/CascadeAnimation.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import HeroBand from '../components/about/HeroBand.astro';
 import { personSchema } from '../utils/schemas';
@@ -80,6 +81,7 @@ const schemas = [personSchema, profilePageSchema, aboutPageSchema];
       </section>
     </div>
   </main>
+  <CascadeAnimation selector=".hero" />
 </BaseLayout>
 
 <style>

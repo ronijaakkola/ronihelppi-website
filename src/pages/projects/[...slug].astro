@@ -268,8 +268,14 @@ const schemas = [
     line-height: 1;
     color: var(--color-text-secondary);
     text-decoration: none;
-    transition: border-color 100ms ease, color 100ms ease;
+    /* filter is in the list so .meta-link-primary's brightness hover fades
+       like the header contact button instead of snapping */
+    transition: border-color 100ms ease, color 100ms ease, filter 150ms ease, transform 150ms var(--ease-out);
     width: fit-content;
+  }
+
+  .meta-link:active {
+    transform: scale(0.97);
   }
 
   .meta-link:hover,

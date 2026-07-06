@@ -113,6 +113,36 @@ const alt =
     object-position: 50% 15%;
   }
 
+  /* Portrait entrance — plays on full page loads only (CascadeAnimation stamps
+     .cascade-animate; client-side navigations already dissolve the page in).
+     A photographic focus-pull: fade + the cascade's 8px rise while the blur
+     resolves to sharp, delayed 100ms so the copy lands first. `backwards`
+     holds the hidden from-state through the delay. Total stays within the
+     700ms animation window the accessibility tests wait for. Without JS the
+     class is never added and the photo simply shows. */
+  @keyframes photo-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .hero.cascade-animate .hero-photo {
+    animation: photo-reveal 0.6s var(--ease-out) 100ms backwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero.cascade-animate .hero-photo {
+      animation: none;
+    }
+  }
+
   /* ---- Mobile: a compact framed print floated beside the heading; the intro
          wraps around it and continues full-width below. Heading reads first. ---- */
   @media (max-width: 720px) {

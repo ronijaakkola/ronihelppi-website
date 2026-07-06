@@ -154,6 +154,40 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
         document.addEventListener('astro:after-swap', function () {
           apply(resolve());
         });
+
+        // Smooth scrolling (global.css) is for in-page anchor jumps only.
+        // Suspend it around router navigations so Astro's scroll restoration
+        // (history back/forward) stays instant.
+        document.addEventListener('astro:before-preparation', function () {
+          document.documentElement.classList.add('is-navigating');
+        });
+        document.addEventListener('astro:page-load', function () {
+          document.documentElement.classList.remove('is-navigating');
+        });
+
+        // In-page anchor clicks (heading rail, TOC card, heading anchors):
+        // update the URL with replaceState instead of pushing a history entry,
+        // so the Back button always leaves the page rather than stepping back
+        // through every heading visited. Capture phase so this wins over the
+        // Astro router's own click handler (it skips defaultPrevented events).
+        document.addEventListener(
+          'click',
+          function (e) {
+            if (e.defaultPrevented || e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var el = e.target instanceof Element ? e.target : null;
+            var link = el && el.closest('a[href^="#"]');
+            if (!link) return;
+            var id = decodeURIComponent(link.getAttribute('href').slice(1));
+            var target = id ? document.getElementById(id) : null;
+            if (!target) return;
+            e.preventDefault();
+            history.replaceState(history.state, '', '#' + id);
+            // Follows CSS scroll-behavior: smooth unless reduced motion.
+            target.scrollIntoView();
+          },
+          true
+        );
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -242,7 +276,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     color: var(--color-button-text);
     text-decoration: none;
     opacity: 0;
-    transition: top 0.2s ease, opacity 0.2s ease;
+    /* No transition: the skip link is keyboard-only and must appear instantly */
   }
 
   .skip-link:focus {
@@ -326,6 +360,16 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     view-transition-name: none !important;
   }
 
+  /* Keyboard-initiated navigation (the C shortcut) skips the page transition
+     entirely — keyboard actions should feel instant. The class is stamped by
+     the shortcut handler in Header and cleared on the next page load. */
+  html.vt-instant::view-transition-group(*),
+  html.vt-instant::view-transition-image-pair(*),
+  html.vt-instant::view-transition-old(*),
+  html.vt-instant::view-transition-new(*) {
+    animation: none !important;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     @keyframes dissolve-in {
       from {
@@ -345,12 +389,15 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
       }
     }
 
+    /* Both halves use a strong ease-out so the incoming page shows up
+       immediately — ease-in on the new snapshot delays the moment the user
+       is watching most and made every navigation feel slower than it is. */
     ::view-transition-old(root) {
-      animation: dissolve-out 0.3s ease-out;
+      animation: dissolve-out 0.25s var(--ease-out);
     }
 
     ::view-transition-new(root) {
-      animation: dissolve-in 0.3s ease-in;
+      animation: dissolve-in 0.25s var(--ease-out);
     }
 
     /* Theme toggle only (html.theme-transition): iOS-style circular reveal.
