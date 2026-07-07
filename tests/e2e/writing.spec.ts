@@ -48,21 +48,21 @@ test.describe('Post Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/writing/"]').first().click();
 
-    // Should have the logo link back to home
-    const backLink = page.locator('.logo');
+    const backLink = page.getByRole('link', { name: 'Back to writing' });
     await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute('href', '/writing');
+    await expect(backLink).toHaveAttribute('aria-label', 'Back to writing');
+    await expect(backLink.locator('.back-link-label')).toHaveText('Back');
   });
 
-  test('should navigate back to home when clicking back link', async ({ page }) => {
+  test('should navigate back to writing index when clicking back link', async ({ page }) => {
     await page.goto('/');
     await page.locator('a[href^="/writing/"]').first().click();
 
-    // Click logo to go back home
-    const backLink = page.locator('.logo');
+    const backLink = page.getByRole('link', { name: 'Back to writing' });
     await backLink.click();
 
-    // Should be back on home page
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/writing');
   });
 
   test('should render markdown content as HTML', async ({ page }) => {

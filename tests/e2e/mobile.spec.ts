@@ -221,6 +221,30 @@ test.describe('Mobile Layout', () => {
     }
   });
 
+  test('post back link is visible and usable on mobile', async ({ page }) => {
+    await page.goto('/writing/a-practical-guide-to-writing-your-own-obsidian-skills/');
+
+    const backLink = page.getByRole('link', { name: 'Back to writing' });
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute('aria-label', 'Back to writing');
+    await expect(backLink.locator('.back-link-label')).toHaveText('Back');
+
+    await backLink.click();
+    await expect(page).toHaveURL('/writing');
+  });
+
+  test('project back link is visible and usable on mobile', async ({ page }) => {
+    await page.goto('/projects/resokill/');
+
+    const backLink = page.getByRole('link', { name: 'Back to projects' });
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute('aria-label', 'Back to projects');
+    await expect(backLink.locator('.back-link-label')).toHaveText('Back');
+
+    await backLink.click();
+    await expect(page).toHaveURL('/projects');
+  });
+
   test('filter chips are usable on mobile', async ({ page }) => {
     await page.goto('/projects');
 

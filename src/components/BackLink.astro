@@ -1,0 +1,67 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  ariaLabel?: string;
+}
+
+const { href, label, ariaLabel = label } = Astro.props;
+---
+
+<a href={href} class="back-link" aria-label={ariaLabel}>
+  <svg
+    class="back-link-icon"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+  >
+    <path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+  <span class="back-link-label">{label}</span>
+</a>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 100ms ease;
+  }
+
+  .back-link-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-body-tight);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-text-secondary);
+    text-underline-offset: 2px;
+    transition: text-decoration-color 100ms ease;
+  }
+
+  .back-link-icon {
+    flex-shrink: 0;
+    transition: transform 140ms ease;
+  }
+
+  .back-link:hover,
+  .back-link:focus-visible {
+    color: var(--color-text-primary);
+    text-decoration: none;
+  }
+
+  .back-link:hover .back-link-label,
+  .back-link:focus-visible .back-link-label {
+    text-decoration-color: var(--color-text-primary);
+  }
+
+  .back-link:hover .back-link-icon,
+  .back-link:focus-visible .back-link-icon {
+    transform: translateX(-3px);
+  }
+</style>

@@ -48,21 +48,21 @@ test.describe('Project Pages', () => {
     await page.goto('/');
     await page.locator('a[href^="/projects/"]').first().click();
 
-    // Should have a link back to home (either header logo or explicit back link)
-    const backLink = page.locator('a[href="/"]').first();
+    const backLink = page.getByRole('link', { name: 'Back to projects' });
     await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute('href', '/projects');
+    await expect(backLink).toHaveAttribute('aria-label', 'Back to projects');
+    await expect(backLink.locator('.back-link-label')).toHaveText('Back');
   });
 
-  test('should navigate back to home when clicking back link', async ({ page }) => {
+  test('should navigate back to project index when clicking back link', async ({ page }) => {
     await page.goto('/');
     await page.locator('a[href^="/projects/"]').first().click();
 
-    // Click back link (use first match - header logo)
-    const backLink = page.locator('a[href="/"]').first();
+    const backLink = page.getByRole('link', { name: 'Back to projects' });
     await backLink.click();
 
-    // Should be back on home page
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/projects');
   });
 
   test('should display meta card if meta entries are present', async ({ page }) => {

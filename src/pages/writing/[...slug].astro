@@ -2,6 +2,7 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BackLink from '../../components/BackLink.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import HeadingRail from '../../components/HeadingRail.astro';
@@ -95,7 +96,11 @@ const schemas = [
   mdPath={`/writing/${post.id}.md`}
 >
   <main id="main-content" class="main">
-    <article class="layout">
+    <article class="layout detail-layout">
+      <div class="detail-back-nav">
+        <BackLink href="/writing" label="Back" ariaLabel="Back to writing" />
+      </div>
+
       <!-- Post Heading -->
       <header class="post-header">
         <div class="post-title-group">
@@ -175,6 +180,18 @@ const schemas = [
 </BaseLayout>
 
 <style>
+  .detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--gap-sm);
+    align-items: start;
+  }
+
+  .detail-back-nav {
+    width: 100%;
+    max-width: var(--content-width);
+  }
+
   .post-header {
     display: flex;
     flex-direction: column;
@@ -371,6 +388,27 @@ const schemas = [
   @media (prefers-reduced-motion: reduce) {
     .writing-cursor.placed {
       display: none;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .detail-layout {
+      grid-template-columns: 132px minmax(0, 1fr);
+      column-gap: var(--gap-md);
+    }
+
+    .detail-back-nav {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--header-height) + var(--gap-sm));
+      max-width: none;
+    }
+
+    .post-header,
+    .prose {
+      grid-column: 2;
     }
   }
 </style>
