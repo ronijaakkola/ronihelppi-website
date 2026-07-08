@@ -30,6 +30,47 @@ test.describe('Theme switching', () => {
     expect(bg).toBe('rgb(246, 244, 243)');
   });
 
+  test('toggle icon swaps with a subtle blur morph', async ({ page }) => {
+    await page.goto('/');
+
+    const iconStyles = () =>
+      page.evaluate(() => {
+        const read = (selector: string) => {
+          const icon = document.querySelector(selector);
+          if (!icon) throw new Error(`Missing icon: ${selector}`);
+          const style = getComputedStyle(icon);
+          return {
+            opacity: style.opacity,
+            filter: style.filter,
+            transitionProperty: style.transitionProperty,
+          };
+        };
+
+        return {
+          sun: read('.theme-icon-sun'),
+          moon: read('.theme-icon-moon'),
+        };
+      });
+
+    const before = await iconStyles();
+    expect(before.sun.opacity).toBe('1');
+    expect(before.sun.filter).toBe('none');
+    expect(before.moon.opacity).toBe('0');
+    expect(before.moon.filter).toMatch(/blur/);
+    expect(before.sun.transitionProperty).toContain('filter');
+    expect(before.moon.transitionProperty).toContain('filter');
+
+    await page.locator('#theme-toggle').click();
+    await expect(html(page)).toHaveAttribute('data-theme', 'light');
+    await page.waitForTimeout(250);
+
+    const after = await iconStyles();
+    expect(after.sun.opacity).toBe('0');
+    expect(after.sun.filter).toMatch(/blur/);
+    expect(after.moon.opacity).toBe('1');
+    expect(after.moon.filter).toBe('none');
+  });
+
   test('circular-reveal wipe stamps click-point vars and flips without errors', async ({
     page,
   }) => {
