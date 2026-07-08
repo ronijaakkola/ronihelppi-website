@@ -4,6 +4,9 @@ import { join } from 'node:path';
 
 describe('Build Output Validation', () => {
   const distPath = join(process.cwd(), 'dist');
+  const expectedPreviewBase = process.env.EXPECT_PREVIEW_BASE;
+  const expectedPreviewSite = process.env.EXPECT_PREVIEW_SITE;
+  const expectedAstroAssetPrefix = expectedPreviewBase ? `${expectedPreviewBase}/_astro/` : '/_astro/';
 
   // Note: These tests assume the build has been run before testing
   // In CI, the build step should run before tests
@@ -207,7 +210,7 @@ describe('Build Output Validation', () => {
           .filter((src) => src.startsWith('/'));
 
         expect(imageSources.length).toBeGreaterThan(0);
-        expect(imageSources.every((src) => src.startsWith('/_astro/'))).toBe(true);
+        expect(imageSources.every((src) => src.startsWith(expectedAstroAssetPrefix))).toBe(true);
       }
     });
 
@@ -218,7 +221,7 @@ describe('Build Output Validation', () => {
 
       expect(heroImageTag).toBeDefined();
       expect(heroImageTag).toContain('class="hero-image"');
-      expect(heroImageTag).toMatch(/src="\/_astro\//);
+      expect(heroImageTag).toContain(`src="${expectedAstroAssetPrefix}`);
       expect(heroImageTag).not.toContain('/images/');
     });
 
@@ -228,7 +231,7 @@ describe('Build Output Validation', () => {
       const bodyImageTag = content.match(/<img[^>]+alt="An example where Claude Code automatically invokes a skill based on my messages\."[^>]*>|<img[^>]*alt="An example where Claude Code automatically invokes a skill based on my messages\."[^>]+>/)?.[0];
 
       expect(bodyImageTag).toBeDefined();
-      expect(bodyImageTag).toMatch(/src="\/_astro\//);
+      expect(bodyImageTag).toContain(`src="${expectedAstroAssetPrefix}`);
       expect(bodyImageTag).not.toContain('/images/');
     });
   });
@@ -237,6 +240,40 @@ describe('Build Output Validation', () => {
     it('favicon exists', async () => {
       const faviconPath = join(distPath, 'favicon.svg');
       await expect(access(faviconPath)).resolves.not.toThrow();
+    });
+  });
+
+  describe('Preview Build Output', () => {
+    const isPreviewBuild = Boolean(expectedPreviewBase && expectedPreviewSite);
+
+    it('rewrites canonical URLs, internal links, and asset paths for preview builds', async () => {
+      if (!isPreviewBuild) {
+        return;
+      }
+
+      const indexPath = join(distPath, 'index.html');
+      const content = await readFile(indexPath, 'utf-8');
+
+      expect(content).toContain(`<link rel="canonical" href="${expectedPreviewSite}"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/projects"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/writing"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/contact"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/rss.xml"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/favicon.svg"`);
+      expect(content).toContain(`src="${expectedPreviewBase}/_astro/`);
+    });
+
+    it('rewrites article canonicals and related links for preview builds', async () => {
+      if (!isPreviewBuild) {
+        return;
+      }
+
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const content = await readFile(postPath, 'utf-8');
+
+      expect(content).toContain(`<link rel="canonical" href="${expectedPreviewSite}writing/a-practical-guide-to-writing-your-own-obsidian-skills/"`);
+      expect(content).toContain(`href="${expectedPreviewBase}/about"`);
+      expect(content).toContain('rel="author"');
     });
   });
 

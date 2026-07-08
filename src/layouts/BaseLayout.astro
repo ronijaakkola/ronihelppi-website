@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Lightbox from '../components/Lightbox.astro';
+import { stripSiteBase, toSitePath, toSiteUrl } from '../utils/site-config';
 
 interface Props {
   title: string;
@@ -25,11 +26,18 @@ const {
   schemas = [],
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(image || '/og-default.png', Astro.site).href;
+const sitePathname = stripSiteBase(Astro.url.pathname, Astro.site);
+const canonicalURL = toSiteUrl(sitePathname, Astro.site);
+const ogImage = toSiteUrl(image || '/og-default.png', Astro.site);
+const aboutUrl = toSiteUrl('/about', Astro.site);
+const faviconPath = toSitePath('/favicon.svg', Astro.site);
+const faviconIcoPath = toSitePath('/favicon.ico', Astro.site);
+const appleTouchIconPath = toSitePath('/apple-touch-icon.png', Astro.site);
+const rssPath = toSitePath('/rss.xml', Astro.site);
+const llmsPath = toSitePath('/llms.txt', Astro.site);
 
 // Auto-generate BreadcrumbList from URL path
-const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const pathSegments = sitePathname.split('/').filter(Boolean);
 const breadcrumbItems = [
   { '@type': 'ListItem', position: 1, name: 'Home', item: Astro.site?.href }
 ];
@@ -59,13 +67,13 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b0b0b" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href={faviconPath} />
+    <link rel="icon" type="image/x-icon" href={faviconIcoPath} />
+    <link rel="apple-touch-icon" href={appleTouchIconPath} />
 
     <!-- SEO -->
-    <link rel="alternate" type="application/rss+xml" title="Roni Helppi" href="/rss.xml" />
-    <link rel="alternate" type="text/plain" title="LLM content" href="/llms.txt" />
+    <link rel="alternate" type="application/rss+xml" title="Roni Helppi" href={rssPath} />
+    <link rel="alternate" type="text/plain" title="LLM content" href={llmsPath} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="description" content={description} />
     <meta name="author" content="Roni Helppi" />
@@ -79,7 +87,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
-    {type === 'article' && <meta property="article:author" content="https://ronihelppi.com/about" />}
+    {type === 'article' && <meta property="article:author" content={aboutUrl} />}
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
@@ -120,7 +128,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
             <span class="footer-sep" aria-hidden="true">/</span>
             <a href="https://www.linkedin.com/in/ronihelppi/" target="_blank" rel="noopener noreferrer">linkedin<span class="visually-hidden"> (opens in new tab)</span></a>
             <span class="footer-sep" aria-hidden="true">/</span>
-            <a href="/rss.xml">rss</a>
+            <a href={rssPath}>rss</a>
           </nav>
         </div>
       </footer>

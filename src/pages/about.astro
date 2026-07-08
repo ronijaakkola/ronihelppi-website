@@ -1,7 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
-import { personSchema } from '../utils/schemas';
+import { getPersonSchema } from '../utils/schemas';
+import { toSitePath, toSiteUrl } from '../utils/site-config';
+
+const personSchema = getPersonSchema(Astro.site);
 
 const experience = [
   { date: '08/2022–', datetime: '2022-08', company: 'Reaktor', role: 'Senior Product Designer' },
@@ -21,7 +24,7 @@ const aboutPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'About Roni Helppi',
-  url: 'https://ronihelppi.com/about/',
+  url: toSiteUrl('/about/', Astro.site),
   about: personSchema,
 };
 
@@ -46,7 +49,7 @@ const schemas = [personSchema, profilePageSchema, aboutPageSchema];
               On my own time, I'm deep in AI, generative tools, and pushing the edges of what design and code can do together.
             </p>
             <p class="intro-secondary">
-              This site is where that overlap ends up: <a href="/projects">projects</a> when the work wants a case study, and <a href="/writing">writing</a> when it wants a longer argument. If you're trying to figure out what I actually do, that's the shortest honest answer.
+              This site is where that overlap ends up: <a href={toSitePath('/projects', Astro.site)}>projects</a> when the work wants a case study, and <a href={toSitePath('/writing', Astro.site)}>writing</a> when it wants a longer argument. If you're trying to figure out what I actually do, that's the shortest honest answer.
             </p>
           </section>
 
@@ -87,7 +90,7 @@ const schemas = [personSchema, profilePageSchema, aboutPageSchema];
               <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>.
             </p>
             <p class="contact-text contact-text-secondary">
-              For the quick version, the <a href="/contact">contact page</a> has the relevant links in one place.
+              For the quick version, the <a href={toSitePath('/contact', Astro.site)}>contact page</a> has the relevant links in one place.
             </p>
           </section>
         </div>

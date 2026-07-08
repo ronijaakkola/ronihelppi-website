@@ -101,7 +101,16 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push to m
 
 1. **test** job: Type checking, unit tests, build, build validation tests, E2E tests
 2. **lighthouse** job (after test passes): Lighthouse CI quality validation
-3. **deploy** job (future, after lighthouse passes): GitHub Pages deployment
+3. **deploy** job (after lighthouse passes): Deploy the built site to the `gh-pages` branch while preserving PR previews under `pr-preview/`
+
+The PR preview workflow (`.github/workflows/pr-preview.yml`) runs on pull requests:
+
+1. Builds the site with a PR-specific `BASE_PATH`
+2. Deploys the preview to `gh-pages/pr-preview/pr-<number>/`
+3. Comments the preview URL on the PR and updates it on new commits
+4. Removes the preview when the PR closes
+
+Preview URLs are likely public because they live on the GitHub Pages site. The repo must be configured to deploy Pages from the `gh-pages` branch for this to work.
 
 ### Lighthouse CI
 
@@ -190,4 +199,4 @@ test('should have no accessibility violations', async ({ page }) => {
 - Accessibility tests wait 700ms for cascade animations to complete
 - Mobile tests use viewport sizes: 375x667 (phone), 768x1024 (tablet)
 - All tests run in CI before deployment
-- CI only runs on pushes to master (pre-commit hook handles local validation)
+- CI runs on pushes to master, and PR previews run on pull requests (pre-commit hook handles local validation)

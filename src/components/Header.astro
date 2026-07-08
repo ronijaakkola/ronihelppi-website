@@ -1,22 +1,30 @@
 ---
 import KeyboardShortcut from './KeyboardShortcut.astro';
+import { toSitePath } from '../utils/site-config';
+
+const homePath = toSitePath('/', Astro.site);
+const aboutPath = toSitePath('/about', Astro.site);
+const projectsPath = toSitePath('/projects', Astro.site);
+const writingPath = toSitePath('/writing', Astro.site);
+const contactPath = toSitePath('/contact', Astro.site);
+const rssPath = toSitePath('/rss.xml', Astro.site);
 ---
 
 <header class="header">
   <div class="nav">
     <nav class="logo-breadcrumb" aria-label="Breadcrumb">
-      <a href="/" class="logo" aria-label="Roni Helppi, home">Roni Helppi</a>
+      <a href={homePath} class="logo" aria-label="Roni Helppi, home">Roni Helppi</a>
       <span class="breadcrumb-separator" id="breadcrumb-separator" aria-hidden="true"></span>
-      <a href="/" class="breadcrumb" id="breadcrumb"></a>
+      <a href={homePath} class="breadcrumb" id="breadcrumb"></a>
     </nav>
 
     <nav class="nav-links" aria-label="Main">
-      <a href="/about" class="nav-link">About</a>
-      <a href="/projects" class="nav-link">Projects</a>
-      <a href="/writing" class="nav-link">Writing</a>
+      <a href={aboutPath} class="nav-link">About</a>
+      <a href={projectsPath} class="nav-link">Projects</a>
+      <a href={writingPath} class="nav-link">Writing</a>
     </nav>
 
-    <a href="/contact" class="contact-button">
+    <a href={contactPath} class="contact-button">
       <span>Contact</span>
       <KeyboardShortcut key="C" label="Press C to go to contact page" />
     </a>
@@ -37,14 +45,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 <!-- Mobile Menu Overlay -->
 <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
   <nav class="mobile-menu-nav" aria-label="Mobile navigation">
-    <a href="/" class="mobile-menu-link">Home</a>
-    <a href="/about" class="mobile-menu-link">About</a>
-    <a href="/projects" class="mobile-menu-link">Projects</a>
-    <a href="/writing" class="mobile-menu-link">Writing</a>
-    <a href="/contact" class="mobile-menu-link">Contact</a>
+    <a href={homePath} class="mobile-menu-link">Home</a>
+    <a href={aboutPath} class="mobile-menu-link">About</a>
+    <a href={projectsPath} class="mobile-menu-link">Projects</a>
+    <a href={writingPath} class="mobile-menu-link">Writing</a>
+    <a href={contactPath} class="mobile-menu-link">Contact</a>
   </nav>
   <div class="mobile-menu-footer">
-    <a href="/rss.xml" class="mobile-menu-rss">RSS</a>
+    <a href={rssPath} class="mobile-menu-rss">RSS</a>
   </div>
 </div>
 
@@ -394,9 +402,31 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 </style>
 
 <script>
+  const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+  function stripBasePath(path: string) {
+    if (!basePath) {
+      return path;
+    }
+
+    if (path === basePath) {
+      return '/';
+    }
+
+    return path.startsWith(basePath) ? path.slice(basePath.length) || '/' : path;
+  }
+
+  function toBaseAwarePath(path: string) {
+    if (path === '/') {
+      return basePath ? `${basePath}/` : '/';
+    }
+
+    return `${basePath}${path}`;
+  }
+
   // Update active navigation state based on current URL
   function updateActiveNavLinks() {
-    const pathname = window.location.pathname;
+    const pathname = stripBasePath(window.location.pathname);
 
     // Get all nav links (desktop and mobile)
     const desktopLinks = document.querySelectorAll('.nav-link');
@@ -423,13 +453,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       links.forEach(link => {
         const href = link.getAttribute('href');
         if (!href) return;
+        const normalizedHref = stripBasePath(href);
 
         // Exact match for home
-        if (href === '/' && activeSection === '/') {
+        if (normalizedHref === '/' && activeSection === '/') {
           link.setAttribute('aria-current', 'page');
         }
         // Section match for other pages
-        else if (href !== '/' && activeSection === href) {
+        else if (normalizedHref !== '/' && activeSection === normalizedHref) {
           link.setAttribute('aria-current', 'page');
         }
       });
@@ -549,7 +580,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 
     if (e.key === 'c' || e.key === 'C') {
       const { navigate } = await import('astro:transitions/client');
-      navigate('/contact');
+      navigate(toBaseAwarePath('/contact'));
     }
   });
 
@@ -575,7 +606,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     const breadcrumb = document.getElementById('breadcrumb') as HTMLAnchorElement | null;
     if (!separator || !breadcrumb) return;
 
-    const pathname = window.location.pathname;
+    const pathname = stripBasePath(window.location.pathname);
 
     // No breadcrumb on 404 pages
     const is404Page = document.querySelector('[data-page-type="404"]') !== null;
@@ -618,7 +649,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     // Only animate if section is actually changing
     if (sectionName !== currentBreadcrumbText) {
       separator.textContent = '/';
-      breadcrumb.href = `/${section}`;
+      breadcrumb.href = toBaseAwarePath(`/${section}`);
 
       if (prefersReducedMotion()) {
         separator.classList.add('visible');
@@ -638,7 +669,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       // Restore without animation if view transitions cleared the DOM
       separator.textContent = '/';
       separator.classList.add('visible');
-      breadcrumb.href = `/${section}`;
+      breadcrumb.href = toBaseAwarePath(`/${section}`);
       breadcrumb.textContent = sectionName;
     }
   }

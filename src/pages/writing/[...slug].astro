@@ -7,6 +7,7 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 import { getTitleFromEntry } from '../../utils/title';
 import { generateDescription } from '../../utils/description';
+import { toSitePath, toSiteUrl } from '../../utils/site-config';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -44,7 +45,9 @@ const heroImageUrl = heroImage?.src;
 
 const description = post.data.description || generateDescription(post.body || '');
 
-const postURL = new URL(`/writing/${post.id}/`, Astro.site).href;
+const postURL = toSiteUrl(`/writing/${post.id}/`, Astro.site);
+const homeUrl = toSiteUrl('/', Astro.site);
+const aboutPath = toSitePath('/about', Astro.site);
 
 const dateModified = post.data.dateModified || post.data.date;
 
@@ -63,14 +66,14 @@ const schemas = [
     author: {
       '@type': 'Person',
       name: 'Roni Helppi',
-      url: 'https://ronihelppi.com',
+      url: homeUrl,
     },
     publisher: {
       '@type': 'Person',
       name: 'Roni Helppi',
-      url: 'https://ronihelppi.com',
+      url: homeUrl,
     },
-    ...(heroImageUrl && { image: new URL(heroImageUrl, Astro.site).href }),
+    ...(heroImageUrl && { image: toSiteUrl(heroImageUrl, Astro.site) }),
     ...(post.data.tags && { keywords: post.data.tags }),
   },
 ];
@@ -96,7 +99,7 @@ const schemas = [
         </div>
         <div class="post-meta-row">
           <div class="post-meta">
-            <a href="/about" rel="author" class="post-author">Roni Helppi</a>
+            <a href={aboutPath} rel="author" class="post-author">Roni Helppi</a>
             <span class="post-meta-details">
               <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
               <span class="post-meta-separator" aria-hidden="true">·</span>
@@ -144,7 +147,7 @@ const schemas = [
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M11.5202 10.1465C11.7155 10.3418 11.7155 10.6584 11.5202 10.8537L9.18687 13.187C9.04387 13.33 8.8288 13.3727 8.642 13.2953C8.45513 13.2179 8.33333 13.0357 8.33333 12.8334V8.16675C8.33333 7.96455 8.45513 7.78222 8.642 7.70482C8.8288 7.62742 9.04387 7.67022 9.18687 7.81322L11.5202 10.1465Z" fill="currentColor"/>
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M9.66667 10.5001C9.66667 10.7762 9.4428 11.0001 9.16667 11.0001H7.16667C5.41777 11.0001 4 9.58235 4 7.83342V3.16675C4 2.89061 4.22386 2.66675 4.5 2.66675C4.77614 2.66675 5 2.89061 5 3.16675V7.83342C5 9.03002 5.97005 10.0001 7.16667 10.0001H9.16667C9.4428 10.0001 9.66667 10.2239 9.66667 10.5001Z" fill="currentColor"/>
                     </svg>
-                    <a href={`/writing/${relatedPost.id}`}>
+                    <a href={toSitePath(`/writing/${relatedPost.id}`, Astro.site)}>
                       {getTitleFromEntry(relatedPost)}
                     </a>
                   </li>

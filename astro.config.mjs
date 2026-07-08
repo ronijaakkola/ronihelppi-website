@@ -8,10 +8,14 @@ import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
 import { rehypeImageFigure } from './src/utils/rehype-image-figure';
 import { remarkCodeTitle } from './src/utils/remark-code-title';
 import { remarkToc } from './src/utils/remark-toc';
+import { getSiteConfig } from './src/utils/site-config';
+
+const { site, base } = getSiteConfig(process.env);
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://ronihelppi.com',
+  site,
+  base,
   devToolbar: { enabled: false },
   integrations: [sitemap()],
   markdown: {

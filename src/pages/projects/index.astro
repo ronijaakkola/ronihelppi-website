@@ -6,6 +6,7 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getTitleFromEntry } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
+import { toSitePath, toSiteUrl } from '../../utils/site-config';
 
 const projects = sortByDateDesc(await getCollection('projects'));
 
@@ -45,12 +46,12 @@ const schemas = [
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Projects',
-    url: 'https://ronihelppi.com/projects/',
+    url: toSiteUrl('/projects/', Astro.site),
     description: 'Selected projects and case studies by Roni Helppi across UX design, games, and creative technology.',
     hasPart: projects.map((item) => ({
       '@type': 'CreativeWork',
       name: getTitleFromEntry(item),
-      url: new URL(`/projects/${item.id}/`, Astro.site).href,
+      url: toSiteUrl(`/projects/${item.id}/`, Astro.site),
     })),
   },
 ];
@@ -70,7 +71,7 @@ const schemas = [
             A mix of shipped client work, experiments, and games. Some are polished case studies, some are smaller builds that were worth documenting because they taught me something specific.
           </p>
           <p>
-            If you want the broader throughline behind the work, start with <a href="/about">about</a>. If you want the written version of the same thinking, head to <a href="/writing">writing</a>.
+            If you want the broader throughline behind the work, start with <a href={toSitePath('/about', Astro.site)}>about</a>. If you want the written version of the same thinking, head to <a href={toSitePath('/writing', Astro.site)}>writing</a>.
           </p>
         </div>
         <section class="projects-section">
@@ -107,7 +108,7 @@ const schemas = [
 
             return (
               <a
-                href={`/projects/${item.id}`}
+                href={toSitePath(`/projects/${item.id}`, Astro.site)}
                 class:list={['grid-item', { 'cascade-item': !isAboveTheFoldCandidate }]}
                 data-categories={categories.join(',')}
                 style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
