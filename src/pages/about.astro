@@ -2,8 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import HeroBand from '../components/about/HeroBand.astro';
-import { personSchema } from '../utils/schemas';
+import { getPersonSchema } from '../utils/schemas';
+import { toSitePath, toSiteUrl } from '../utils/site-config';
 import { experience } from '../data/profile';
+
+const personSchema = getPersonSchema(Astro.site);
 
 const profilePageSchema = {
   '@context': 'https://schema.org',
@@ -15,7 +18,7 @@ const aboutPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'About Roni Helppi',
-  url: 'https://ronihelppi.com/about/',
+  url: toSiteUrl('/about/', Astro.site),
   about: personSchema,
 };
 
@@ -68,7 +71,7 @@ const schemas = [personSchema, profilePageSchema, aboutPageSchema];
           <a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">GitHub<span class="visually-hidden"> (opens in new tab)</span></a>.
         </p>
         <p class="contact-text contact-text-secondary">
-          All contact methods can be found on the <a href="/contact">contact page</a>.
+          All contact methods can be found on the <a href={toSitePath('/contact', Astro.site)}>contact page</a>.
         </p>
       </section>
     </div>

@@ -103,7 +103,16 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pull requests a
 
 1. **test** job: Type checking, unit tests, build, build validation tests, E2E tests
 2. **lighthouse** job (pull requests only, optional): Lighthouse CI quality validation
-3. **deploy** job (pushes to `master` only, after test passes): GitHub Pages deployment
+3. **deploy** job (pushes to `master` only, after test passes): Deploy the built site to the `gh-pages` branch while preserving PR previews under `pr-preview/`
+
+The PR preview workflow (`.github/workflows/pr-preview.yml`) runs on pull requests:
+
+1. Builds the site with a PR-specific `BASE_PATH`
+2. Deploys the preview to `gh-pages/pr-preview/pr-<number>/`
+3. Comments the preview URL on the PR and updates it on new commits
+4. Removes the preview when the PR closes
+
+Preview URLs are likely public because they live on the GitHub Pages site. The repo must be configured to deploy Pages from the `gh-pages` branch for this to work.
 
 ### Branch protection
 
