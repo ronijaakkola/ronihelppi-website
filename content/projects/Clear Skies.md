@@ -1,5 +1,6 @@
 ---
 date: 2025-10-06
+order: 2
 description: "A star-gazing game made from scratch completely solo in 48 hours for the Ludum Dare 58 jam Compo category."
 subtitle: "Jam game"
 tags:

@@ -21,6 +21,7 @@ const postsSchema = z.object({
 
 const projectsSchema = z.object({
   date: z.coerce.date(),
+  order: z.number().int().positive().optional(),
   tags: z.array(z.string()).optional(),
   meta: z.array(z.object({
     label: z.string(),
@@ -229,6 +230,39 @@ describe('Content Collection Schemas', () => {
     it('accepts valid date string', () => {
       const result = projectsSchema.parse({ date: '2026-01-30' });
       expect(result.date).toBeInstanceOf(Date);
+    });
+
+    it('accepts optional positive integer order', () => {
+      const result = projectsSchema.parse({
+        date: '2026-01-30',
+        order: 1,
+      });
+
+      expect(result.order).toBe(1);
+    });
+
+    it('works without order field', () => {
+      const result = projectsSchema.parse({
+        date: '2026-01-30',
+      });
+
+      expect(result.order).toBeUndefined();
+    });
+
+    it('rejects invalid project order values', () => {
+      expect(() =>
+        projectsSchema.parse({
+          date: '2026-01-30',
+          order: 0,
+        })
+      ).toThrow();
+
+      expect(() =>
+        projectsSchema.parse({
+          date: '2026-01-30',
+          order: 1.5,
+        })
+      ).toThrow();
     });
 
     it('accepts optional tags array', () => {

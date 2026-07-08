@@ -5,9 +5,9 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getTitleFromEntry } from '../../utils/title';
-import { sortByDateDesc } from '../../utils/sortByDate';
+import { sortProjects } from '../../utils/sortProjects';
 
-const projects = sortByDateDesc(await getCollection('projects'));
+const projects = sortProjects(await getCollection('projects'));
 
 // Extract unique categories from tags
 function getCategoryFromTag(tag: string): string {
