@@ -1,0 +1,100 @@
+---
+import SectionHeading from './SectionHeading.astro';
+
+interface SuggestionItem {
+  href: string;
+  title: string;
+  subheading?: string;
+}
+
+interface Props {
+  heading: string;
+  items: SuggestionItem[];
+}
+
+const { heading, items } = Astro.props;
+const headingId = 'suggestions-heading';
+---
+
+{items.length > 0 && (
+  <section class="suggestions" aria-labelledby={headingId}>
+    <SectionHeading title={heading} id={headingId} />
+    <ul class="suggestions-list">
+      {items.map((item) => (
+        <li class="suggestion-card">
+          <a href={item.href} class="suggestion-link">
+            <span class="suggestion-title">{item.title}</span>
+            {item.subheading && (
+              <span class="suggestion-subheading">{item.subheading}</span>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+    margin-top: var(--gap-section);
+  }
+
+  .suggestions-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--gap-2xs);
+    list-style: none;
+    padding-left: 0;
+  }
+
+  @media (max-width: 600px) {
+    .suggestions-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Lighter relative of .project-meta-card: same border/radius language,
+     but the whole card is a link and reacts on hover/focus. */
+  .suggestion-card {
+    display: flex;
+  }
+
+  .suggestion-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+    width: 100%;
+    padding: var(--gap-xs);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: border-color 100ms ease;
+  }
+
+  .suggestion-link:hover,
+  .suggestion-link:focus-visible {
+    border-color: var(--color-text-primary);
+  }
+
+  .suggestion-link:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  .suggestion-title {
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+    text-decoration-line: underline;
+  }
+
+  .suggestion-subheading {
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-body);
+  }
+</style>

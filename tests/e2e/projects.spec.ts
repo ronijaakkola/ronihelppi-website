@@ -163,4 +163,22 @@ test.describe('Project Pages', () => {
       expect(bodyText).toBeTruthy();
     }
   });
+
+  test('should suggest another project by shared tags', async ({ page }) => {
+    // RESOKILL and Clear Skies both carry the #games tag, so each should
+    // surface the other in the suggestions section.
+    await page.goto('/projects/resokill/');
+
+    const suggestions = page.locator('.suggestions');
+    await expect(suggestions).toBeVisible();
+    await expect(suggestions.getByRole('heading', { name: 'More projects' })).toBeVisible();
+
+    const suggestionLink = suggestions.locator('a.suggestion-link').first();
+    await expect(suggestionLink).toBeVisible();
+
+    const href = await suggestionLink.getAttribute('href');
+    expect(href).toContain('/projects/');
+    // Must not link back to the current project.
+    expect(href).not.toContain('/projects/resokill');
+  });
 });
