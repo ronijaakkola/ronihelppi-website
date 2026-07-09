@@ -1,0 +1,441 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0b0b0b"><!-- Theme init: runs before first paint to avoid a flash of the wrong theme.
+         Dark is the default until the user makes an explicit choice. Keeps the
+         theme correct across Astro View Transitions and updates the browser UI
+         theme-color. Exposes window.__setTheme / __getTheme for the toggle. --><script>
+      (function () {
+        if (window.__themeReady) return;
+        window.__themeReady = true;
+
+        var STORAGE_KEY = 'theme';
+        var THEME_COLORS = { dark: '#0b0b0b', light: '#f6f4f3' };
+
+        function stored() {
+          try {
+            var v = localStorage.getItem(STORAGE_KEY);
+            return v === 'light' || v === 'dark' ? v : null;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        // Explicit choice wins; default to dark when none has been made.
+        function resolve() {
+          return stored() || 'dark';
+        }
+
+        function applyTo(doc, theme) {
+          doc.documentElement.setAttribute('data-theme', theme);
+          var meta = doc.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+        }
+
+        function apply(theme) {
+          applyTo(document, theme);
+          window.dispatchEvent(
+            new CustomEvent('themechange', { detail: { theme: theme } })
+          );
+        }
+
+        window.__getTheme = function () {
+          return document.documentElement.getAttribute('data-theme') || resolve();
+        };
+
+        window.__setTheme = function (theme) {
+          if (theme !== 'light' && theme !== 'dark') return;
+          try {
+            localStorage.setItem(STORAGE_KEY, theme);
+          } catch (e) {}
+
+          // iOS-style circular reveal wipe. The toggle click handler stamps the
+          // click point (--reveal-x/y/r) on <html>; the reveal CSS reads those.
+          // Scoped by the temporary `theme-transition` class so it never
+          // collides with Astro's page-navigation view transitions.
+          var reduceMotion = false;
+          try {
+            reduceMotion = window.matchMedia(
+              '(prefers-reduced-motion: reduce)'
+            ).matches;
+          } catch (e) {}
+
+          if (
+            typeof document.startViewTransition !== 'function' ||
+            reduceMotion
+          ) {
+            // Fallback: instant flip, no animation.
+            apply(theme);
+            return;
+          }
+
+          var root = document.documentElement;
+          root.classList.add('theme-transition');
+          var vt = document.startViewTransition(function () {
+            apply(theme);
+          });
+          var done = function () {
+            root.classList.remove('theme-transition');
+          };
+          vt.finished.then(done, done);
+        };
+
+        // Initial application (before body paints -> no flash).
+        apply(resolve());
+
+        // Stamp the incoming document before it swaps in, so there's no flash
+        // during a View Transition navigation.
+        document.addEventListener('astro:before-swap', function (e) {
+          applyTo(e.newDocument, resolve());
+        });
+
+        // The <html> element is reused across swaps; reassert and notify the
+        // toggle control so its label stays in sync.
+        document.addEventListener('astro:after-swap', function () {
+          apply(resolve());
+        });
+
+        // Smooth scrolling (global.css) is for in-page anchor jumps only.
+        // Suspend it around router navigations so Astro's scroll restoration
+        // (history back/forward) stays instant.
+        document.addEventListener('astro:before-preparation', function () {
+          document.documentElement.classList.add('is-navigating');
+        });
+        document.addEventListener('astro:page-load', function () {
+          document.documentElement.classList.remove('is-navigating');
+        });
+
+        // In-page anchor clicks (heading rail, TOC card, heading anchors):
+        // update the URL with replaceState instead of pushing a history entry,
+        // so the Back button always leaves the page rather than stepping back
+        // through every heading visited. Capture phase so this wins over the
+        // Astro router's own click handler (it skips defaultPrevented events).
+        document.addEventListener(
+          'click',
+          function (e) {
+            if (e.defaultPrevented || e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var el = e.target instanceof Element ? e.target : null;
+            var link = el && el.closest('a[href^="#"]');
+            if (!link) return;
+            var id = decodeURIComponent(link.getAttribute('href').slice(1));
+            var target = id ? document.getElementById(id) : null;
+            if (!target) return;
+            e.preventDefault();
+            history.replaceState(history.state, '', '#' + id);
+            // Follows CSS scroll-behavior: smooth unless reduced motion.
+            target.scrollIntoView();
+          },
+          true
+        );
+      })();
+    </script><link rel="icon" type="image/svg+xml" href="/pr-preview/pr-97/favicon.svg"><link rel="icon" type="image/x-icon" href="/pr-preview/pr-97/favicon.ico"><link rel="apple-touch-icon" href="/pr-preview/pr-97/apple-touch-icon.png"><!-- SEO --><link rel="alternate" type="application/rss+xml" title="Roni Helppi" href="/pr-preview/pr-97/rss.xml"><link rel="alternate" type="text/plain" title="LLM content" href="/pr-preview/pr-97/llms.txt"><link rel="alternate" type="text/markdown" title="Markdown source" href="/writing/a-practical-guide-to-writing-your-own-obsidian-skills.md"><link rel="canonical" href="https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/"><meta name="description" content="Stop copying skills. Build your own."><meta name="author" content="Roni Helppi"><!-- Open Graph --><meta property="og:type" content="article"><meta property="og:url" content="https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/"><meta property="og:title" content="A practical guide to writing your own Obsidian skills — Roni Helppi"><meta property="og:description" content="Stop copying skills. Build your own."><meta property="og:site_name" content="Roni Helppi"><meta property="og:locale" content="en_US"><meta property="og:image" content="https://ronihelppi.com/pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO.png"><meta property="article:published_time" content="2026-03-10T00:00:00.000Z"><meta property="article:author" content="https://ronihelppi.com/pr-preview/pr-97/about"><!-- Twitter Card --><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@Nashtanir"><meta name="twitter:creator" content="@Nashtanir"><meta name="twitter:title" content="A practical guide to writing your own Obsidian skills — Roni Helppi"><meta name="twitter:description" content="Stop copying skills. Build your own."><meta name="twitter:image" content="https://ronihelppi.com/pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO.png"><!-- Local fonts --><link rel="preload" href="/fonts/rethink-sans-400-600-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/spectral-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/spectral-500-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/jetbrains-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin><title>A practical guide to writing your own Obsidian skills — Roni Helppi</title><!-- Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"A practical guide to writing your own Obsidian skills","description":"Stop copying skills. Build your own.","datePublished":"2026-03-10T00:00:00.000Z","dateModified":"2026-03-10T00:00:00.000Z","mainEntityOfPage":{"@type":"WebPage","@id":"https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/"},"author":{"@type":"Person","name":"Roni Helppi","url":"https://ronihelppi.com/pr-preview/pr-97/"},"publisher":{"@type":"Person","name":"Roni Helppi","url":"https://ronihelppi.com/pr-preview/pr-97/"},"image":"https://ronihelppi.com/pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO.png"}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ronihelppi.com/pr-preview/pr-97/"},{"@type":"ListItem","position":2,"name":"Writing","item":"https://ronihelppi.com/pr-preview/pr-97/writing/"},{"@type":"ListItem","position":3,"name":"A practical guide to writing your own obsidian skills","item":"https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/"}]}</script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/pr-preview/pr-97/_astro/ClientRouter.astro_astro_type_script_index_0_lang.BvDQ8sA6.js"></script><link rel="stylesheet" href="/pr-preview/pr-97/_astro/BaseLayout.BJhakOm_.css"><style>.divider[data-astro-cid-boktbqod]{background-color:var(--color-divider);border:none;width:100%;height:1px}
+.section-heading[data-astro-cid-ypavld2q]{font-family:var(--font-serif);font-size:var(--text-section);letter-spacing:var(--tracking-section);color:var(--color-text-primary);font-weight:400;line-height:var(--leading-normal)}
+</style><link rel="stylesheet" href="/pr-preview/pr-97/_astro/_..6zk2TduO.css"><script type="module" src="/pr-preview/pr-97/_astro/page.BxNEB9YK.js"></script></head><body><a href="#main-content" class="skip-link">Skip to main content</a><div class="site-wrapper"><header class="header" data-astro-cid-nen7h5rs><div class="nav" data-astro-cid-nen7h5rs><nav class="logo-breadcrumb" aria-label="Breadcrumb" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/" class="logo" aria-label="Roni Helppi, home" data-astro-cid-nen7h5rs>Roni Helppi</a><span class="breadcrumb-separator" id="breadcrumb-separator" aria-hidden="true" data-astro-cid-nen7h5rs></span><a href="/pr-preview/pr-97/" class="breadcrumb" id="breadcrumb" data-astro-cid-nen7h5rs></a></nav><nav class="nav-links" aria-label="Main" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/about" class="nav-link" data-astro-cid-nen7h5rs>About</a><a href="/pr-preview/pr-97/projects" class="nav-link" data-astro-cid-nen7h5rs>Projects</a><a href="/pr-preview/pr-97/writing" class="nav-link" data-astro-cid-nen7h5rs>Writing</a></nav><div class="header-actions" data-astro-cid-nen7h5rs><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme" data-astro-cid-nen7h5rs><svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg><svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M3 11.5066C3 16.7497 7.25034 21 12.4934 21C16.2209 21 19.4466 18.8518 21 15.7259C12.4934 15.7259 8.27411 11.5066 8.27411 3C5.14821 4.55344 3 7.77915 3 11.5066Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg></button><a href="/pr-preview/pr-97/contact" class="contact-button" data-astro-cid-nen7h5rs><span data-astro-cid-nen7h5rs>Contact</span><span class="keystroke" aria-hidden="true" data-astro-cid-kf5yt4dj>C</span><span class="visually-hidden" data-astro-cid-kf5yt4dj>Press C to go to contact page</span></a><button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-astro-cid-nen7h5rs><svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M13 5H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M8 12H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M3 19H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg><svg class="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M6.75827 17.2426L12.0009 12M12.0009 12L17.2435 6.75736M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg></button></div></div></header><!-- Mobile Menu Overlay --><div class="mobile-menu" id="mobile-menu" aria-hidden="true" data-astro-cid-nen7h5rs><nav class="mobile-menu-nav" aria-label="Mobile navigation" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/" class="mobile-menu-link" data-astro-cid-nen7h5rs>Home</a><a href="/pr-preview/pr-97/about" class="mobile-menu-link" data-astro-cid-nen7h5rs>About</a><a href="/pr-preview/pr-97/projects" class="mobile-menu-link" data-astro-cid-nen7h5rs>Projects</a><a href="/pr-preview/pr-97/writing" class="mobile-menu-link" data-astro-cid-nen7h5rs>Writing</a><a href="/pr-preview/pr-97/contact" class="mobile-menu-link" data-astro-cid-nen7h5rs>Contact</a></nav><div class="mobile-menu-footer" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/rss.xml" class="mobile-menu-rss" data-astro-cid-nen7h5rs>RSS</a></div></div><script type="module" src="/pr-preview/pr-97/_astro/Header.astro_astro_type_script_index_0_lang.Bc24xyy3.js"></script><main id="main-content" class="main" data-astro-cid-s4ha2ih2><article class="layout" data-astro-cid-s4ha2ih2><!-- Post Heading --><header class="post-header" data-astro-cid-s4ha2ih2><div class="post-title-group" data-astro-cid-s4ha2ih2><h1 class="page-title" data-astro-cid-s4ha2ih2>A practical guide to writing your own Obsidian skills</h1><p class="post-ingress" data-astro-cid-s4ha2ih2>Stop copying skills. Build your own.</p></div><div class="post-meta-row" data-astro-cid-s4ha2ih2><div class="post-meta" data-astro-cid-s4ha2ih2><a href="/pr-preview/pr-97/about" rel="author" class="post-author" data-astro-cid-s4ha2ih2>Roni Helppi</a><span class="post-meta-details" data-astro-cid-s4ha2ih2><time datetime="2026-03-10T00:00:00.000Z" data-astro-cid-s4ha2ih2>March 10, 2026</time><span class="post-meta-separator" aria-hidden="true" data-astro-cid-s4ha2ih2>·</span><span data-astro-cid-s4ha2ih2>14 minute read</span></span></div><button class="copy-markdown-btn" data-title="A practical guide to writing your own Obsidian skills" type="button" data-astro-cid-s4ha2ih2>Copy post</button></div><div class="hero-image-container" data-astro-cid-s4ha2ih2><img src="/pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO_ZQuorM.webp" srcset="/pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO_1HoBi3.webp 920w, /pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO_293M6u.webp 1380w, /pr-preview/pr-97/_astro/obsidian-skills-banner.CTXu4QtO_ZQuorM.webp 1843w" alt="A cover image of the post, decipting the Obsidian logo rendered with ASCII characters." sizes="(max-width: 960px) 100vw, 920px" loading="eager" fetchpriority="high" data-astro-cid-s4ha2ih2="true" decoding="async" width="1843" height="480" class="hero-image"></div></header><nav class="heading-rail" aria-label="On this page" data-heading-rail data-astro-cid-xe4x7kkc><ol class="heading-rail-list" role="list" data-astro-cid-xe4x7kkc><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#stop-copying-skills-build-your-own" class="heading-rail-link" data-rail-link="stop-copying-skills-build-your-own" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>01</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Stop copying skills. Build your own.</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#before-we-start" class="heading-rail-link" data-rail-link="before-we-start" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>02</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Before we start</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#what-are-skills" class="heading-rail-link" data-rail-link="what-are-skills" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>03</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>What are skills?</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#teach-the-agent-basic-things-it-needs-to-know" class="heading-rail-link" data-rail-link="teach-the-agent-basic-things-it-needs-to-know" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>04</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Teach the agent basic things it needs to know</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#teach-the-agent-how-you-think" class="heading-rail-link" data-rail-link="teach-the-agent-how-you-think" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>05</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Teach the agent how you think</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#keep-iterating" class="heading-rail-link" data-rail-link="keep-iterating" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>06</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Keep iterating</span></a></li><li class="heading-rail-item" data-astro-cid-xe4x7kkc><a href="#now-its-your-turn" class="heading-rail-link" data-rail-link="now-its-your-turn" data-astro-cid-xe4x7kkc><span class="heading-rail-tick" aria-hidden="true" data-astro-cid-xe4x7kkc></span><span class="heading-rail-number" aria-hidden="true" data-astro-cid-xe4x7kkc>07</span><span class="heading-rail-text" data-astro-cid-xe4x7kkc>Now it&#39;s your turn</span></a></li></ol></nav><script type="module">function e(e,t,n=!1){if(e.length===0)return null;if(n)return e[e.length-1].id;let r=e[0].id;for(let n of e)if(n.top-t<=0)r=n.id;else break;return r}var t=null,n=`__headingRailPageLoadHandler__`;function r(){t&&=(t(),null);let n=document.querySelector(`[data-heading-rail]`);if(!n)return;let r=Array.from(n.querySelectorAll(`[data-rail-link]`)),i=[];for(let e of r){let t=e.dataset.railLink,n=t?document.getElementById(t):null;t&&n&&i.push({id:t,heading:n,link:e})}if(i.length===0)return;let a=null;function o(e){if(e!==a){a=e;for(let t of i)t.id===e?t.link.setAttribute(`aria-current`,`location`):t.link.removeAttribute(`aria-current`)}}let s=!1;function c(){s=!1,o(e(i.map(e=>({id:e.id,top:e.heading.getBoundingClientRect().top})),140,window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2))}function l(){s||(s=!0,requestAnimationFrame(c))}window.addEventListener(`scroll`,l,{passive:!0}),window.addEventListener(`resize`,l,{passive:!0}),c(),t=()=>{window.removeEventListener(`scroll`,l),window.removeEventListener(`resize`,l)}}r();var i=window[n];i&&document.removeEventListener(`astro:page-load`,i),window[n]=r,document.addEventListener(`astro:page-load`,r);</script><!-- Post Content --><div class="prose" data-astro-cid-s4ha2ih2><div class="post-content" data-astro-cid-s4ha2ih2><div class="prose-content" data-astro-cid-s4ha2ih2><p>Agentic skills have taken the AI world by storm. People are slowly starting to experiment on using them on other tasks than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.</p>
+<p>Around two months ago, the Obsidian CEO kepano released a <a href="https://github.com/kepano/obsidian-skills" rel="noopener noreferrer" target="_blank">GitHub repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a> containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.</p>
+<nav class="toc-card" aria-label="Table of contents">
+<div class="toc-header"><span class="toc-label">Table of contents</span><span class="toc-count">7 sections</span></div>
+<ol class="toc-list" role="list">
+<li class="toc-row"><a href="#stop-copying-skills-build-your-own" class="toc-link"><span class="toc-number" aria-hidden="true">01</span><span class="toc-text">Stop copying skills. Build your own.</span></a></li>
+<li class="toc-row"><a href="#before-we-start" class="toc-link"><span class="toc-number" aria-hidden="true">02</span><span class="toc-text">Before we start</span></a></li>
+<li class="toc-row"><a href="#what-are-skills" class="toc-link"><span class="toc-number" aria-hidden="true">03</span><span class="toc-text">What are skills?</span></a></li>
+<li class="toc-row"><a href="#teach-the-agent-basic-things-it-needs-to-know" class="toc-link"><span class="toc-number" aria-hidden="true">04</span><span class="toc-text">Teach the agent basic things it needs to know</span></a></li>
+<li class="toc-row"><a href="#teach-the-agent-how-you-think" class="toc-link"><span class="toc-number" aria-hidden="true">05</span><span class="toc-text">Teach the agent how you think</span></a></li>
+<li class="toc-row"><a href="#keep-iterating" class="toc-link"><span class="toc-number" aria-hidden="true">06</span><span class="toc-text">Keep iterating</span></a></li>
+<li class="toc-row"><a href="#now-its-your-turn" class="toc-link"><span class="toc-number" aria-hidden="true">07</span><span class="toc-text">Now it’s your turn</span></a></li>
+</ol>
+</nav>
+<h2 id="stop-copying-skills-build-your-own">Stop copying skills. Build your own.<a class="heading-anchor" href="#stop-copying-skills-build-your-own" aria-label="Link to this section: Stop copying skills. Build your own."><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>I divide agentic skills roughly to two categories. There are skills that teach the agent to <strong>use a specific tool</strong>, and there are skills that teach the agent to <strong>follow a certain process</strong>. The first category is a simple one as there are only so few ways to describe how a certain tool is used. In the context of Obsidian, these skills may teach the agent how to deal with Markdown and Bases files. Or, how to use the <a href="https://help.obsidian.md/cli" rel="noopener noreferrer" target="_blank">Obsidian CLI<span><span class="visually-hidden"> (opens in new tab)</span></span></a>. These are the skills you <em>should</em> copy, and you can find many of those in <a href="https://github.com/kepano/obsidian-skills" rel="noopener noreferrer" target="_blank">kepano’s repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a>.</p>
+<p>The latter category, skills that teach the agent a process, <strong>should not be copied</strong>. They should be created by yourself.</p>
+<p><strong>Why should you consider creating skills by yourself?</strong> Custom-made skills are endlessly more useful and reliable as they have been tailored to follow your needs and processes. Using skills created by someone else may not work well for your workflow and vault structure. Moreover, creating them is actually easier than you think. So easy, in fact, that it may be quicker than copy-pasting an unknown skill from a Git repository to your <code>.claude</code> folder.</p>
+<p>In this post, I will share concrete and practical examples how you can create your own skills and iterate them. After reading this post, you should feel very comfortable to try to extract your processes and routines to your AI agent of choosing. This guide is divided into steps that build upon each other. You can start small, and come back to this guide when you are ready to dive deeper.</p>
+<h2 id="before-we-start">Before we start<a class="heading-anchor" href="#before-we-start" aria-label="Link to this section: Before we start"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>You will need:</p>
+<ul>
+<li>An Obsidian vault.</li>
+<li>An agentic tool of some sort. I will use <a href="https://claude.com/product/claude-code" rel="noopener noreferrer" target="_blank">Claude Code<span><span class="visually-hidden"> (opens in new tab)</span></span></a> as an example, but other tools like <a href="https://openai.com/codex/" rel="noopener noreferrer" target="_blank">Codex<span><span class="visually-hidden"> (opens in new tab)</span></span></a> and <a href="https://geminicli.com/" rel="noopener noreferrer" target="_blank">Gemini CLI<span><span class="visually-hidden"> (opens in new tab)</span></span></a> also support skills just as well. I will also expect that you have basic knowledge of using the agentic tool of your choice.</li>
+</ul>
+<p>And, before you do anything:</p>
+<ul>
+<li>Always regularly backup your vault before giving AI agents access to it.</li>
+<li>If you wish to keep your notes truly private, consider setting up a local model, e.g. with <a href="https://ollama.com/" rel="noopener noreferrer" target="_blank">Ollama<span><span class="visually-hidden"> (opens in new tab)</span></span></a>.</li>
+</ul>
+<h2 id="what-are-skills">What are skills?<a class="heading-anchor" href="#what-are-skills" aria-label="Link to this section: What are skills?"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>Skills are a simple format of teaching your AI agents new capabilities and expertise. They are really just loosely formatted Markdown files. The original concept was coined by Anthropic but it has been since made an <a href="https://agentskills.io/home" rel="noopener noreferrer" target="_blank">open-format<span><span class="visually-hidden"> (opens in new tab)</span></span></a> that most agentic harnesses nowadays follow.</p>
+<p></p><figure class="prose-figure"><img alt="An example where Claude Code automatically invokes a skill based on my messages." loading="lazy" decoding="async" width="2872" height="1588" src="/pr-preview/pr-97/_astro/obsidian-skills.CUX8tRBA_Ztuj8G.webp" srcset=""><figcaption>An example where Claude Code automatically invokes a skill based on my messages.</figcaption></figure><p></p>
+<p>Here is an example of a skill called <code>obsidian-markdown</code> (from the <a href="https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-markdown/SKILL.md" rel="noopener noreferrer" target="_blank">obsidian-skills repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a>) that teaches the agent how to create and edit Markdown files within Obsidian:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>---</span></span>
+<span class="line"><span>name: obsidian-markdown</span></span>
+<span class="line"><span>description: Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.</span></span>
+<span class="line"><span>---</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># Obsidian Flavored Markdown Skill</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Create and edit valid Obsidian Flavored Markdown. Obsidian extends CommonMark and GFM with wikilinks, embeds, callouts, properties, comments, and other syntax. This skill covers only Obsidian-specific extensions -- standard Markdown (headings, bold, italic, lists, quotes, code blocks, tables) is assumed knowledge.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>## Workflow: Creating an Obsidian Note</span></span>
+<span class="line"><span>...</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>What people often miss about skills, is that the best way to create them is to ask the agent to create them for you. When starting out, it is recommended to use a specific skill that aids you creating high-quality skills. Anthropic offers a <a href="https://claude.com/plugins/skill-creator" rel="noopener noreferrer" target="_blank">Skill Creator<span><span class="visually-hidden"> (opens in new tab)</span></span></a> that you can install as a Claude plugin.</p>
+<p>Note that you can build skills without the Skill Creator if you wish. Agents do a fine job even this way but I recommend using the creator if possible as it more accurately follows Anthropic’s newest prompting guidelines and even features a process for testing your skills with multiple subagents.</p>
+<h2 id="teach-the-agent-basic-things-it-needs-to-know">Teach the agent basic things it needs to know<a class="heading-anchor" href="#teach-the-agent-basic-things-it-needs-to-know" aria-label="Link to this section: Teach the agent basic things it needs to know"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>Before we can build anything useful, we need to teach the agent how to interact with the environment we are in. This means mainly three (3) things:</p>
+<ol>
+<li>Help it understand (Obsidian-flavored) Markdown files</li>
+<li>Help it understand how to use Obsidian CLI</li>
+<li>Help it understand how your vault is structured</li>
+</ol>
+<p>Let’s go through these one by one.</p>
+<h3 id="help-it-understand-obsidian-flavored-markdown-files">Help it understand (Obsidian-flavored) Markdown files<a class="heading-anchor" href="#help-it-understand-obsidian-flavored-markdown-files" aria-label="Link to this section: Help it understand (Obsidian-flavored) Markdown files"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>The first one will be easy. The <a href="https://github.com/kepano/obsidian-skills/tree/main/skills" rel="noopener noreferrer" target="_blank">Obsidian skills GitHub repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a> features skills to teach the agent to deal with Markdown, Bases and Canvas files. Go ahead and copy them either to your global <code>~/.claude/skills</code> folder or to the vault-specific <code>.claude/skills</code> folder. Both are okay but I prefer the vault-specific folder to keep my skills synced between all of my devices via <a href="https://obsidian.md/sync" rel="noopener noreferrer" target="_blank">Obsidian Sync<span><span class="visually-hidden"> (opens in new tab)</span></span></a>.</p>
+<h3 id="help-it-understand-how-to-use-obsidian-cli">Help it understand how to use Obsidian CLI<a class="heading-anchor" href="#help-it-understand-how-to-use-obsidian-cli" aria-label="Link to this section: Help it understand how to use Obsidian CLI"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>Now as that is out of the way, let’s focus on teaching the agent how to use Obsidian CLI. If you are not familiar with it, it is a command line interface that allows controlling Obsidian from a terminal. While it may be useful for humans too, the real power of it lies in how agents can use it to interact with Obsidian just like you could through the app. While kepano has made it easy for us by also <a href="https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-cli/SKILL.md" rel="noopener noreferrer" target="_blank">including a skill for the CLI in the repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a>, I will quickly teach you how you can also create a similar one by yourself. Just open up your Claude Code, and prompt it to:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>/skill-creator Help me to create a skill to use Obsidian CLI. Run `obsidian help` to learn how the CLI works. Then, write a skill to explain how to use it.</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>And that’s it! It is really that simple. The agent will do its job (and the skill-creator actually takes a while to run), and the end result will be something very similar that is available in the Obsidian skills repository.</p>
+<p>This process can be used to teach the agent to use <em>any</em> terminal commands you wish. Just ask it to run the help command, and it will investigate and write the skill itself.</p>
+<h3 id="help-it-understand-how-your-vault-is-structured">Help it understand how your vault is structured<a class="heading-anchor" href="#help-it-understand-how-your-vault-is-structured" aria-label="Link to this section: Help it understand how your vault is structured"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>The last thing we need to prepare is an explanation of your vault’s structure for the agent. All of our vaults are slightly different. Some of us mainly use tags to organise, some tend to use links. Some of us use a lot of folders, some use none. And this is why we need to give some initial information to the agent about how the vault is built. This way it can get right into work and not investigate the vault structure every time.</p>
+<p>There are multiple ways you can provide this information to the agent. The most common way is to include the information in the <code>AGENTS.md</code> file (<code>CLAUDE.md</code> for Claude Code). To do this, open up your Claude Code, and prompt it to:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>This folder contains my Obsidian vault. Please investigate the vault structure and its contents. After that, write the absolute basics to the @CLAUDE.md file. The basics should include:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>- The general folder structure of the vault</span></span>
+<span class="line"><span>- How I use tags/links/folders</span></span>
+<span class="line"><span>- What kind of templates there are and how they should be used</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>After the agent is complete, I recommend going ahead and reading the file it wrote. Verify that the description it created makes sense and captures the structure of your vault. The general consensus nowadays is (and there is even some <a href="https://arxiv.org/abs/2602.11988" rel="noopener noreferrer" target="_blank">research<span><span class="visually-hidden"> (opens in new tab)</span></span></a> that supports it) that the always-included context files like <code>AGENTS.md</code> and <code>CLAUDE.md</code> should only contain the bare minimum. Adding more information than what the agent would need every prompt will most likely have negative effects. So, while important, ensure that the file only lists the <em>most important</em> facts about your vault.</p>
+<h2 id="teach-the-agent-how-you-think">Teach the agent how you think<a class="heading-anchor" href="#teach-the-agent-how-you-think" aria-label="Link to this section: Teach the agent how you think"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>Finally, we can get into the fun stuff. Now the agent understands how your vault is structured and how it can interact with files in the vault. Now, we can move on to creating skills that mimic your processes and thinking. I will give you three examples of creation of skills that I use weekly (some even daily) when working in my Obsidian vault.</p>
+<p>One more thing to keep in mind: keep your skills small and focused. A skill with clear inputs and outputs is much easier to debug when something goes wrong. If your weekly review skill also tries to reorganize your tags, clean up orphan notes, and update your dashboard, it will be hard to tell which part broke. <strong>One skill, one job.</strong></p>
+<p>Note that the following prompts are examples. You should definitely edit them to make sure the skills will serve your vault and processes the best.</p>
+<h3 id="weekly-review">Weekly review<a class="heading-anchor" href="#weekly-review" aria-label="Link to this section: Weekly review"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>I do planning in quarter and weekly levels. Weekly planning repeats every week, so I have created a skill where the agent checks related notes, gathers all the needed information, and interviews me to review the last week and to plan the next one. To create something similar to suit your needs, prompt your agent to:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>/skill-creator Help me to create a skill to run my weekly review and planning for the next week. When creating weekly notes, please use the weekly note template in my templates folder.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Follow this process for this weekly review:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>1. Gather all notes I have created this week</span></span>
+<span class="line"><span>2. Create me a short summary of what I did and thought during the week</span></span>
+<span class="line"><span>3. Check what goals I set for this week</span></span>
+<span class="line"><span>4. Those goals in mind, interview me about how to week went. Ask me what worked, what did not work, and what will I focus next.</span></span>
+<span class="line"><span>5. Fill my answers to the current weekly note review section. Use my words exactly, do not edit them.</span></span>
+<span class="line"><span>6. Create a note for the next week and interview me for the three most important goals for that week.</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>You can go as detailed as you want with the prompt. It is likely that the first version of the skill does not exactly work as you envisioned, and this is completely normal. More about iterating your skills in the next chapter.</p>
+<p><a href="https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-weekly-review/SKILL.md" rel="noopener noreferrer" target="_blank">See my weekly review skill<span><span class="visually-hidden"> (opens in new tab)</span></span></a></p>
+<h3 id="summarize-material">Summarize material<a class="heading-anchor" href="#summarize-material" aria-label="Link to this section: Summarize material"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>I tend to consume a lot of material (blogs, articles, research, podcasts, etc. ) during my week. Sometimes I find things that seem interesting but I do not have enough time to decide if the material is something I want to spend more time on. I wanted to create a skill that quickly lists the key topics discussed in the material, similar to a table of contents, and saved the note in my inbox folder of my vault. To create something similar, run:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>/skill-creator Help me to create a skill to summarize material so I can decide if I want to delve in deeper. I want you to create a table of contents of the key topics discussed in the material. For each topic, use the following template:</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span># Topic title</span></span>
+<span class="line"><span>&#x3C;brief description of the topic and why it is interesting, 4-5 sentences></span></span>
+<span class="line"><span>&#x3C;if applicable, a link or timestamp of when the topic is discussed in the material></span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>After making the table of contents, save them as a note to my inbox folder. Use the summary template from the templates folder. </span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>For tagging, use tags that are already present in my vault (see the skill for using Obsidian CLI to query all tags in my vault).</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>This example was more of a generic one but you can create more sophisticated skills for different material types (e.g. a separate skill for videos) if you want to.</p>
+<p><a href="https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-summarize-material/SKILL.md" rel="noopener noreferrer" target="_blank">See my summarize material skill<span><span class="visually-hidden"> (opens in new tab)</span></span></a></p>
+<h3 id="prepare-materials-for-writing">Prepare materials for writing<a class="heading-anchor" href="#prepare-materials-for-writing" aria-label="Link to this section: Prepare materials for writing"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h3>
+<p>I do plenty of writing inside my vault. Sometimes some of my notes turn into published materials quite easily. However, it is often hard to keep track of which notes could be the most potential ones to turn into releases next. I have had very good results with the following skill prompt:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>/skill-creator Help me to create a skill to prepare my notes for writing and eventually publication.</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Follow this process:</span></span>
+<span class="line"><span>1. Browse all notes tagged with #note (those are my own words).</span></span>
+<span class="line"><span>2. Evaluate which of those notes could be potential for publication. Focus on ideas that are new, interesting, or view a familiar topic from a new angle. Pick 5 most promising ideas.</span></span>
+<span class="line"><span>3. Gather all related material from my vault related to the notes you picked.</span></span>
+<span class="line"><span>4. Review each note against the following questions. How much work is required in order to publish this piece? Do we have enough supporting material? If not, what we need to focus on gathering?</span></span>
+<span class="line"><span>5. Create a project note (using the project template) for each note you picked. Append the note with tasks what I should focus on next for that particular idea.</span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>I have been iterating my own version of this skill over several weeks and have gotten very good results. The agent has been able to surface really old notes for further review, and has found good supporting material that I had completely overlooked. Agents really shine at handling scale.</p>
+<p><a href="https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-prepare-writing/SKILL.md" rel="noopener noreferrer" target="_blank">See my prepare writing skill<span><span class="visually-hidden"> (opens in new tab)</span></span></a></p>
+<h2 id="keep-iterating">Keep iterating<a class="heading-anchor" href="#keep-iterating" aria-label="Link to this section: Keep iterating"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>You should now have a few skills that you frequently use. Now what?</p>
+<p>It is likely that the skills you create do not turn out as perfect on the first try. They may be missing some critical part of your process, or the agent may inject too much of its own “thinking” into your notes.</p>
+<p>This is completely normal and luckily it is also very easy to fix. You should <strong>treat your skills like code</strong>; they are living documents that are constantly being improved. The best way to keep working on your skills is to explain the agent what the problem is and ask it to directly edit the skill. For example:</p>
+<div class="code-block-wrapper"><div class="code-block-body"><pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>In the skill `obsidian-prepare-writing`, I want you to add a step after step 2. In that step, evaluate each idea against my already published work. I want to check that I have not already published something similar. </span></span></code></pre><button class="code-copy-btn" type="button" aria-label="Copy code">Copy</button></div></div>
+<p>And there you go, the version 2 of that skill was just created. Now you use it again, and keep iterating if it needs more work or if your process or your vault changes.</p>
+<p>One point where you also may need to revisit your skills is when you change models or when models update to newer versions. For example, when Claude updated its models to version 4.6, I ran a review pass and found that many of my skills used overly aggressive language like “You MUST use this tool” or “CRITICAL: always do X.” This kind of wording worked fine on older models but caused newer ones to overtrigger and overplan. The fix was simple: softening the language to something like “Use this tool when it would help.” A small change, but it made a real difference in how reliably the skills performed.</p>
+<h2 id="now-its-your-turn">Now it’s your turn<a class="heading-anchor" href="#now-its-your-turn" aria-label="Link to this section: Now it’s your turn"><svg class="heading-anchor-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 11.9976C14 9.5059 11.683 7 8.85714 7C8.52241 7 7.41904 7.00001 7.14286 7.00001C4.30254 7.00001 2 9.23752 2 11.9976C2 14.376 3.70973 16.3664 6 16.8714C6.36756 16.9525 6.75006 16.9952 7.14286 16.9952" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path><path d="M10 11.9976C10 14.4893 12.317 16.9952 15.1429 16.9952C15.4776 16.9952 16.581 16.9952 16.8571 16.9952C19.6975 16.9952 22 14.7577 22 11.9976C22 9.6192 20.2903 7.62884 18 7.12383C17.6324 7.04278 17.2499 6.99999 16.8571 6.99999" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></h2>
+<p>I hope this piece gave you more confidence to work on your own skills instead of trying to hunt a perfect one that someone else has created. But we do not need to settle in for options we can find on the Internet. The time we are living with AI is really the perfect moment to create personalized tools by us for ourselves.</p>
+<p>To find all skill examples mentioned in this post, see <a href="https://github.com/ronijaakkola/obsidian-skill-examples" rel="noopener noreferrer" target="_blank">this GitHub repository<span><span class="visually-hidden"> (opens in new tab)</span></span></a>.</p>
+<p>And if you work in a team, remember the distinction from earlier: tool-type skills that teach the agent how to use Obsidian CLI or Markdown can absolutely be shared via Git or a skill marketplace. The workflow skills that encode your personal process are the ones worth building yourself.</p><span class="writing-cursor" aria-hidden="true" data-astro-cid-s4ha2ih2></span></div></div></div></article></main><script type="text/plain" id="post-body-raw">Agentic skills have taken the AI world by storm. People are slowly starting to experiment on using them on other tasks than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
+
+Around two months ago, the Obsidian CEO kepano released a [GitHub repository](https://github.com/kepano/obsidian-skills) containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.
+
+[toc]
+
+## Stop copying skills. Build your own.
+
+I divide agentic skills roughly to two categories. There are skills that teach the agent to **use a specific tool**, and there are skills that teach the agent to **follow a certain process**. The first category is a simple one as there are only so few ways to describe how a certain tool is used. In the context of Obsidian, these skills may teach the agent how to deal with Markdown and Bases files. Or, how to use the [Obsidian CLI](https://help.obsidian.md/cli). These are the skills you *should* copy, and you can find many of those in [kepano&#39;s repository](https://github.com/kepano/obsidian-skills).
+
+The latter category, skills that teach the agent a process, **should not be copied**. They should be created by yourself.
+
+**Why should you consider creating skills by yourself?** Custom-made skills are endlessly more useful and reliable as they have been tailored to follow your needs and processes. Using skills created by someone else may not work well for your workflow and vault structure. Moreover, creating them is actually easier than you think. So easy, in fact, that it may be quicker than copy-pasting an unknown skill from a Git repository to your `.claude` folder.
+
+In this post, I will share concrete and practical examples how you can create your own skills and iterate them. After reading this post, you should feel very comfortable to try to extract your processes and routines to your AI agent of choosing. This guide is divided into steps that build upon each other. You can start small, and come back to this guide when you are ready to dive deeper.
+
+## Before we start
+
+You will need:
+
+- An Obsidian vault.
+- An agentic tool of some sort. I will use [Claude Code](https://claude.com/product/claude-code) as an example, but other tools like [Codex](https://openai.com/codex/) and [Gemini CLI](https://geminicli.com/) also support skills just as well. I will also expect that you have basic knowledge of using the agentic tool of your choice.
+
+And, before you do anything:
+
+- Always regularly backup your vault before giving AI agents access to it.
+- If you wish to keep your notes truly private, consider setting up a local model, e.g. with [Ollama](https://ollama.com/).
+
+## What are skills?
+
+Skills are a simple format of teaching your AI agents new capabilities and expertise. They are really just loosely formatted Markdown files. The original concept was coined by Anthropic but it has been since made an [open-format](https://agentskills.io/home) that most agentic harnesses nowadays follow.
+
+![[obsidian-skills.png|An example where Claude Code automatically invokes a skill based on my messages.]]
+
+Here is an example of a skill called `obsidian-markdown` (from the [obsidian-skills repository](https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-markdown/SKILL.md)) that teaches the agent how to create and edit Markdown files within Obsidian:
+
+```
+---
+name: obsidian-markdown
+description: Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.
+---
+
+# Obsidian Flavored Markdown Skill
+
+Create and edit valid Obsidian Flavored Markdown. Obsidian extends CommonMark and GFM with wikilinks, embeds, callouts, properties, comments, and other syntax. This skill covers only Obsidian-specific extensions -- standard Markdown (headings, bold, italic, lists, quotes, code blocks, tables) is assumed knowledge.
+
+## Workflow: Creating an Obsidian Note
+...
+```
+
+What people often miss about skills, is that the best way to create them is to ask the agent to create them for you. When starting out, it is recommended to use a specific skill that aids you creating high-quality skills. Anthropic offers a [Skill Creator](https://claude.com/plugins/skill-creator) that you can install as a Claude plugin.
+
+Note that you can build skills without the Skill Creator if you wish. Agents do a fine job even this way but I recommend using the creator if possible as it more accurately follows Anthropic&#39;s newest prompting guidelines and even features a process for testing your skills with multiple subagents.
+
+## Teach the agent basic things it needs to know
+
+Before we can build anything useful, we need to teach the agent how to interact with the environment we are in. This means mainly three (3) things:
+
+1. Help it understand (Obsidian-flavored) Markdown files
+2. Help it understand how to use Obsidian CLI
+3. Help it understand how your vault is structured
+
+Let&#39;s go through these one by one.
+
+### Help it understand (Obsidian-flavored) Markdown files
+
+The first one will be easy. The [Obsidian skills GitHub repository](https://github.com/kepano/obsidian-skills/tree/main/skills) features skills to teach the agent to deal with Markdown, Bases and Canvas files. Go ahead and copy them either to your global `~/.claude/skills` folder or to the vault-specific `.claude/skills` folder. Both are okay but I prefer the vault-specific folder to keep my skills synced between all of my devices via [Obsidian Sync](https://obsidian.md/sync).
+
+### Help it understand how to use Obsidian CLI
+
+Now as that is out of the way, let&#39;s focus on teaching the agent how to use Obsidian CLI. If you are not familiar with it, it is a command line interface that allows controlling Obsidian from a terminal. While it may be useful for humans too, the real power of it lies in how agents can use it to interact with Obsidian just like you could through the app. While kepano has made it easy for us by also [including a skill for the CLI in the repository](https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-cli/SKILL.md), I will quickly teach you how you can also create a similar one by yourself. Just open up your Claude Code, and prompt it to:
+
+```
+/skill-creator Help me to create a skill to use Obsidian CLI. Run `obsidian help` to learn how the CLI works. Then, write a skill to explain how to use it.
+```
+
+And that&#39;s it! It is really that simple. The agent will do its job (and the skill-creator actually takes a while to run), and the end result will be something very similar that is available in the Obsidian skills repository.
+
+This process can be used to teach the agent to use *any* terminal commands you wish. Just ask it to run the help command, and it will investigate and write the skill itself.
+
+### Help it understand how your vault is structured
+
+The last thing we need to prepare is an explanation of your vault&#39;s structure for the agent. All of our vaults are slightly different. Some of us mainly use tags to organise, some tend to use links. Some of us use a lot of folders, some use none. And this is why we need to give some initial information to the agent about how the vault is built. This way it can get right into work and not investigate the vault structure every time.
+
+There are multiple ways you can provide this information to the agent. The most common way is to include the information in the `AGENTS.md` file (`CLAUDE.md` for Claude Code). To do this, open up your Claude Code, and prompt it to:
+
+```
+This folder contains my Obsidian vault. Please investigate the vault structure and its contents. After that, write the absolute basics to the @CLAUDE.md file. The basics should include:
+
+- The general folder structure of the vault
+- How I use tags/links/folders
+- What kind of templates there are and how they should be used
+```
+
+After the agent is complete, I recommend going ahead and reading the file it wrote. Verify that the description it created makes sense and captures the structure of your vault. The general consensus nowadays is (and there is even some [research](https://arxiv.org/abs/2602.11988) that supports it) that the always-included context files like `AGENTS.md` and `CLAUDE.md` should only contain the bare minimum. Adding more information than what the agent would need every prompt will most likely have negative effects. So, while important, ensure that the file only lists the *most important* facts about your vault.
+
+## Teach the agent how you think
+
+Finally, we can get into the fun stuff. Now the agent understands how your vault is structured and how it can interact with files in the vault. Now, we can move on to creating skills that mimic your processes and thinking. I will give you three examples of creation of skills that I use weekly (some even daily) when working in my Obsidian vault.
+
+One more thing to keep in mind: keep your skills small and focused. A skill with clear inputs and outputs is much easier to debug when something goes wrong. If your weekly review skill also tries to reorganize your tags, clean up orphan notes, and update your dashboard, it will be hard to tell which part broke. **One skill, one job.**
+
+Note that the following prompts are examples. You should definitely edit them to make sure the skills will serve your vault and processes the best.
+
+### Weekly review
+
+I do planning in quarter and weekly levels. Weekly planning repeats every week, so I have created a skill where the agent checks related notes, gathers all the needed information, and interviews me to review the last week and to plan the next one. To create something similar to suit your needs, prompt your agent to:
+
+```
+/skill-creator Help me to create a skill to run my weekly review and planning for the next week. When creating weekly notes, please use the weekly note template in my templates folder.
+
+Follow this process for this weekly review:
+
+1. Gather all notes I have created this week
+2. Create me a short summary of what I did and thought during the week
+3. Check what goals I set for this week
+4. Those goals in mind, interview me about how to week went. Ask me what worked, what did not work, and what will I focus next.
+5. Fill my answers to the current weekly note review section. Use my words exactly, do not edit them.
+6. Create a note for the next week and interview me for the three most important goals for that week.
+```
+
+You can go as detailed as you want with the prompt. It is likely that the first version of the skill does not exactly work as you envisioned, and this is completely normal. More about iterating your skills in the next chapter.
+
+[See my weekly review skill](https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-weekly-review/SKILL.md)
+
+### Summarize material
+
+I tend to consume a lot of material (blogs, articles, research, podcasts, etc. ) during my week. Sometimes I find things that seem interesting but I do not have enough time to decide if the material is something I want to spend more time on. I wanted to create a skill that quickly lists the key topics discussed in the material, similar to a table of contents, and saved the note in my inbox folder of my vault. To create something similar, run:
+
+```
+/skill-creator Help me to create a skill to summarize material so I can decide if I want to delve in deeper. I want you to create a table of contents of the key topics discussed in the material. For each topic, use the following template:
+
+# Topic title
+&lt;brief description of the topic and why it is interesting, 4-5 sentences&gt;
+&lt;if applicable, a link or timestamp of when the topic is discussed in the material&gt;
+
+After making the table of contents, save them as a note to my inbox folder. Use the summary template from the templates folder. 
+
+For tagging, use tags that are already present in my vault (see the skill for using Obsidian CLI to query all tags in my vault).
+```
+
+This example was more of a generic one but you can create more sophisticated skills for different material types (e.g. a separate skill for videos) if you want to.
+
+[See my summarize material skill](https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-summarize-material/SKILL.md)
+
+### Prepare materials for writing
+
+I do plenty of writing inside my vault. Sometimes some of my notes turn into published materials quite easily. However, it is often hard to keep track of which notes could be the most potential ones to turn into releases next. I have had very good results with the following skill prompt:
+
+```
+/skill-creator Help me to create a skill to prepare my notes for writing and eventually publication.
+
+Follow this process:
+1. Browse all notes tagged with #note (those are my own words).
+2. Evaluate which of those notes could be potential for publication. Focus on ideas that are new, interesting, or view a familiar topic from a new angle. Pick 5 most promising ideas.
+3. Gather all related material from my vault related to the notes you picked.
+4. Review each note against the following questions. How much work is required in order to publish this piece? Do we have enough supporting material? If not, what we need to focus on gathering?
+5. Create a project note (using the project template) for each note you picked. Append the note with tasks what I should focus on next for that particular idea.
+```
+
+I have been iterating my own version of this skill over several weeks and have gotten very good results. The agent has been able to surface really old notes for further review, and has found good supporting material that I had completely overlooked. Agents really shine at handling scale.
+
+[See my prepare writing skill](https://github.com/ronijaakkola/obsidian-skill-examples/blob/main/.claude/skills/obsidian-prepare-writing/SKILL.md)
+
+## Keep iterating
+
+You should now have a few skills that you frequently use. Now what?
+
+It is likely that the skills you create do not turn out as perfect on the first try. They may be missing some critical part of your process, or the agent may inject too much of its own &quot;thinking&quot; into your notes.
+
+This is completely normal and luckily it is also very easy to fix. You should **treat your skills like code**; they are living documents that are constantly being improved. The best way to keep working on your skills is to explain the agent what the problem is and ask it to directly edit the skill. For example:
+
+```
+In the skill `obsidian-prepare-writing`, I want you to add a step after step 2. In that step, evaluate each idea against my already published work. I want to check that I have not already published something similar. 
+```
+
+And there you go, the version 2 of that skill was just created. Now you use it again, and keep iterating if it needs more work or if your process or your vault changes.
+
+One point where you also may need to revisit your skills is when you change models or when models update to newer versions. For example, when Claude updated its models to version 4.6, I ran a review pass and found that many of my skills used overly aggressive language like &quot;You MUST use this tool&quot; or &quot;CRITICAL: always do X.&quot; This kind of wording worked fine on older models but caused newer ones to overtrigger and overplan. The fix was simple: softening the language to something like &quot;Use this tool when it would help.&quot; A small change, but it made a real difference in how reliably the skills performed.
+
+## Now it&#39;s your turn
+
+I hope this piece gave you more confidence to work on your own skills instead of trying to hunt a perfect one that someone else has created. But we do not need to settle in for options we can find on the Internet. The time we are living with AI is really the perfect moment to create personalized tools by us for ourselves.
+
+To find all skill examples mentioned in this post, see [this GitHub repository](https://github.com/ronijaakkola/obsidian-skill-examples).
+
+And if you work in a team, remember the distinction from earlier: tool-type skills that teach the agent how to use Obsidian CLI or Markdown can absolutely be shared via Git or a skill marketplace. The workflow skills that encode your personal process are the ones worth building yourself.</script><footer class="site-footer"><div class="footer-inner"><p class="footer-copyright">&copy; 2026 Roni Helppi</p><nav class="footer-links" aria-label="Social links"><a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">github<span class="visually-hidden"> (opens in new tab)</span></a><span class="footer-sep" aria-hidden="true">/</span><a href="https://www.linkedin.com/in/ronihelppi/" target="_blank" rel="noopener noreferrer">linkedin<span class="visually-hidden"> (opens in new tab)</span></a><span class="footer-sep" aria-hidden="true">/</span><a href="/rss.xml">rss</a></nav></div></footer></div><dialog id="lightbox" class="lightbox" aria-label="Image viewer" data-astro-cid-utnzf2kr><div class="lightbox-container" data-astro-cid-utnzf2kr><figure class="lightbox-figure" data-astro-cid-utnzf2kr><button class="lightbox-close" type="button" aria-label="Close image viewer" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M9.01103 22.9901L16.0012 16M16.0012 16L22.9913 9.00981M16.0012 16L9.01103 9.00981M16.0012 16L22.9913 22.9901" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button><img class="lightbox-image" src="" alt="" data-astro-cid-utnzf2kr><div class="lightbox-controls" data-astro-cid-utnzf2kr><button class="lightbox-nav lightbox-prev" type="button" aria-label="Previous image" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M28 16H4M4 16L15.3333 4.66667M4 16L15.3333 27.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button><figcaption class="lightbox-caption" data-astro-cid-utnzf2kr></figcaption><button class="lightbox-nav lightbox-next" type="button" aria-label="Next image" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M4 16H28M28 16L16.6667 4.66667M28 16L16.6667 27.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button></div></figure></div></dialog><script type="module">function e(){let e=document.getElementById(`lightbox`);if(!e)return;let t=e,n=t.querySelector(`.lightbox-image`),r=t.querySelector(`.lightbox-caption`),i=t.querySelector(`.lightbox-close`),a=t.querySelector(`.lightbox-prev`),o=t.querySelector(`.lightbox-next`),s=[],c=0,l=null,u=!1,d=0,f=window.matchMedia(`(prefers-reduced-motion: reduce)`);function p(){let e=document.querySelectorAll(`.prose-content img`);return Array.from(e).map(e=>{let t=e;return{src:t.src||t.currentSrc,alt:t.alt||``}})}function m(){[c-1,c+1].forEach(e=>{let t=s[e];if(t){let e=new Image;e.src=t.src}})}function h(e=!1){if(s.length===0)return;let t=s[c],i=()=>{n.src=t.src,n.alt=t.alt,r.textContent=t.alt};if(a.disabled=c===0,o.disabled=c===s.length-1,!e||f.matches){i(),m();return}let l=++d;n.classList.add(`is-swapping`),setTimeout(()=>{if(l!==d)return;i();let e=()=>{l===d&&n.classList.remove(`is-swapping`)};n.decode?n.decode().then(e,e):e(),m()},150)}function g(e,r){s=p(),s.length!==0&&(c=Math.max(0,Math.min(e,s.length-1)),l=r,d++,n.classList.remove(`is-swapping`),t.classList.remove(`is-open`,`is-animating`,`is-closing`),h(),document.body.classList.add(`scroll-lock`),t.showModal(),requestAnimationFrame(()=>{t.classList.add(`is-animating`),requestAnimationFrame(()=>{t.classList.add(`is-open`),i.focus()})}))}function _(){u||(u=!0,t.classList.add(`is-closing`),t.classList.remove(`is-open`),setTimeout(()=>{t.close(),t.classList.remove(`is-animating`,`is-closing`),u=!1,document.body.classList.remove(`scroll-lock`),l&&=(l.focus(),null)},200))}function v(){c>0&&(c--,h(!0))}function y(){c<s.length-1&&(c++,h(!0))}i.addEventListener(`click`,_),a.addEventListener(`click`,v),o.addEventListener(`click`,y),n.addEventListener(`click`,_);let b=t.querySelector(`.lightbox-container`);t.addEventListener(`click`,e=>{(e.target===t||e.target===b)&&_()}),t.addEventListener(`keydown`,e=>{e.key===`Escape`?(e.preventDefault(),_()):e.key===`ArrowLeft`?(e.preventDefault(),v()):e.key===`ArrowRight`&&(e.preventDefault(),y())});function x(){document.querySelectorAll(`.prose-content img`).forEach((e,t)=>{let n=e;if(n.dataset.lightboxSetup===`true`)return;n.dataset.lightboxSetup=`true`;let r=document.createElement(`button`);r.type=`button`,r.className=`lightbox-trigger`,r.setAttribute(`aria-label`,`View ${n.alt||`image`} in fullscreen`),n.parentNode.insertBefore(r,n),r.appendChild(n),r.addEventListener(`click`,()=>{g(t,r)})})}x()}e(),document.addEventListener(`astro:after-swap`,e);</script><script data-goatcounter="https://helppi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script></body></html><script type="module">var e=window.matchMedia(`(prefers-reduced-motion: reduce)`);function t(t,n){if(e.matches){t.textContent=n;return}t.classList.add(`label-swapping`),setTimeout(()=>{t.textContent=n,t.classList.remove(`label-swapping`)},100)}function n(){let e=document.querySelector(`.copy-markdown-btn`);e&&e.addEventListener(`click`,async()=>{let n=`# ${e.dataset.title??``}\n\n${document.getElementById(`post-body-raw`)?.textContent??``}`;try{await navigator.clipboard.writeText(n),t(e,`Copied!`),setTimeout(()=>{t(e,`Copy post`)},2e3)}catch{}})}n(),document.addEventListener(`astro:page-load`,n);function r(){document.querySelectorAll(`.code-copy-btn`).forEach(e=>{let n=e.cloneNode(!0);e.replaceWith(n),n.addEventListener(`click`,async()=>{let e=n.closest(`.code-block-wrapper`)?.querySelector(`pre`);if(e)try{await navigator.clipboard.writeText(e.textContent??``),t(n,`Copied!`),setTimeout(()=>{t(n,`Copy`)},2e3)}catch{}})})}r(),document.addEventListener(`astro:page-load`,r);function i(){let e=document.querySelector(`.writing-cursor`);if(!e)return;let t=e.closest(`.prose-content`);if(!t)return;t.appendChild(e),e.classList.remove(`placed`);let n=Array.from(t.children).filter(t=>t!==e),r=n[n.length-1];if(r){let t=r.tagName;if([`P`,`H1`,`H2`,`H3`,`H4`,`H5`,`H6`].includes(t))r.appendChild(e);else if(t===`UL`||t===`OL`){let t=r.querySelector(`li:last-child`);t&&t.appendChild(e)}else if(t===`BLOCKQUOTE`){let t=r.querySelector(`p:last-child`);t?t.appendChild(e):r.appendChild(e)}}e.classList.add(`placed`)}i(),document.addEventListener(`astro:page-load`,i);</script>

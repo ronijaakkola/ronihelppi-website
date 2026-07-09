@@ -1,0 +1,256 @@
+# Roni Helppi — Full Site Content
+
+> This file contains all writing and project content from ronihelppi.com in plain text, intended for LLM ingestion.
+> For a summary, see https://ronihelppi.com/llms.txt
+
+> Generated: 2026-07-09
+
+---
+
+## About
+
+Roni Helppi is a Senior Product Designer at Reaktor, working across design and engineering. Previously at Gofore, Leadin, and Atostek. Interests include AI, generative tools, game development, and the intersection of design and code.
+
+### Experience
+
+- 08/2022– — Senior Product Designer, Reaktor
+- 12/2017–08/2022 — UX Designer, Gofore
+- 02/2017–12/2017 — UX Developer, Leadin
+- 01/2016–02/2017 — Software Designer, Atostek
+- 01/2015–06/2015 — Research Assistant, Tampere University
+
+Contact: hello@ronihelppi.com
+LinkedIn: https://www.linkedin.com/in/ronihelppi/
+GitHub: https://github.com/ronijaakkola
+X: https://x.com/Nashtanir
+
+---
+
+## Writing
+
+### A practical guide to writing your own Obsidian skills
+
+Date: 2026-03-10
+URL: https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/
+Summary: Stop copying skills. Build your own.
+
+Agentic skills have taken the AI world by storm. People are slowly starting to experiment on using them on other tasks than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
+
+Around two months ago, the Obsidian CEO kepano released a GitHub repository containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.
+
+[toc]
+
+Stop copying skills. Build your own.
+
+I divide agentic skills roughly to two categories. There are skills that teach the agent to use a specific tool, and there are skills that teach the agent to follow a certain process. The first category is a simple one as there are only so few ways to describe how a certain tool is used. In the context of Obsidian, these skills may teach the agent how to deal with Markdown and Bases files. Or, how to use the Obsidian CLI. These are the skills you should copy, and you can find many of those in kepano's repository.
+
+The latter category, skills that teach the agent a process, should not be copied. They should be created by yourself.
+
+Why should you consider creating skills by yourself? Custom-made skills are endlessly more useful and reliable as they have been tailored to follow your needs and processes. Using skills created by someone else may not work well for your workflow and vault structure. Moreover, creating them is actually easier than you think. So easy, in fact, that it may be quicker than copy-pasting an unknown skill from a Git repository to your .claude folder.
+
+In this post, I will share concrete and practical examples how you can create your own skills and iterate them. After reading this post, you should feel very comfortable to try to extract your processes and routines to your AI agent of choosing. This guide is divided into steps that build upon each other. You can start small, and come back to this guide when you are ready to dive deeper.
+
+Before we start
+
+You will need:
+- An Obsidian vault.
+- An agentic tool of some sort. I will use Claude Code as an example, but other tools like Codex and Gemini CLI also support skills just as well. I will also expect that you have basic knowledge of using the agentic tool of your choice.
+
+And, before you do anything:
+- Always regularly backup your vault before giving AI agents access to it.
+- If you wish to keep your notes truly private, consider setting up a local model, e.g. with Ollama.
+
+What are skills?
+
+Skills are a simple format of teaching your AI agents new capabilities and expertise. They are really just loosely formatted Markdown files. The original concept was coined by Anthropic but it has been since made an open-format that most agentic harnesses nowadays follow.
+
+Here is an example of a skill called obsidian-markdown (from the obsidian-skills repository) that teaches the agent how to create and edit Markdown files within Obsidian:
+
+What people often miss about skills, is that the best way to create them is to ask the agent to create them for you. When starting out, it is recommended to use a specific skill that aids you creating high-quality skills. Anthropic offers a Skill Creator that you can install as a Claude plugin.
+
+Note that you can build skills without the Skill Creator if you wish. Agents do a fine job even this way but I recommend using the creator if possible as it more accurately follows Anthropic's newest prompting guidelines and even features a process for testing your skills with multiple subagents.
+
+Teach the agent basic things it needs to know
+
+Before we can build anything useful, we need to teach the agent how to interact with the environment we are in. This means mainly three (3) things:
+
+1. Help it understand (Obsidian-flavored) Markdown files
+2. Help it understand how to use Obsidian CLI
+3. Help it understand how your vault is structured
+
+Let's go through these one by one.
+
+Help it understand (Obsidian-flavored) Markdown files
+
+The first one will be easy. The Obsidian skills GitHub repository features skills to teach the agent to deal with Markdown, Bases and Canvas files. Go ahead and copy them either to your global ~/.claude/skills folder or to the vault-specific .claude/skills folder. Both are okay but I prefer the vault-specific folder to keep my skills synced between all of my devices via Obsidian Sync.
+
+Help it understand how to use Obsidian CLI
+
+Now as that is out of the way, let's focus on teaching the agent how to use Obsidian CLI. If you are not familiar with it, it is a command line interface that allows controlling Obsidian from a terminal. While it may be useful for humans too, the real power of it lies in how agents can use it to interact with Obsidian just like you could through the app. While kepano has made it easy for us by also including a skill for the CLI in the repository, I will quickly teach you how you can also create a similar one by yourself. Just open up your Claude Code, and prompt it to:
+
+And that's it! It is really that simple. The agent will do its job (and the skill-creator actually takes a while to run), and the end result will be something very similar that is available in the Obsidian skills repository.
+
+This process can be used to teach the agent to use any terminal commands you wish. Just ask it to run the help command, and it will investigate and write the skill itself.
+
+Help it understand how your vault is structured
+
+The last thing we need to prepare is an explanation of your vault's structure for the agent. All of our vaults are slightly different. Some of us mainly use tags to organise, some tend to use links. Some of us use a lot of folders, some use none. And this is why we need to give some initial information to the agent about how the vault is built. This way it can get right into work and not investigate the vault structure every time.
+
+There are multiple ways you can provide this information to the agent. The most common way is to include the information in the AGENTS.md file (CLAUDE.md for Claude Code). To do this, open up your Claude Code, and prompt it to:
+
+After the agent is complete, I recommend going ahead and reading the file it wrote. Verify that the description it created makes sense and captures the structure of your vault. The general consensus nowadays is (and there is even some research that supports it) that the always-included context files like AGENTS.md and CLAUDE.md should only contain the bare minimum. Adding more information than what the agent would need every prompt will most likely have negative effects. So, while important, ensure that the file only lists the most important facts about your vault.
+
+Teach the agent how you think
+
+Finally, we can get into the fun stuff. Now the agent understands how your vault is structured and how it can interact with files in the vault. Now, we can move on to creating skills that mimic your processes and thinking. I will give you three examples of creation of skills that I use weekly (some even daily) when working in my Obsidian vault.
+
+One more thing to keep in mind: keep your skills small and focused. A skill with clear inputs and outputs is much easier to debug when something goes wrong. If your weekly review skill also tries to reorganize your tags, clean up orphan notes, and update your dashboard, it will be hard to tell which part broke. One skill, one job.
+
+Note that the following prompts are examples. You should definitely edit them to make sure the skills will serve your vault and processes the best.
+
+Weekly review
+
+I do planning in quarter and weekly levels. Weekly planning repeats every week, so I have created a skill where the agent checks related notes, gathers all the needed information, and interviews me to review the last week and to plan the next one. To create something similar to suit your needs, prompt your agent to:
+
+You can go as detailed as you want with the prompt. It is likely that the first version of the skill does not exactly work as you envisioned, and this is completely normal. More about iterating your skills in the next chapter.
+
+See my weekly review skill
+
+Summarize material
+
+I tend to consume a lot of material (blogs, articles, research, podcasts, etc. ) during my week. Sometimes I find things that seem interesting but I do not have enough time to decide if the material is something I want to spend more time on. I wanted to create a skill that quickly lists the key topics discussed in the material, similar to a table of contents, and saved the note in my inbox folder of my vault. To create something similar, run:
+
+This example was more of a generic one but you can create more sophisticated skills for different material types (e.g. a separate skill for videos) if you want to.
+
+See my summarize material skill
+
+Prepare materials for writing
+
+I do plenty of writing inside my vault. Sometimes some of my notes turn into published materials quite easily. However, it is often hard to keep track of which notes could be the most potential ones to turn into releases next. I have had very good results with the following skill prompt:
+
+I have been iterating my own version of this skill over several weeks and have gotten very good results. The agent has been able to surface really old notes for further review, and has found good supporting material that I had completely overlooked. Agents really shine at handling scale.
+
+See my prepare writing skill
+
+Keep iterating
+
+You should now have a few skills that you frequently use. Now what?
+
+It is likely that the skills you create do not turn out as perfect on the first try. They may be missing some critical part of your process, or the agent may inject too much of its own "thinking" into your notes.
+
+This is completely normal and luckily it is also very easy to fix. You should treat your skills like code; they are living documents that are constantly being improved. The best way to keep working on your skills is to explain the agent what the problem is and ask it to directly edit the skill. For example:
+
+And there you go, the version 2 of that skill was just created. Now you use it again, and keep iterating if it needs more work or if your process or your vault changes.
+
+One point where you also may need to revisit your skills is when you change models or when models update to newer versions. For example, when Claude updated its models to version 4.6, I ran a review pass and found that many of my skills used overly aggressive language like "You MUST use this tool" or "CRITICAL: always do X." This kind of wording worked fine on older models but caused newer ones to overtrigger and overplan. The fix was simple: softening the language to something like "Use this tool when it would help." A small change, but it made a real difference in how reliably the skills performed.
+
+Now it's your turn
+
+I hope this piece gave you more confidence to work on your own skills instead of trying to hunt a perfect one that someone else has created. But we do not need to settle in for options we can find on the Internet. The time we are living with AI is really the perfect moment to create personalized tools by us for ourselves.
+
+To find all skill examples mentioned in this post, see this GitHub repository.
+
+And if you work in a team, remember the distinction from earlier: tool-type skills that teach the agent how to use Obsidian CLI or Markdown can absolutely be shared via Git or a skill marketplace. The workflow skills that encode your personal process are the ones worth building yourself.
+
+---
+
+## Projects
+
+### Vuoro
+
+Date: 2026-06-11
+URL: https://ronihelppi.com/pr-preview/pr-97/projects/vuoro/
+Summary: Application for Pebble smartwatches to find nearest bus stops and next departing lines in Finland.
+Tags: #apps
+
+Vuoro is an application made for Pebble smartwatches. Pebbles are very minimalistic smartwatches with an e-ink screen and long battery life.
+
+The Vuoro app quickly shows the nearest bus stops and the next departing lines in Finnish cities. It also allows the user to favorite their most used stops and view the status of city bike stations. Vuoro supports buses, trams, and subways, and it works in most major Finnish cities.
+
+Design and development
+
+It is hard to believe this myself, but the development of this app started over 10 years ago, in 2016. I had just received my shiny new Pebble Time Steel watch, and I was disappointed to find out that nobody had made a decent app for it to track buses in my hometown, Tampere. The app had only some of the features it has today, but it was fully functional and used by many. As Pebble got acquired by Fitbit in late 2016, Pebble services eventually got shut down. To the surprise of many of us, Pebble officially returned in 2025, and even announced that new watch models were in production. This inspired me to revive this app and update it to match the vision I originally had for it.
+
+But a lot had changed during 10 years. The API for Tampere transit services had gone down and Tampere had moved to use the Digitransit API. This was mostly a good change because it meant I was able to support more cities than just Tampere, and Digitransit also offered a lot more data to build experiences around.
+
+So, I opened up Figma and redesigned the whole application with the same core idea but a lot of new features and quality-of-life changes. I also took advantage of the new hardware while still wanting to maintain support even for the oldest Pebble models. Feeling nostalgic, I also designed new custom icons for the app following the distinct and lovely style of Pebble icons. Getting icons to render cleanly on Pebble devices is a skill of its own, as the small e-ink screen is very picky about the rendered angles and stroke widths.
+
+Reimplementing the whole application in C was interesting. I have to admit that I really got spoiled by past me, as the app was already structured in a way that changes were quite a breeze to implement. Touching code over 10 years old makes me feel warm and fuzzy. It was never forgotten, and still useful.
+
+Hardware limitations
+
+One of the key challenges when developing for Pebble watches is their harsh hardware limitations. Screens are small on all models, 144×168 pixels on most Pebbles. But an even more challenging limitation is the app RAM (heap) budget. Most Pebbles have 64 KB of heap, and the oldest Pebble model has merely 24 KB. If you were wondering, yes, that is the total budget the app has to fit into — the code's static data, all mallocs, and the graphics buffers all come from that memory.
+
+This creates interesting challenges when designing and developing apps for Pebble watches. You cannot include everything, and you need to carefully consider the budget for every feature you add. When Vuoro loads on the aplite platform (which is the platform of the oldest Pebble model), there is only about 3.5 KB of free heap left. This means that even the smallest code additions can tip it over into an out-of-memory crash.
+
+I, for one, enjoy these kinds of limitations. In the modern world we are used to having a nearly endless amount of resources available. It was refreshing to design something that needed to squeeze every single bit out of the memory budget to create a consistent and useful experience. I also almost feel like it is my responsibility to keep even the oldest Pebble models supported. My own 10-year-old Pebble Time Steel is still running strong too.
+
+If you have a Pebble, you can download Vuoro to your watch from the Pebble Appstore. If you do not live in Finland, please feel free to adapt the app to work in your country.
+
+---
+
+### RESOKILL
+
+Date: 2025-12-01
+URL: https://ronihelppi.com/pr-preview/pr-97/projects/resokill/
+Summary: A retro rhythm shooter inspired by the PS1 era, created in one month for GitHub's Game Off 2025 Jam.
+Tags: #games
+
+RESOKILL is a retro rhythm shooter built in one month for GitHub's annual Game Off 2025 Jam. Our team of three placed 36th overall out of 716 participants and 20th in Audio.
+
+The jam's theme was waves. We interpreted it literally and mechanically: the player picks up a portable cassette player, inserts a tape, and wields a sound blaster that shoots sound waves against waves of enemies. Shooting in rhythm with the music lets the player unleash increasingly powerful blasts. Accurate shooting builds up a combo that increases damage — and part of that combo can be spent on a devastating piercing sound blast. A stats screen after each song tracks beat accuracy, encouraging players to chase tighter timing.
+
+Beating a song unlocks the next cassette. Four custom tracks, composed by our sound designer, drive the game — each designed with clear, detectable beats at different tempos to support the rhythm mechanic. The visual intensity matches the audio: the dithered PS1-style graphics with aggressive screen effects.
+
+Development
+
+We developed RESOKILL in Unity. Our team had experience with multiple game engines, but we preferred Unity's reliable WebGL export for game jams where browser playability matters.
+
+I created the 3D models in Blender, with textures stitched together from CC0 sources. To nail the retro look, we built a custom dithering shader to emulate the way the PS1 rendered graphics.
+
+Learnings
+
+Rhythm games demand careful latency management
+
+Many factors influence audio latency, and the game can feel very different across audio setups. We used FMOD and rewrote the beat detection system multiple times to get latency as low as possible. The WebGL build still struggled with timing precision, so we recommended players download the executable for the best experience. If I were to build another rhythm game, I'd include a latency calibration step at startup.
+
+Tying level length to song duration limited our options
+
+Each level lasted exactly as long as its song. This made balancing difficult — we couldn't adjust level pacing without touching the music. Next time, I'd design looping tracks that give more control over the gameplay experience independent of the composition.
+
+You can try the game on Itch.io. For the best rhythm experience, I recommend the downloadable version.
+
+---
+
+### Clear Skies
+
+Date: 2025-10-06
+URL: https://ronihelppi.com/pr-preview/pr-97/projects/clear-skies/
+Summary: A star-gazing game made from scratch completely solo in 48 hours for the Ludum Dare 58 jam Compo category.
+Tags: #games
+
+Clear Skies is a star-gazing game that I created solo for the Ludum Dare 58 jam. It was created for the Compo category, meaning that all code and assets must be made during the jam, and alone. I placed 29th overall out of 272 participants, and got 14th in Innovation and 24th in Mood categories.
+
+The jam's theme was collector. I do a lot of star-gazing during winter time. Each night I pick a new target to hunt for and try to find it with my telescope. Finding a specific object from the night sky is not always an easy feat. This process is called starhopping. It means moving your telescope from a familiar star to another and finally (hopefully) reach the target destination.
+
+This translated into a game quite nicely. I gave the player a book that listed star constellations they can find and the most notable stars of each constellation. Then, their task was to find them all using their telescope by connecting stars together similarly to how they were defined in the book. Due to the telescope, the player can only see a small portion of the sky at the same time. This forces them to naturally use the starhopping technique just as they would in real life.
+
+Development
+
+Clear Skies was developed using the PICO-8 fantasy console. While it has very harsh limitations, it is one of my favorite platforms to make small games solo, as it features all the tools within the console itself. This means I was able to do coding, art and even sound effects and music directly inside the console.
+
+As stars in the game accurately simulate a portion of a real night sky, modelling it was an important task during the development. I ended up taking a screenshot of the sky, scaling it to the size of the map, and then drew stars on top of it using Aseprite. This allowed me to easily get star distances right. I also used the relative brightness and color of the stars in the art. Even though the star color is not too apparent in real life, I felt it was necessary for the game. Combining the star size, name and color gave the player a lot of different ways to locate stars from the sky.
+
+Learnings
+
+Shared cartridge memory
+
+PICO-8's bottom half of the spritesheet and the bottom half of the map live in the same cartridge memory. This is stated clearly in the documentation but I missed this when moving quickly during the jam. At first, I had my whole sky modelled in the map. However, the sky was so large that it ended up overlapping with my sprite sheet. Due to this, I had to refactor the whole sky rendering during the jam. I ended up drawing all the stars manually to the screen, skipping the map memory completely.
+
+Giving your players more than they need
+
+I deliberately added a lot of ways the player could locate and recognize specific stars from the sky. The book not only lists names of notable stars but also shows their color and relative size (brightness). It was clear from the feedback that players used a lot of different strategies to locate constellations. Some used the color alone, some hunted for star names. As people tend to gravitate towards different kinds of hints, adding a few more is never going to do any harm.
+
+You can try the game directly on your browser on Itch.io.
+
+---

@@ -1,0 +1,25 @@
+# Roni Helppi
+
+> Senior designer & engineer at Reaktor. Personal website with writing and project case studies.
+
+## About
+
+Roni Helppi is a Senior Product Designer at Reaktor, working across design and engineering. Previously at Gofore, Leadin, and Atostek. Interests include AI, generative tools, game development, and the intersection of design and code.
+
+- Site: https://ronihelppi.com
+- Email: hello@ronihelppi.com
+- LinkedIn: https://www.linkedin.com/in/ronihelppi/
+- GitHub: https://github.com/ronijaakkola
+- X: https://x.com/Nashtanir
+
+## Sections
+
+- [About](https://ronihelppi.com/about): Background, experience, and contact info
+- [Writing](https://ronihelppi.com/writing): Articles on design, technology, and creative work
+- [Projects](https://ronihelppi.com/projects): UX design projects and case studies
+- [Contact](https://ronihelppi.com/contact): Email, LinkedIn, X, and GitHub links
+
+## Content Feeds
+
+- [RSS Feed](https://ronihelppi.com/rss.xml): Blog posts in XML format
+- [Full Content for LLMs](https://ronihelppi.com/llms-full.txt): All writing and project content in plain text

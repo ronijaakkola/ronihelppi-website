@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0b0b0b"><!-- Theme init: runs before first paint to avoid a flash of the wrong theme.
+         Dark is the default until the user makes an explicit choice. Keeps the
+         theme correct across Astro View Transitions and updates the browser UI
+         theme-color. Exposes window.__setTheme / __getTheme for the toggle. --><script>
+      (function () {
+        if (window.__themeReady) return;
+        window.__themeReady = true;
+
+        var STORAGE_KEY = 'theme';
+        var THEME_COLORS = { dark: '#0b0b0b', light: '#f6f4f3' };
+
+        function stored() {
+          try {
+            var v = localStorage.getItem(STORAGE_KEY);
+            return v === 'light' || v === 'dark' ? v : null;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        // Explicit choice wins; default to dark when none has been made.
+        function resolve() {
+          return stored() || 'dark';
+        }
+
+        function applyTo(doc, theme) {
+          doc.documentElement.setAttribute('data-theme', theme);
+          var meta = doc.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+        }
+
+        function apply(theme) {
+          applyTo(document, theme);
+          window.dispatchEvent(
+            new CustomEvent('themechange', { detail: { theme: theme } })
+          );
+        }
+
+        window.__getTheme = function () {
+          return document.documentElement.getAttribute('data-theme') || resolve();
+        };
+
+        window.__setTheme = function (theme) {
+          if (theme !== 'light' && theme !== 'dark') return;
+          try {
+            localStorage.setItem(STORAGE_KEY, theme);
+          } catch (e) {}
+
+          // iOS-style circular reveal wipe. The toggle click handler stamps the
+          // click point (--reveal-x/y/r) on <html>; the reveal CSS reads those.
+          // Scoped by the temporary `theme-transition` class so it never
+          // collides with Astro's page-navigation view transitions.
+          var reduceMotion = false;
+          try {
+            reduceMotion = window.matchMedia(
+              '(prefers-reduced-motion: reduce)'
+            ).matches;
+          } catch (e) {}
+
+          if (
+            typeof document.startViewTransition !== 'function' ||
+            reduceMotion
+          ) {
+            // Fallback: instant flip, no animation.
+            apply(theme);
+            return;
+          }
+
+          var root = document.documentElement;
+          root.classList.add('theme-transition');
+          var vt = document.startViewTransition(function () {
+            apply(theme);
+          });
+          var done = function () {
+            root.classList.remove('theme-transition');
+          };
+          vt.finished.then(done, done);
+        };
+
+        // Initial application (before body paints -> no flash).
+        apply(resolve());
+
+        // Stamp the incoming document before it swaps in, so there's no flash
+        // during a View Transition navigation.
+        document.addEventListener('astro:before-swap', function (e) {
+          applyTo(e.newDocument, resolve());
+        });
+
+        // The <html> element is reused across swaps; reassert and notify the
+        // toggle control so its label stays in sync.
+        document.addEventListener('astro:after-swap', function () {
+          apply(resolve());
+        });
+
+        // Smooth scrolling (global.css) is for in-page anchor jumps only.
+        // Suspend it around router navigations so Astro's scroll restoration
+        // (history back/forward) stays instant.
+        document.addEventListener('astro:before-preparation', function () {
+          document.documentElement.classList.add('is-navigating');
+        });
+        document.addEventListener('astro:page-load', function () {
+          document.documentElement.classList.remove('is-navigating');
+        });
+
+        // In-page anchor clicks (heading rail, TOC card, heading anchors):
+        // update the URL with replaceState instead of pushing a history entry,
+        // so the Back button always leaves the page rather than stepping back
+        // through every heading visited. Capture phase so this wins over the
+        // Astro router's own click handler (it skips defaultPrevented events).
+        document.addEventListener(
+          'click',
+          function (e) {
+            if (e.defaultPrevented || e.button !== 0) return;
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            var el = e.target instanceof Element ? e.target : null;
+            var link = el && el.closest('a[href^="#"]');
+            if (!link) return;
+            var id = decodeURIComponent(link.getAttribute('href').slice(1));
+            var target = id ? document.getElementById(id) : null;
+            if (!target) return;
+            e.preventDefault();
+            history.replaceState(history.state, '', '#' + id);
+            // Follows CSS scroll-behavior: smooth unless reduced motion.
+            target.scrollIntoView();
+          },
+          true
+        );
+      })();
+    </script><link rel="icon" type="image/svg+xml" href="/pr-preview/pr-97/favicon.svg"><link rel="icon" type="image/x-icon" href="/pr-preview/pr-97/favicon.ico"><link rel="apple-touch-icon" href="/pr-preview/pr-97/apple-touch-icon.png"><!-- SEO --><link rel="alternate" type="application/rss+xml" title="Roni Helppi" href="/pr-preview/pr-97/rss.xml"><link rel="alternate" type="text/plain" title="LLM content" href="/pr-preview/pr-97/llms.txt"><link rel="canonical" href="https://ronihelppi.com/pr-preview/pr-97/writing/"><meta name="description" content="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."><meta name="author" content="Roni Helppi"><!-- Open Graph --><meta property="og:type" content="website"><meta property="og:url" content="https://ronihelppi.com/pr-preview/pr-97/writing/"><meta property="og:title" content="Writing — Roni Helppi"><meta property="og:description" content="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."><meta property="og:site_name" content="Roni Helppi"><meta property="og:locale" content="en_US"><meta property="og:image" content="https://ronihelppi.com/pr-preview/pr-97/og-default.png"><!-- Twitter Card --><meta name="twitter:card" content="summary"><meta name="twitter:site" content="@Nashtanir"><meta name="twitter:creator" content="@Nashtanir"><meta name="twitter:title" content="Writing — Roni Helppi"><meta name="twitter:description" content="Thoughts on design, technology, and creative work. Articles about UX design, software development, and the intersection of digital and physical."><meta name="twitter:image" content="https://ronihelppi.com/pr-preview/pr-97/og-default.png"><!-- Local fonts --><link rel="preload" href="/fonts/rethink-sans-400-600-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/spectral-400-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/spectral-500-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/fonts/jetbrains-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin><title>Writing — Roni Helppi</title><!-- Structured Data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"Writing","url":"https://ronihelppi.com/pr-preview/pr-97/writing/","description":"Articles by Roni Helppi on design, technology, AI, and creative work.","hasPart":[{"@type":"BlogPosting","headline":"A practical guide to writing your own Obsidian skills","url":"https://ronihelppi.com/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills/"}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ronihelppi.com/pr-preview/pr-97/"},{"@type":"ListItem","position":2,"name":"Writing","item":"https://ronihelppi.com/pr-preview/pr-97/writing/"}]}</script><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script type="module" src="/pr-preview/pr-97/_astro/ClientRouter.astro_astro_type_script_index_0_lang.BvDQ8sA6.js"></script><link rel="stylesheet" href="/pr-preview/pr-97/_astro/BaseLayout.BJhakOm_.css"><style>.post-item[data-astro-cid-teke4qlj]{gap:var(--gap-3xs);flex-direction:column;display:flex}.post-header[data-astro-cid-teke4qlj]{gap:var(--gap-4xs);flex-direction:column;display:flex}.post-date[data-astro-cid-teke4qlj]{font-size:var(--text-small);letter-spacing:var(--tracking-small);color:var(--color-text-secondary)}.post-title[data-astro-cid-teke4qlj]{width:fit-content;font-size:var(--text-body);letter-spacing:var(--tracking-body-tight);color:var(--color-text-primary);text-decoration-line:underline}.post-description[data-astro-cid-teke4qlj]{font-size:var(--text-small);letter-spacing:var(--tracking-small);color:var(--color-text-secondary);line-height:var(--leading-body)}.post-item--row[data-astro-cid-teke4qlj] .post-header[data-astro-cid-teke4qlj]{flex-direction:row;align-items:baseline;gap:0}.post-item--row[data-astro-cid-teke4qlj] .post-date[data-astro-cid-teke4qlj]{flex-shrink:0;min-width:115px}
+.divider[data-astro-cid-boktbqod]{background-color:var(--color-divider);border:none;width:100%;height:1px}
+.content[data-astro-cid-67lgijtc]{gap:var(--gap-md);flex-direction:column;display:flex}.page-header[data-astro-cid-67lgijtc]{gap:var(--gap-sm);flex-direction:column;display:flex}.intro-divider{margin-block:var(--gap-2xs)}.intro[data-astro-cid-67lgijtc]{gap:var(--gap-xs);font-size:var(--text-body);letter-spacing:var(--tracking-body-tight);line-height:var(--leading-body);color:var(--color-text-secondary);flex-direction:column;max-width:40rem;display:flex}.intro[data-astro-cid-67lgijtc] a[data-astro-cid-67lgijtc]{color:var(--color-text-secondary);text-decoration-line:underline}.intro[data-astro-cid-67lgijtc] a[data-astro-cid-67lgijtc]:hover,.intro[data-astro-cid-67lgijtc] a[data-astro-cid-67lgijtc]:focus-visible{color:var(--color-text-primary)}.posts-section[data-astro-cid-67lgijtc]{gap:var(--gap-md);flex-direction:column;display:flex}.posts-list[data-astro-cid-67lgijtc]{gap:var(--gap-lg);flex-direction:column;display:flex}
+</style><script type="module" src="/pr-preview/pr-97/_astro/page.BxNEB9YK.js"></script></head><body><a href="#main-content" class="skip-link">Skip to main content</a><div class="site-wrapper"><header class="header" data-astro-cid-nen7h5rs><div class="nav" data-astro-cid-nen7h5rs><nav class="logo-breadcrumb" aria-label="Breadcrumb" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/" class="logo" aria-label="Roni Helppi, home" data-astro-cid-nen7h5rs>Roni Helppi</a><span class="breadcrumb-separator" id="breadcrumb-separator" aria-hidden="true" data-astro-cid-nen7h5rs></span><a href="/pr-preview/pr-97/" class="breadcrumb" id="breadcrumb" data-astro-cid-nen7h5rs></a></nav><nav class="nav-links" aria-label="Main" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/about" class="nav-link" data-astro-cid-nen7h5rs>About</a><a href="/pr-preview/pr-97/projects" class="nav-link" data-astro-cid-nen7h5rs>Projects</a><a href="/pr-preview/pr-97/writing" class="nav-link" data-astro-cid-nen7h5rs>Writing</a></nav><div class="header-actions" data-astro-cid-nen7h5rs><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme" data-astro-cid-nen7h5rs><svg class="theme-icon theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M22 12L23 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M12 2V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M12 23V22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M20 20L19 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M20 4L19 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M4 20L5 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M4 4L5 5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M1 12L2 12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg><svg class="theme-icon theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M3 11.5066C3 16.7497 7.25034 21 12.4934 21C16.2209 21 19.4466 18.8518 21 15.7259C12.4934 15.7259 8.27411 11.5066 8.27411 3C5.14821 4.55344 3 7.77915 3 11.5066Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg></button><a href="/pr-preview/pr-97/contact" class="contact-button" data-astro-cid-nen7h5rs><span data-astro-cid-nen7h5rs>Contact</span><span class="keystroke" aria-hidden="true" data-astro-cid-kf5yt4dj>C</span><span class="visually-hidden" data-astro-cid-kf5yt4dj>Press C to go to contact page</span></a><button class="menu-button" id="menu-button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu" data-astro-cid-nen7h5rs><svg class="menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M13 5H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M8 12H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path><path d="M3 19H21" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg><svg class="close-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-nen7h5rs><path d="M6.75827 17.2426L12.0009 12M12.0009 12L17.2435 6.75736M12.0009 12L6.75827 6.75736M12.0009 12L17.2435 17.2426" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-nen7h5rs></path></svg></button></div></div></header><!-- Mobile Menu Overlay --><div class="mobile-menu" id="mobile-menu" aria-hidden="true" data-astro-cid-nen7h5rs><nav class="mobile-menu-nav" aria-label="Mobile navigation" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/" class="mobile-menu-link" data-astro-cid-nen7h5rs>Home</a><a href="/pr-preview/pr-97/about" class="mobile-menu-link" data-astro-cid-nen7h5rs>About</a><a href="/pr-preview/pr-97/projects" class="mobile-menu-link" data-astro-cid-nen7h5rs>Projects</a><a href="/pr-preview/pr-97/writing" class="mobile-menu-link" data-astro-cid-nen7h5rs>Writing</a><a href="/pr-preview/pr-97/contact" class="mobile-menu-link" data-astro-cid-nen7h5rs>Contact</a></nav><div class="mobile-menu-footer" data-astro-cid-nen7h5rs><a href="/pr-preview/pr-97/rss.xml" class="mobile-menu-rss" data-astro-cid-nen7h5rs>RSS</a></div></div><script type="module" src="/pr-preview/pr-97/_astro/Header.astro_astro_type_script_index_0_lang.Bc24xyy3.js"></script><main id="main-content" class="main" data-astro-cid-67lgijtc><div class="layout" data-astro-cid-67lgijtc><div class="prose" data-astro-cid-67lgijtc><div class="content" data-astro-cid-67lgijtc><header class="page-header" data-astro-cid-67lgijtc><h1 class="page-title" data-astro-cid-67lgijtc>Writing<span class="visually-hidden" data-astro-cid-67lgijtc> on Design & Technology</span></h1><div class="intro" data-astro-cid-67lgijtc><p data-astro-cid-67lgijtc>This is the part of the site where I work ideas out in public. Expect notes on design, software, AI tooling, and the weirdly productive space where those overlap.</p><p data-astro-cid-67lgijtc>If you prefer feeds to social apps, you can follow along via <a href="/pr-preview/pr-97/rss.xml" data-astro-cid-67lgijtc>RSS</a>.</p></div></header><hr class="divider intro-divider" aria-hidden="true" data-astro-cid-boktbqod><section class="posts-section" data-astro-cid-67lgijtc><div class="posts-list" data-astro-cid-67lgijtc><div class="post-item" data-astro-cid-teke4qlj><div class="post-header" data-astro-cid-teke4qlj><time class="post-date" datetime="2026-03-10" data-astro-cid-teke4qlj>March 10, 2026</time><a href="/pr-preview/pr-97/writing/a-practical-guide-to-writing-your-own-obsidian-skills" class="post-title" data-astro-cid-teke4qlj>A practical guide to writing your own Obsidian skills</a></div><p class="post-description" data-astro-cid-teke4qlj>Stop copying skills. Build your own.</p></div></div></section></div></div></div></main><footer class="site-footer"><div class="footer-inner"><p class="footer-copyright">&copy; 2026 Roni Helppi</p><nav class="footer-links" aria-label="Social links"><a href="https://github.com/ronijaakkola" target="_blank" rel="noopener noreferrer">github<span class="visually-hidden"> (opens in new tab)</span></a><span class="footer-sep" aria-hidden="true">/</span><a href="https://www.linkedin.com/in/ronihelppi/" target="_blank" rel="noopener noreferrer">linkedin<span class="visually-hidden"> (opens in new tab)</span></a><span class="footer-sep" aria-hidden="true">/</span><a href="/rss.xml">rss</a></nav></div></footer></div><dialog id="lightbox" class="lightbox" aria-label="Image viewer" data-astro-cid-utnzf2kr><div class="lightbox-container" data-astro-cid-utnzf2kr><figure class="lightbox-figure" data-astro-cid-utnzf2kr><button class="lightbox-close" type="button" aria-label="Close image viewer" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M9.01103 22.9901L16.0012 16M16.0012 16L22.9913 9.00981M16.0012 16L9.01103 9.00981M16.0012 16L22.9913 22.9901" stroke="currentColor" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button><img class="lightbox-image" src="" alt="" data-astro-cid-utnzf2kr><div class="lightbox-controls" data-astro-cid-utnzf2kr><button class="lightbox-nav lightbox-prev" type="button" aria-label="Previous image" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M28 16H4M4 16L15.3333 4.66667M4 16L15.3333 27.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button><figcaption class="lightbox-caption" data-astro-cid-utnzf2kr></figcaption><button class="lightbox-nav lightbox-next" type="button" aria-label="Next image" data-astro-cid-utnzf2kr><svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" data-astro-cid-utnzf2kr><path d="M4 16H28M28 16L16.6667 4.66667M28 16L16.6667 27.3333" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-utnzf2kr></path></svg></button></div></figure></div></dialog><script type="module">function e(){let e=document.getElementById(`lightbox`);if(!e)return;let t=e,n=t.querySelector(`.lightbox-image`),r=t.querySelector(`.lightbox-caption`),i=t.querySelector(`.lightbox-close`),a=t.querySelector(`.lightbox-prev`),o=t.querySelector(`.lightbox-next`),s=[],c=0,l=null,u=!1,d=0,f=window.matchMedia(`(prefers-reduced-motion: reduce)`);function p(){let e=document.querySelectorAll(`.prose-content img`);return Array.from(e).map(e=>{let t=e;return{src:t.src||t.currentSrc,alt:t.alt||``}})}function m(){[c-1,c+1].forEach(e=>{let t=s[e];if(t){let e=new Image;e.src=t.src}})}function h(e=!1){if(s.length===0)return;let t=s[c],i=()=>{n.src=t.src,n.alt=t.alt,r.textContent=t.alt};if(a.disabled=c===0,o.disabled=c===s.length-1,!e||f.matches){i(),m();return}let l=++d;n.classList.add(`is-swapping`),setTimeout(()=>{if(l!==d)return;i();let e=()=>{l===d&&n.classList.remove(`is-swapping`)};n.decode?n.decode().then(e,e):e(),m()},150)}function g(e,r){s=p(),s.length!==0&&(c=Math.max(0,Math.min(e,s.length-1)),l=r,d++,n.classList.remove(`is-swapping`),t.classList.remove(`is-open`,`is-animating`,`is-closing`),h(),document.body.classList.add(`scroll-lock`),t.showModal(),requestAnimationFrame(()=>{t.classList.add(`is-animating`),requestAnimationFrame(()=>{t.classList.add(`is-open`),i.focus()})}))}function _(){u||(u=!0,t.classList.add(`is-closing`),t.classList.remove(`is-open`),setTimeout(()=>{t.close(),t.classList.remove(`is-animating`,`is-closing`),u=!1,document.body.classList.remove(`scroll-lock`),l&&=(l.focus(),null)},200))}function v(){c>0&&(c--,h(!0))}function y(){c<s.length-1&&(c++,h(!0))}i.addEventListener(`click`,_),a.addEventListener(`click`,v),o.addEventListener(`click`,y),n.addEventListener(`click`,_);let b=t.querySelector(`.lightbox-container`);t.addEventListener(`click`,e=>{(e.target===t||e.target===b)&&_()}),t.addEventListener(`keydown`,e=>{e.key===`Escape`?(e.preventDefault(),_()):e.key===`ArrowLeft`?(e.preventDefault(),v()):e.key===`ArrowRight`&&(e.preventDefault(),y())});function x(){document.querySelectorAll(`.prose-content img`).forEach((e,t)=>{let n=e;if(n.dataset.lightboxSetup===`true`)return;n.dataset.lightboxSetup=`true`;let r=document.createElement(`button`);r.type=`button`,r.className=`lightbox-trigger`,r.setAttribute(`aria-label`,`View ${n.alt||`image`} in fullscreen`),n.parentNode.insertBefore(r,n),r.appendChild(n),r.addEventListener(`click`,()=>{g(t,r)})})}x()}e(),document.addEventListener(`astro:after-swap`,e);</script><script data-goatcounter="https://helppi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script></body></html>
