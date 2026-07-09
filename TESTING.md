@@ -107,10 +107,12 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on pull requests a
 
 The PR preview workflow (`.github/workflows/pr-preview.yml`) runs on pull requests:
 
-1. Builds the site with a PR-specific `BASE_PATH`
+1. Builds the site with a PR-specific `SITE_URL` and `BASE_PATH`
 2. Deploys the preview to `gh-pages/pr-preview/pr-<number>/`
-3. Comments the preview URL on the PR and updates it on new commits
-4. Removes the preview when the PR closes
+3. Posts (or updates on each new commit) a single sticky PR comment with the preview URL and an explicit note that preview URLs are likely public
+4. On close, removes the preview files and updates the comment to note the preview was taken down
+
+The comment is managed by the workflow via `actions/github-script` (the `rossjrw/pr-preview-action` built-in comment is disabled with `comment: false`) so the public-URL note is always included.
 
 Preview URLs are likely public because they live on the GitHub Pages site. The repo must be configured to deploy Pages from the `gh-pages` branch for this to work.
 

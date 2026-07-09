@@ -48,3 +48,64 @@ jobs:
           umbrella-dir: pr-preview
           pages-base-url: https://ronihelppi.com/
           wait-for-pages-deployment: true
+          # Disable the action's built-in comment; we post our own below so we
+          # can include the explicit "preview URLs are likely public" note.
+          comment: false
+
+      - name: Update preview comment
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.preview-url }}
+          IS_CLOSED: ${{ github.event.action == 'closed' }}
+        with:
+          script: |
+            const marker = '<!-- pr-preview -->';
+            const closed = process.env.IS_CLOSED === 'true';
+            const url = process.env.PREVIEW_URL;
+            const body = closed
+              ? [
+                  marker,
+                  '## 🧹 Preview removed',
+                  '',
+                  'The preview for this pull request has been taken down.',
+                ].join('\n')
+              : [
+                  marker,
+                  '## 🔍 Preview deployed',
+                  '',
+                  `Your changes are live at **${url}**`,
+                  '',
+                  '> ⚠️ Preview URLs are likely public — they are served from the',
+                  '> public GitHub Pages site, so anyone with the link can open them.',
+                  '> Avoid putting secrets or content you would not publish into a',
+                  '> preview.',
+                  '',
+                  '<sub>Updates automatically on every new commit; removed when the PR closes.</sub>',
+                ].join('\n');
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+            });
+            const existing = comments.find(
+              (c) => c.body && c.body.includes(marker),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else if (!closed) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
