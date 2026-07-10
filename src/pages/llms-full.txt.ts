@@ -2,6 +2,7 @@ import { getCollection } from 'astro:content';
 import { getTitleFromEntry } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
 import { bio, experience, contact } from '../data/profile';
+import { toSiteUrl } from '../utils/site-config';
 import type { APIContext } from 'astro';
 
 function stripMarkdownToPlainText(body: string): string {
@@ -64,7 +65,7 @@ export async function GET(context: APIContext) {
   for (const post of posts) {
     const title = getTitleFromEntry(post);
     const date = post.data.date.toISOString().split('T')[0];
-    const url = new URL(`/writing/${post.id}/`, context.site).href;
+    const url = toSiteUrl(`/writing/${post.id}/`, context.site);
 
     lines.push(`### ${title}`);
     lines.push('');
@@ -87,7 +88,7 @@ export async function GET(context: APIContext) {
   for (const project of projects) {
     const title = getTitleFromEntry(project);
     const date = project.data.date.toISOString().split('T')[0];
-    const url = new URL(`/projects/${project.id}/`, context.site).href;
+    const url = toSiteUrl(`/projects/${project.id}/`, context.site);
 
     lines.push(`### ${title}`);
     lines.push('');

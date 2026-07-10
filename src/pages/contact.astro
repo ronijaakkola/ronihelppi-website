@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { toSitePath, toSiteUrl } from '../utils/site-config';
 
 const schemas = [
   {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
     name: 'Contact Roni Helppi',
-    url: 'https://ronihelppi.com/contact/',
+    url: toSiteUrl('/contact/', Astro.site),
     description: 'How to reach Roni Helppi on LinkedIn, X, and GitHub.',
   },
 ];
@@ -27,7 +28,7 @@ const schemas = [
               I'm always up for a chat. Whether you have a project in mind, want to collaborate, or just want to say hello.
             </p>
             <p>
-              The easiest way to get a feel for my work before reaching out is to skim the <a href="/about">about page</a>, a few <a href="/projects">projects</a>, or the latest pieces in <a href="/writing">writing</a>.
+              The easiest way to get a feel for my work before reaching out is to skim the <a href={toSitePath('/about', Astro.site)}>about page</a>, a few <a href={toSitePath('/projects', Astro.site)}>projects</a>, or the latest pieces in <a href={toSitePath('/writing', Astro.site)}>writing</a>.
             </p>
             <dl class="contact-methods">
               <!-- <div class="contact-method">

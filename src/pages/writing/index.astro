@@ -6,6 +6,7 @@ import Divider from '../../components/Divider.astro';
 import { getCollection } from 'astro:content';
 import { getTitleFromEntry } from '../../utils/title';
 import { sortByDateDesc } from '../../utils/sortByDate';
+import { toSitePath, toSiteUrl } from '../../utils/site-config';
 
 const posts = sortByDateDesc(await getCollection('posts'));
 
@@ -14,12 +15,12 @@ const schemas = [
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Writing',
-    url: 'https://ronihelppi.com/writing/',
+    url: toSiteUrl('/writing/', Astro.site),
     description: 'Articles by Roni Helppi on design, technology, AI, and creative work.',
     hasPart: posts.map((post) => ({
       '@type': 'BlogPosting',
       headline: getTitleFromEntry(post),
-      url: new URL(`/writing/${post.id}/`, Astro.site).href,
+      url: toSiteUrl(`/writing/${post.id}/`, Astro.site),
     })),
   },
 ];
@@ -41,7 +42,7 @@ const schemas = [
                 This is the part of the site where I work ideas out in public. Expect notes on design, software, AI tooling, and the weirdly productive space where those overlap.
               </p>
               <p>
-                If you prefer feeds to social apps, you can follow along via <a href="/rss.xml">RSS</a>.
+                If you prefer feeds to social apps, you can follow along via <a href={toSitePath('/rss.xml', Astro.site)}>RSS</a>.
               </p>
             </div>
           </header>
@@ -52,7 +53,7 @@ const schemas = [
                 <PostListItem
                   title={getTitleFromEntry(post)}
                   date={post.data.date}
-                  href={`/writing/${post.id}`}
+                  href={toSitePath(`/writing/${post.id}`, Astro.site)}
                   description={post.data.description}
                 />
               ))}
