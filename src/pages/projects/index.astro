@@ -5,9 +5,9 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getTitleFromEntry } from '../../utils/title';
-import { sortByDateDesc } from '../../utils/sortByDate';
+import { sortProjects } from '../../utils/sortProjects';
 
-const projects = sortByDateDesc(await getCollection('projects'));
+const projects = sortProjects(await getCollection('projects'));
 
 // Extract unique categories from tags
 function getCategoryFromTag(tag: string): string {
@@ -97,16 +97,21 @@ const schemas = [
             const title = getTitleFromEntry(item);
             const categories = item.data.tags?.map(getCategoryFromTag) || [];
             const coverImage = item.data.coverImage;
+            // LCP / eager / cascade decisions stay keyed off the final sorted
+            // position, so the flagship (first) card is always prioritized.
             const isPrimaryLcpCandidate = index === 0;
             const isAboveTheFoldCandidate = index < 2;
-            const imageSizes = isPrimaryLcpCandidate
+            // Image size candidates derive from the card's span, not its
+            // position: a wide (span 2) card renders larger at every breakpoint.
+            const isWide = item.data.span === 2;
+            const imageSizes = isWide
               ? '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px'
               : '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px';
 
             return (
               <a
                 href={`/projects/${item.id}`}
-                class:list={['grid-item', { 'cascade-item': !isAboveTheFoldCandidate }]}
+                class:list={['grid-item', { 'grid-item--wide': isWide, 'cascade-item': !isAboveTheFoldCandidate }]}
                 data-categories={categories.join(',')}
                 style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
               >
@@ -115,7 +120,7 @@ const schemas = [
                     src={coverImage}
                     alt={title}
                     class="grid-item-image"
-                    widths={isPrimaryLcpCandidate ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
+                    widths={isWide ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
                     sizes={imageSizes}
                     format="webp"
                     quality={70}
@@ -251,6 +256,10 @@ const schemas = [
   .bento-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    /* Author-order row placement, never dense: a wide card that cannot fit the
+       remaining columns wraps to the next row and leaves the trailing slot
+       empty rather than pulling a later card up to backfill it. */
+    grid-auto-flow: row;
     gap: var(--gap-md);
     width: calc(100% + 8px);
     padding: 4px;
@@ -365,16 +374,10 @@ const schemas = [
     color: var(--color-text-secondary);
   }
 
-  /* Bento grid spanning patterns based on Figma */
-  /* First item spans 2 columns */
-  .grid-item:nth-child(1) {
-    grid-column: span 2;
-  }
-
-  /* Items 2-5 are single column (already default) */
-
-  /* 7th item spans 2 columns */
-  .grid-item:nth-child(7) {
+  /* Wide cards span two columns. Driven by each project's `span` frontmatter
+     (span: 2) rather than positional nth-child rules, so authoring order and
+     content decide the layout. */
+  .grid-item--wide {
     grid-column: span 2;
   }
 
@@ -431,12 +434,9 @@ const schemas = [
       gap: var(--gap-md);
     }
 
-    .grid-item:nth-child(1) {
-      grid-column: span 2;
-    }
-
-    .grid-item:nth-child(7) {
-      grid-column: span 1;
+    /* Two columns: a wide card fills the whole row. */
+    .grid-item--wide {
+      grid-column: 1 / -1;
     }
   }
 
@@ -470,9 +470,9 @@ const schemas = [
       height: 180px;
     }
 
-    .grid-item:nth-child(1),
-    .grid-item:nth-child(7) {
-      grid-column: span 1;
+    /* Single column: wide cards reset to a normal full-width column. */
+    .grid-item--wide {
+      grid-column: auto;
     }
   }
 </style>

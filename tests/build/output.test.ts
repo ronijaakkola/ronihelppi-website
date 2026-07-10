@@ -138,6 +138,55 @@ describe('Build Output Validation', () => {
       }
     });
 
+    it('orders project cards by explicit order first, then unordered by date desc', async () => {
+      const projectsIndexPath = join(distPath, 'projects', 'index.html');
+      const content = await readFile(projectsIndexPath, 'utf-8');
+
+      const slugs = Array.from(
+        content.matchAll(/<a\s+href="\/projects\/([^/"]+)"[^>]*class="[^"]*grid-item[^"]*"/g)
+      ).map((match) => match[1]);
+
+      // RESOKILL (order 1) and Vuoro (order 2) are pinned first even though
+      // Clear Skies is not the oldest — proving order overrides date. RESOKILL
+      // (2025-12) precedes the newer Vuoro (2026-06) only because of `order`.
+      expect(slugs).toEqual(['resokill', 'vuoro', 'clear-skies']);
+    });
+
+    it('marks span-2 project cards wide via a class instead of positional nth-child CSS', async () => {
+      const projectsIndexPath = join(distPath, 'projects', 'index.html');
+      const content = await readFile(projectsIndexPath, 'utf-8');
+
+      const cards = Array.from(
+        content.matchAll(/<a\s+href="\/projects\/([^/"]+)"[^>]*class="([^"]*)"/g)
+      ).map((match) => ({ slug: match[1], classes: match[2] }));
+
+      const wide = cards.filter((c) => c.classes.includes('grid-item--wide')).map((c) => c.slug);
+      expect(wide).toEqual(['resokill', 'vuoro']);
+      expect(cards.find((c) => c.slug === 'clear-skies')!.classes).not.toContain('grid-item--wide');
+
+      // The positional span CSS must be gone — spans are driven by the class now.
+      expect(content).toContain('grid-item--wide');
+      expect(content).not.toMatch(/nth-child\(1\)[^}]*grid-column/);
+      expect(content).not.toMatch(/nth-child\(7\)[^}]*grid-column/);
+    });
+
+    it('derives project cover image size candidates from span, not card position', async () => {
+      const projectsIndexPath = join(distPath, 'projects', 'index.html');
+      const content = await readFile(projectsIndexPath, 'utf-8');
+
+      const images = Array.from(
+        content.matchAll(/<img[^>]+class="grid-item-image"[^>]*>/g)
+      ).map((match) => match[0]);
+
+      // DOM order: resokill (span 2), vuoro (span 2), clear-skies (span 1).
+      const wideSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px"';
+      const narrowSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px"';
+
+      expect(images[0]).toContain(wideSizes);
+      expect(images[1]).toContain(wideSizes);
+      expect(images[2]).toContain(narrowSizes);
+    });
+
     it('home page keeps the hero out of the cascade while preserving lower sections', async () => {
       const indexPath = join(distPath, 'index.html');
       const content = await readFile(indexPath, 'utf-8');
