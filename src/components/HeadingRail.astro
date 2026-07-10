@@ -35,8 +35,10 @@ const { headings } = Astro.props;
 
      Progressive enhancement: the markup is server-rendered, so its links are
      plain fragment anchors that jump to the heading and it expands on
-     hover/focus via CSS. JS only adds the scroll-spy highlight of the in-view
-     section.
+     hover/focus via CSS. JS adds the scroll-spy highlight of the in-view
+     section and drops the focus a pointer click leaves on a link (see the
+     script) so the rail collapses on mouse-leave instead of staying pinned open
+     by :focus-within until the next click. Keyboard focus is left untouched.
 
      Shown only on wide, hover-capable viewports. On narrower or touch screens it
      stays hidden and the inline `[toc]` card (or the heading anchors) provide
@@ -242,6 +244,23 @@ const { headings } = Astro.props;
     const rail = document.querySelector<HTMLElement>('[data-heading-rail]');
     if (!rail) return;
 
+    // The rail expands via CSS on :hover and :focus-within. A pointer click on a
+    // jump link focuses that link, and :focus-within would then keep the rail
+    // expanded even after the pointer leaves — until the next click elsewhere
+    // blurs it. So after a pointer-driven activation, drop the focus. Keyboard
+    // activation (Enter/Space) reports detail === 0, so its focus is preserved
+    // and keyboard users keep the rail open. `focus-visible` heuristics are not
+    // relied on: only the pointer path is affected.
+    function onRailClick(event: MouseEvent) {
+      if (event.detail === 0) return; // keyboard-activated click: keep focus
+      const link =
+        event.target instanceof Element
+          ? event.target.closest<HTMLElement>('[data-rail-link]')
+          : null;
+      link?.blur();
+    }
+    rail.addEventListener('click', onRailClick);
+
     const links = Array.from(
       rail.querySelectorAll<HTMLAnchorElement>('[data-rail-link]')
     );
@@ -251,7 +270,12 @@ const { headings } = Astro.props;
       const heading = id ? document.getElementById(id) : null;
       if (id && heading) tracked.push({ id, heading, link });
     }
-    if (tracked.length === 0) return;
+    if (tracked.length === 0) {
+      // Still tear down the click handler we just attached (blur behaviour needs
+      // no tracked headings, but we must not leak the listener).
+      cleanup = () => rail.removeEventListener('click', onRailClick);
+      return;
+    }
 
     let activeId: string | null = null;
     function setActive(id: string | null) {
@@ -291,6 +315,7 @@ const { headings } = Astro.props;
     cleanup = () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      rail.removeEventListener('click', onRailClick);
     };
   }
 
