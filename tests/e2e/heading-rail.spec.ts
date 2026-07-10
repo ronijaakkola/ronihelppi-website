@@ -141,8 +141,55 @@ test.describe('Heading navigator rail', () => {
     // Collapsed by default: the label is clipped to zero width.
     await expect(firstText).toBeHidden();
 
-    await page.locator('.heading-rail-link').first().focus();
+    // Tab into the rail (a real keyboard interaction, so :focus-visible applies).
+    // Focus alone must expand the label — no hover required.
+    await page.locator('.copy-markdown-btn').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('.heading-rail-link').first()).toBeFocused();
     await expect(firstText).toBeVisible();
+  });
+
+  test('collapses back to the tick lines shortly after the mouse leaves', async ({
+    page,
+  }) => {
+    await page.setViewportSize(WIDE);
+    await gotoFirstPost(page);
+
+    const rail = page.locator('[data-heading-rail]');
+    const firstText = page.locator('.heading-rail-text').first();
+
+    // Collapsed by default.
+    await expect(firstText).toBeHidden();
+
+    // Hover the rail: it expands and the label becomes visible.
+    await rail.hover();
+    await expect(firstText).toBeVisible();
+
+    // Move the pointer well away from the rail. It must collapse promptly, not
+    // linger until the next click.
+    await page.mouse.move(1200, 450);
+    await expect(firstText).toBeHidden();
+  });
+
+  test('collapses after a mouse click on a rail link once the pointer leaves', async ({
+    page,
+  }) => {
+    await page.setViewportSize(WIDE);
+    await gotoFirstPost(page);
+
+    const firstText = page.locator('.heading-rail-text').first();
+    const secondLink = page.locator('.heading-rail-link').nth(1);
+
+    // Expand via hover, then click a link to jump to its section (a mouse
+    // interaction, so no keyboard focus ring should apply).
+    await secondLink.hover();
+    await expect(firstText).toBeVisible();
+    await secondLink.click();
+
+    // Pointer leaves the rail. Because the click was mouse-driven, the rail must
+    // collapse rather than stay pinned open by lingering focus.
+    await page.mouse.move(1200, 450);
+    await expect(firstText).toBeHidden();
   });
 
   test('jumping to a section updates the URL hash', async ({ page }) => {
