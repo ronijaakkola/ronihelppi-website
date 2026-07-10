@@ -4,8 +4,8 @@ description: "Application for Pebble smartwatches to find nearest bus stops and 
 subtitle: "Smartwatch app"
 tags:
   - "#apps"
-coverImage: ../images/vuoro-cover.png
-coverImageAlt: "Screenshot of a Pebble smartwatch running an application called Vuoro, showing a list of departing lines from Hakaniemi, Helsinki bus station."
+coverImage: ../images/vuoro-cover.jpg
+coverImageAlt: "A Pebble Time Steel smartwatch worn on a wrist outdoors, running the Vuoro app main menu with Nearby stops, Pinned stops, and City bikes options for Helsinki."
 meta:
   - label: "Team"
     value: "Solo"
