@@ -164,3 +164,91 @@ test.describe('Project Pages', () => {
     }
   });
 });
+
+test.describe('Project card layout — ordering and span', () => {
+  test('renders cards in explicit-order-first, then date-desc order', async ({ page }) => {
+    await page.goto('/projects');
+
+    const hrefs = await page.locator('.bento-grid .grid-item').evaluateAll((els) =>
+      els.map((el) => (el as HTMLAnchorElement).getAttribute('href'))
+    );
+
+    // RESOKILL (order 1) then Vuoro (order 2) are pinned ahead of the
+    // date-desc tail (only Clear Skies remains unordered here). RESOKILL
+    // precedes the newer Vuoro purely because of its lower order value.
+    expect(hrefs).toEqual([
+      '/projects/resokill',
+      '/projects/vuoro',
+      '/projects/clear-skies',
+    ]);
+  });
+
+  test('desktop: wide cards span two of three columns, adjacent wides wrap leaving a gap', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    // Let the cascade entrance settle so bounding boxes are final — cascade
+    // items animate translateY(8px)→0, which otherwise perturbs a card's top.
+    // 700ms matches the settling window the repo's accessibility tests use.
+    await page.waitForTimeout(700);
+
+    const grid = page.locator('.bento-grid');
+    const gridBox = (await grid.boundingBox())!;
+
+    const items = page.locator('.bento-grid .grid-item');
+    const resokill = (await items.nth(0).boundingBox())!; // wide
+    const vuoro = (await items.nth(1).boundingBox())!; // wide
+    const clearSkies = (await items.nth(2).boundingBox())!; // narrow
+
+    // A wide card is roughly two thirds of the grid width; a narrow one third.
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.6);
+    expect(clearSkies.width / gridBox.width).toBeLessThan(0.4);
+
+    // Two adjacent wide cards cannot share a 3-column row: the second wraps to
+    // the next row, leaving the trailing column of the first row empty (never
+    // backfilled — the grid is not dense).
+    expect(resokill.y).toBeLessThan(vuoro.y - 1);
+    // The first wide card starts at the grid's left edge (the grid carries a
+    // 4px internal padding, so allow for that inset)...
+    expect(Math.abs(resokill.x - gridBox.x)).toBeLessThan(6);
+    // ...and does not reach the grid's right edge, so a slot gap remains.
+    expect(resokill.x + resokill.width).toBeLessThan(gridBox.x + gridBox.width - 20);
+    // The narrow Clear Skies card follows in author order onto Vuoro's row
+    // rather than backfilling the empty trailing slot on RESOKILL's row. Under
+    // dense packing it would jump up beside RESOKILL, so this pins non-dense
+    // flow: Clear Skies is below RESOKILL and shares Vuoro's row.
+    expect(clearSkies.y).toBeGreaterThan(resokill.y + 1);
+    expect(Math.abs(clearSkies.y - vuoro.y)).toBeLessThan(2);
+  });
+
+  test('tablet: wide cards occupy a full row across two columns', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 1024 });
+    await page.goto('/projects');
+
+    const grid = page.locator('.bento-grid');
+    const gridBox = (await grid.boundingBox())!;
+
+    const items = page.locator('.bento-grid .grid-item');
+    const resokill = (await items.nth(0).boundingBox())!; // wide
+
+    // Wide card fills the full two-column row width.
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+  });
+
+  test('phone: wide cards reset to a single full-width column', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/projects');
+
+    const grid = page.locator('.bento-grid');
+    const gridBox = (await grid.boundingBox())!;
+
+    const items = page.locator('.bento-grid .grid-item');
+    const resokill = (await items.nth(0).boundingBox())!; // wide upstream
+    const clearSkies = (await items.nth(2).boundingBox())!; // narrow upstream
+
+    // Every card is one full-width column; wide and narrow are the same width
+    // and each stacks on its own row.
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(Math.abs(resokill.width - clearSkies.width)).toBeLessThan(2);
+    expect(clearSkies.y).toBeGreaterThan(resokill.y + 1);
+  });
+});

@@ -21,6 +21,8 @@ const postsSchema = z.object({
 
 const projectsSchema = z.object({
   date: z.coerce.date(),
+  order: z.number().int().optional(),
+  span: z.union([z.literal(1), z.literal(2)]).default(1),
   tags: z.array(z.string()).optional(),
   meta: z.array(z.object({
     label: z.string(),
@@ -370,6 +372,66 @@ describe('Content Collection Schemas', () => {
           date: '2026-01-30',
           links: [{ url: 'https://example.com' }],
         })
+      ).toThrow();
+    });
+
+    it('defaults span to 1 when omitted', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30' });
+      expect(result.span).toBe(1);
+    });
+
+    it('accepts span of 1', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30', span: 1 });
+      expect(result.span).toBe(1);
+    });
+
+    it('accepts span of 2', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30', span: 2 });
+      expect(result.span).toBe(2);
+    });
+
+    it('rejects span greater than 2', () => {
+      expect(() =>
+        projectsSchema.parse({ date: '2026-01-30', span: 3 })
+      ).toThrow();
+    });
+
+    it('rejects span of 0', () => {
+      expect(() =>
+        projectsSchema.parse({ date: '2026-01-30', span: 0 })
+      ).toThrow();
+    });
+
+    it('rejects non-integer span', () => {
+      expect(() =>
+        projectsSchema.parse({ date: '2026-01-30', span: 1.5 })
+      ).toThrow();
+    });
+
+    it('works without order field', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30' });
+      expect(result.order).toBeUndefined();
+    });
+
+    it('accepts a positive integer order', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30', order: 2 });
+      expect(result.order).toBe(2);
+    });
+
+    it('accepts an order of 0', () => {
+      const result = projectsSchema.parse({ date: '2026-01-30', order: 0 });
+      expect(result.order).toBe(0);
+    });
+
+    it('rejects a non-integer order', () => {
+      expect(() =>
+        projectsSchema.parse({ date: '2026-01-30', order: 1.5 })
+      ).toThrow();
+    });
+
+    it('rejects a non-numeric order', () => {
+      expect(() =>
+        projectsSchema.parse({ date: '2026-01-30', order: 'first' })
       ).toThrow();
     });
   });

@@ -1,5 +1,7 @@
 ---
 date: 2026-06-11
+order: 2
+span: 2
 description: "Application for Pebble smartwatches to find nearest bus stops and next departing lines in Finland."
 subtitle: "Smartwatch app"
 tags:

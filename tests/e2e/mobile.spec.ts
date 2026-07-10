@@ -240,28 +240,29 @@ test.describe('Mobile Layout', () => {
 test.describe('Tablet Layout', () => {
   test.use({ viewport: { width: 768, height: 1024 } });
 
-  test('projects page grid shows 2 columns on tablet', async ({ page }) => {
+  test('projects page grid is 2 columns on tablet: wide cards fill a row, narrow cards take one column', async ({ page }) => {
     await page.goto('/projects');
 
-    // Grid items should be visible
-    const gridItems = page.locator('.grid-item');
+    const grid = page.locator('.bento-grid');
+    const gridBox = (await grid.boundingBox())!;
+
+    const gridItems = page.locator('.bento-grid .grid-item');
     await expect(gridItems.first()).toBeVisible();
 
-    // On tablet, first item should span 2 columns
-    // But subsequent items should be 2 per row
-    const count = await gridItems.count();
+    // DOM order: resokill (span 2), vuoro (span 2), clear-skies (span 1).
+    const resokill = (await gridItems.nth(0).boundingBox())!; // wide
+    const vuoro = (await gridItems.nth(1).boundingBox())!; // wide
+    const clearSkies = (await gridItems.nth(2).boundingBox())!; // narrow
 
-    if (count >= 3) {
-      const secondItem = await gridItems.nth(1).boundingBox();
-      const thirdItem = await gridItems.nth(2).boundingBox();
+    // Each wide card fills its own full-width row and stacks vertically.
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(vuoro.y).toBeGreaterThan(resokill.y + 1);
 
-      // Items 2 and 3 should be roughly on the same row
-      // (difference in Y should be small)
-      if (secondItem && thirdItem) {
-        const yDifference = Math.abs(secondItem.y - thirdItem.y);
-        expect(yDifference).toBeLessThan(50);
-      }
-    }
+    // A narrow card occupies a single column — roughly half the grid — which is
+    // the slot two narrow cards would pair into on a 2-column tablet grid.
+    expect(clearSkies.width / gridBox.width).toBeLessThan(0.6);
+    expect(clearSkies.width / gridBox.width).toBeGreaterThan(0.3);
   });
 });
 
