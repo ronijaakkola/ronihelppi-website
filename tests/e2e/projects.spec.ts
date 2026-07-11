@@ -173,17 +173,19 @@ test.describe('Project card layout — ordering and span', () => {
       els.map((el) => (el as HTMLAnchorElement).getAttribute('href'))
     );
 
-    // RESOKILL (order 1) then Vuoro (order 2) are pinned ahead of the
-    // date-desc tail (only Clear Skies remains unordered here). RESOKILL
-    // precedes the newer Vuoro purely because of its lower order value.
+    // All three carry an explicit `order`, so the grid is pinned purely by
+    // ascending order value: Vuoro (order 1), Clear Skies (order 2), RESOKILL
+    // (order 3). Dates are irrelevant here — Vuoro is the newest (2026) yet
+    // still leads on order 1, and RESOKILL (2025-12, newer than Clear Skies)
+    // lands last because its order value is the highest.
     expect(hrefs).toEqual([
-      '/projects/resokill',
       '/projects/vuoro',
       '/projects/clear-skies',
+      '/projects/resokill',
     ]);
   });
 
-  test('desktop: wide cards span two of three columns, adjacent wides wrap leaving a gap', async ({ page }) => {
+  test('desktop: a wide + narrow pair fills the first row, the next wide wraps leaving a trailing gap', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/projects');
     // Let the cascade entrance settle so bounding boxes are final — cascade
@@ -194,30 +196,33 @@ test.describe('Project card layout — ordering and span', () => {
     const grid = page.locator('.bento-grid');
     const gridBox = (await grid.boundingBox())!;
 
+    // DOM order: vuoro (span 2), clear-skies (span 1), resokill (span 2).
     const items = page.locator('.bento-grid .grid-item');
-    const resokill = (await items.nth(0).boundingBox())!; // wide
-    const vuoro = (await items.nth(1).boundingBox())!; // wide
-    const clearSkies = (await items.nth(2).boundingBox())!; // narrow
+    const vuoro = (await items.nth(0).boundingBox())!; // wide
+    const clearSkies = (await items.nth(1).boundingBox())!; // narrow
+    const resokill = (await items.nth(2).boundingBox())!; // wide
 
     // A wide card is roughly two thirds of the grid width; a narrow one third.
+    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.6);
     expect(resokill.width / gridBox.width).toBeGreaterThan(0.6);
     expect(clearSkies.width / gridBox.width).toBeLessThan(0.4);
 
-    // Two adjacent wide cards cannot share a 3-column row: the second wraps to
-    // the next row, leaving the trailing column of the first row empty (never
-    // backfilled — the grid is not dense).
-    expect(resokill.y).toBeLessThan(vuoro.y - 1);
-    // The first wide card starts at the grid's left edge (the grid carries a
-    // 4px internal padding, so allow for that inset)...
-    expect(Math.abs(resokill.x - gridBox.x)).toBeLessThan(6);
-    // ...and does not reach the grid's right edge, so a slot gap remains.
-    expect(resokill.x + resokill.width).toBeLessThan(gridBox.x + gridBox.width - 20);
-    // The narrow Clear Skies card follows in author order onto Vuoro's row
-    // rather than backfilling the empty trailing slot on RESOKILL's row. Under
-    // dense packing it would jump up beside RESOKILL, so this pins non-dense
-    // flow: Clear Skies is below RESOKILL and shares Vuoro's row.
-    expect(clearSkies.y).toBeGreaterThan(resokill.y + 1);
+    // Row 1 packs a wide + a narrow across all three columns. Vuoro starts at
+    // the grid's left edge (the grid carries a 4px internal padding, so allow
+    // for that inset) and Clear Skies follows on the same row in the trailing
+    // column, reaching the grid's right edge — the row has no empty slot.
+    expect(Math.abs(vuoro.x - gridBox.x)).toBeLessThan(6);
     expect(Math.abs(clearSkies.y - vuoro.y)).toBeLessThan(2);
+    expect(clearSkies.x).toBeGreaterThan(vuoro.x + vuoro.width - 2);
+    expect(clearSkies.x + clearSkies.width).toBeGreaterThan(gridBox.x + gridBox.width - 6);
+
+    // The second wide card cannot fit beside the full first row, so RESOKILL
+    // wraps to row 2 at the grid's left edge. It spans two columns and does not
+    // reach the right edge, leaving its trailing slot empty — never backfilled,
+    // because the grid is not dense.
+    expect(resokill.y).toBeGreaterThan(vuoro.y + 1);
+    expect(Math.abs(resokill.x - gridBox.x)).toBeLessThan(6);
+    expect(resokill.x + resokill.width).toBeLessThan(gridBox.x + gridBox.width - 20);
   });
 
   test('tablet: wide cards occupy a full row across two columns', async ({ page }) => {
@@ -228,10 +233,10 @@ test.describe('Project card layout — ordering and span', () => {
     const gridBox = (await grid.boundingBox())!;
 
     const items = page.locator('.bento-grid .grid-item');
-    const resokill = (await items.nth(0).boundingBox())!; // wide
+    const vuoro = (await items.nth(0).boundingBox())!; // wide
 
     // Wide card fills the full two-column row width.
-    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
   });
 
   test('phone: wide cards reset to a single full-width column', async ({ page }) => {
@@ -242,13 +247,13 @@ test.describe('Project card layout — ordering and span', () => {
     const gridBox = (await grid.boundingBox())!;
 
     const items = page.locator('.bento-grid .grid-item');
-    const resokill = (await items.nth(0).boundingBox())!; // wide upstream
-    const clearSkies = (await items.nth(2).boundingBox())!; // narrow upstream
+    const vuoro = (await items.nth(0).boundingBox())!; // wide upstream
+    const clearSkies = (await items.nth(1).boundingBox())!; // narrow upstream
 
     // Every card is one full-width column; wide and narrow are the same width
     // and each stacks on its own row.
-    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
-    expect(Math.abs(resokill.width - clearSkies.width)).toBeLessThan(2);
-    expect(clearSkies.y).toBeGreaterThan(resokill.y + 1);
+    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(Math.abs(vuoro.width - clearSkies.width)).toBeLessThan(2);
+    expect(clearSkies.y).toBeGreaterThan(vuoro.y + 1);
   });
 });

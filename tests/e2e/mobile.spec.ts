@@ -249,18 +249,21 @@ test.describe('Tablet Layout', () => {
     const gridItems = page.locator('.bento-grid .grid-item');
     await expect(gridItems.first()).toBeVisible();
 
-    // DOM order: resokill (span 2), vuoro (span 2), clear-skies (span 1).
-    const resokill = (await gridItems.nth(0).boundingBox())!; // wide
-    const vuoro = (await gridItems.nth(1).boundingBox())!; // wide
-    const clearSkies = (await gridItems.nth(2).boundingBox())!; // narrow
+    // DOM order: vuoro (span 2), clear-skies (span 1), resokill (span 2).
+    const vuoro = (await gridItems.nth(0).boundingBox())!; // wide
+    const clearSkies = (await gridItems.nth(1).boundingBox())!; // narrow
+    const resokill = (await gridItems.nth(2).boundingBox())!; // wide
 
-    // Each wide card fills its own full-width row and stacks vertically.
-    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    // Each wide card fills its own full-width row, and the three cards stack in
+    // author order: vuoro, then clear-skies, then resokill.
     expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
-    expect(vuoro.y).toBeGreaterThan(resokill.y + 1);
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(clearSkies.y).toBeGreaterThan(vuoro.y + 1);
+    expect(resokill.y).toBeGreaterThan(clearSkies.y + 1);
 
-    // A narrow card occupies a single column — roughly half the grid — which is
-    // the slot two narrow cards would pair into on a 2-column tablet grid.
+    // The narrow card between the two wides occupies a single column — roughly
+    // half the grid — which is the slot two narrow cards would pair into on a
+    // 2-column tablet grid.
     expect(clearSkies.width / gridBox.width).toBeLessThan(0.6);
     expect(clearSkies.width / gridBox.width).toBeGreaterThan(0.3);
   });
