@@ -240,32 +240,70 @@ test.describe('Mobile Layout', () => {
 test.describe('Tablet Layout', () => {
   test.use({ viewport: { width: 768, height: 1024 } });
 
-  test('projects page grid is 2 columns on tablet: wide cards fill a row, narrow cards take one column', async ({ page }) => {
+  test('projects grid balances so no narrow card sits alone in a one-slot row', async ({ page }) => {
     await page.goto('/projects');
 
     const grid = page.locator('.bento-grid');
     const gridBox = (await grid.boundingBox())!;
 
-    const gridItems = page.locator('.bento-grid .grid-item');
+    const gridItems = page.locator('.bento-grid .grid-item:not(.hidden)');
     await expect(gridItems.first()).toBeVisible();
 
-    // DOM order: vuoro (span 2), clear-skies (span 1), resokill (span 2).
-    const vuoro = (await gridItems.nth(0).boundingBox())!; // wide
-    const clearSkies = (await gridItems.nth(1).boundingBox())!; // narrow
-    const resokill = (await gridItems.nth(2).boundingBox())!; // wide
+    // DOM order: vuoro (wide), clear-skies (narrow), resokill (wide). The narrow
+    // clear-skies card is sandwiched between two full-row wide cards, so on the
+    // 2-column tablet grid it would otherwise be left alone in a one-slot row.
+    // Balancing must promote it to fill the whole row while preserving order.
+    const vuoro = (await gridItems.nth(0).boundingBox())!;
+    const clearSkies = (await gridItems.nth(1).boundingBox())!;
+    const resokill = (await gridItems.nth(2).boundingBox())!;
 
-    // Each wide card fills its own full-width row, and the three cards stack in
-    // author order: vuoro, then clear-skies, then resokill.
-    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
-    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    // Author order is preserved: each card stacks below the previous one.
     expect(clearSkies.y).toBeGreaterThan(vuoro.y + 1);
     expect(resokill.y).toBeGreaterThan(clearSkies.y + 1);
 
-    // The narrow card between the two wides occupies a single column — roughly
-    // half the grid — which is the slot two narrow cards would pair into on a
-    // 2-column tablet grid.
-    expect(clearSkies.width / gridBox.width).toBeLessThan(0.6);
-    expect(clearSkies.width / gridBox.width).toBeGreaterThan(0.3);
+    // Every visible card fills the full two-column row width — no one-slot row.
+    expect(vuoro.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(clearSkies.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+
+    // The balance-promoted narrow card renders full width at tablet, so its
+    // responsive `sizes` must advertise the full-width tablet clause — otherwise
+    // the browser picks an undersized source for the half-width value it was
+    // authored with. Clear Skies is promoted here (SSR initial render).
+    const clearSkiesSizes = await gridItems.nth(1).locator('.grid-item-image').getAttribute('sizes');
+    expect(clearSkiesSizes).toContain('(max-width: 960px) calc(100vw - 40px)');
+    expect(clearSkiesSizes).not.toContain('calc(50vw - 32px)');
+  });
+
+  test('filtering recomputes balance so a category never strands a narrow card in a one-slot row', async ({ page }) => {
+    await page.goto('/projects');
+
+    // The "games" category shows clear-skies (narrow) followed by resokill
+    // (wide). Without recomputing the balance on filter, clear-skies would sit
+    // alone in a single-column row. Filtering must re-balance the visible cards.
+    await page.getByRole('button', { name: /Games/ }).click();
+
+    const visible = page.locator('.bento-grid .grid-item:not(.hidden)');
+    await expect(visible).toHaveCount(2);
+    // Let the filter fade/display transition settle before measuring geometry.
+    await page.waitForTimeout(400);
+
+    const grid = page.locator('.bento-grid');
+    const gridBox = (await grid.boundingBox())!;
+
+    const clearSkies = (await visible.nth(0).boundingBox())!; // narrow, now balanced
+    const resokill = (await visible.nth(1).boundingBox())!; // wide
+
+    // Both remaining cards fill the full row width; the narrow card is balanced.
+    expect(clearSkies.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(resokill.width / gridBox.width).toBeGreaterThan(0.9);
+    expect(resokill.y).toBeGreaterThan(clearSkies.y + 1);
+
+    // The rebalanced narrow card is promoted to full width, so its tablet `sizes`
+    // must be updated to the full-width clause after the filter-driven rebalance.
+    const clearSkiesSizes = await visible.nth(0).locator('.grid-item-image').getAttribute('sizes');
+    expect(clearSkiesSizes).toContain('(max-width: 960px) calc(100vw - 40px)');
+    expect(clearSkiesSizes).not.toContain('calc(50vw - 32px)');
   });
 });
 

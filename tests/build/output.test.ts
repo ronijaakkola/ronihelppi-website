@@ -180,10 +180,16 @@ describe('Build Output Validation', () => {
 
       // DOM order: vuoro (span 2), clear-skies (span 1), resokill (span 2).
       const wideSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px"';
-      const narrowSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px"';
+      // Clear Skies (span 1) is balance-promoted to full width at tablet to fill
+      // its row, so the tablet clause is calc(100vw - 40px), yet it stays narrow
+      // (289px) on the desktop grid — the span still drives the desktop candidate.
+      const tabletPromotedNarrowSizes =
+        'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 289px"';
 
       expect(images[0]).toContain(wideSizes);
-      expect(images[1]).toContain(narrowSizes);
+      expect(images[1]).toContain(tabletPromotedNarrowSizes);
+      // Clear Skies is full-width at tablet but must NOT gain the wide desktop candidate.
+      expect(images[1]).not.toContain('605px');
       expect(images[2]).toContain(wideSizes);
     });
 
