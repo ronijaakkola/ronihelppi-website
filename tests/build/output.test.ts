@@ -146,10 +146,10 @@ describe('Build Output Validation', () => {
         content.matchAll(/<a\s+href="\/projects\/([^/"]+)"[^>]*class="[^"]*grid-item[^"]*"/g)
       ).map((match) => match[1]);
 
-      // RESOKILL (order 1) and Vuoro (order 2) are pinned first even though
-      // Clear Skies is not the oldest — proving order overrides date. RESOKILL
-      // (2025-12) precedes the newer Vuoro (2026-06) only because of `order`.
-      expect(slugs).toEqual(['resokill', 'vuoro', 'clear-skies']);
+      // Explicit `order` (Vuoro 1, Clear Skies 2, RESOKILL 3) drives the
+      // sequence over date. Clear Skies (2025-10) precedes the newer RESOKILL
+      // (2025-12) only because its `order` is lower — proving order overrides date.
+      expect(slugs).toEqual(['vuoro', 'clear-skies', 'resokill']);
     });
 
     it('marks span-2 project cards wide via a class instead of positional nth-child CSS', async () => {
@@ -161,7 +161,7 @@ describe('Build Output Validation', () => {
       ).map((match) => ({ slug: match[1], classes: match[2] }));
 
       const wide = cards.filter((c) => c.classes.includes('grid-item--wide')).map((c) => c.slug);
-      expect(wide).toEqual(['resokill', 'vuoro']);
+      expect(wide).toEqual(['vuoro', 'resokill']);
       expect(cards.find((c) => c.slug === 'clear-skies')!.classes).not.toContain('grid-item--wide');
 
       // The positional span CSS must be gone — spans are driven by the class now.
@@ -178,13 +178,13 @@ describe('Build Output Validation', () => {
         content.matchAll(/<img[^>]+class="grid-item-image"[^>]*>/g)
       ).map((match) => match[0]);
 
-      // DOM order: resokill (span 2), vuoro (span 2), clear-skies (span 1).
+      // DOM order: vuoro (span 2), clear-skies (span 1), resokill (span 2).
       const wideSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px"';
       const narrowSizes = 'sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px"';
 
       expect(images[0]).toContain(wideSizes);
-      expect(images[1]).toContain(wideSizes);
-      expect(images[2]).toContain(narrowSizes);
+      expect(images[1]).toContain(narrowSizes);
+      expect(images[2]).toContain(wideSizes);
     });
 
     it('home page keeps the hero out of the cascade while preserving lower sections', async () => {
