@@ -6,8 +6,16 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getTitleFromEntry } from '../../utils/title';
 import { sortProjects } from '../../utils/sortProjects';
+import { balanceTabletGrid } from '../../utils/balanceGrid';
 
 const projects = sortProjects(await getCollection('projects'));
+
+// Tablet balancing for the initial (unfiltered) render. On the 2-column tablet
+// grid a narrow card can be stranded alone in a one-slot row; promote those to
+// full width up front so the layout is correct before the filter script hydrates
+// (it recomputes this on every filter change). Uses the same pure helper the
+// client script does, keyed off `span: 2` = wide.
+const initialBalance = balanceTabletGrid(projects.map((item) => item.data.span === 2));
 
 // Extract unique categories from tags
 function getCategoryFromTag(tag: string): string {
@@ -104,14 +112,19 @@ const schemas = [
             // Image size candidates derive from the card's span, not its
             // position: a wide (span 2) card renders larger at every breakpoint.
             const isWide = item.data.span === 2;
-            const imageSizes = isWide
-              ? '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(100vw - 40px), 605px'
-              : '(max-width: 600px) calc(100vw - 40px), (max-width: 960px) calc(50vw - 32px), 289px';
+            // A card fills the tablet row when it is authored wide OR promoted by
+            // the balancer, so its tablet `sizes` clause must be full width — else
+            // the browser picks an undersized source for a full-width render. Phone
+            // and desktop are unaffected: balancing only applies in the 601–960px
+            // tablet range, so the desktop candidate still keys off `isWide`.
+            const isFullWidthTablet = isWide || initialBalance[index];
+            const tabletSize = isFullWidthTablet ? 'calc(100vw - 40px)' : 'calc(50vw - 32px)';
+            const imageSizes = `(max-width: 600px) calc(100vw - 40px), (max-width: 960px) ${tabletSize}, ${isWide ? '605px' : '289px'}`;
 
             return (
               <a
                 href={`/projects/${item.id}`}
-                class:list={['grid-item', { 'grid-item--wide': isWide, 'cascade-item': !isAboveTheFoldCandidate }]}
+                class:list={['grid-item', { 'grid-item--wide': isWide, 'grid-item--balance': initialBalance[index], 'cascade-item': !isAboveTheFoldCandidate }]}
                 data-categories={categories.join(',')}
                 style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
               >
@@ -440,6 +453,18 @@ const schemas = [
     }
   }
 
+  /* Tablet balancing: a narrow card that would otherwise be stranded alone in a
+     one-slot row is promoted to fill the whole row. Scoped to the 601–960px
+     tablet range only — it must not touch the desktop 3-column layout (above)
+     nor the phone single column (below), where the class is inert. The set of
+     promoted cards is authored server-side for the initial render and
+     recomputed by the filter script whenever the visible cards change. */
+  @media (min-width: 601px) and (max-width: 960px) {
+    .grid-item--balance {
+      grid-column: 1 / -1;
+    }
+  }
+
   /* Touch devices - larger tap targets via invisible hit area, always-visible overlay */
   @media (hover: none) {
     .filter-chip {
@@ -479,6 +504,36 @@ const schemas = [
 
 <script>
   import { TextScramble } from '../../utils/text-scramble';
+  import { balanceTabletGrid } from '../../utils/balanceGrid';
+
+  // Recompute tablet balancing over the currently visible cards, so a narrow
+  // card never sits alone in a one-slot row (including after filtering). Reset
+  // the class on every card first, then promote the stranded narrow cards among
+  // those still visible, in author (DOM) order.
+  // Keep a card's tablet image `sizes` in sync with its tablet width. Only the
+  // `(max-width: 960px)` clause changes — the phone and desktop candidates stay
+  // as authored — so a full-width (wide or balance-promoted) card advertises the
+  // full-width source and never loads an undersized one.
+  function setTabletSizes(item: HTMLElement, fullWidth: boolean) {
+    const img = item.querySelector<HTMLImageElement>('.grid-item-image');
+    const sizes = img?.getAttribute('sizes');
+    if (!img || !sizes) return;
+    const tablet = fullWidth ? 'calc(100vw - 40px)' : 'calc(50vw - 32px)';
+    img.setAttribute('sizes', sizes.replace(/\(max-width: 960px\) calc\([^)]*\)/, `(max-width: 960px) ${tablet}`));
+  }
+
+  function rebalanceGrid(gridItems: NodeListOf<HTMLElement>) {
+    gridItems.forEach((item) => item.classList.remove('grid-item--balance'));
+
+    const visible = Array.from(gridItems).filter((item) => !item.classList.contains('hidden'));
+    const promote = balanceTabletGrid(visible.map((item) => item.classList.contains('grid-item--wide')));
+    visible.forEach((item, i) => {
+      if (promote[i]) item.classList.add('grid-item--balance');
+      // Wide and promoted-narrow cards fill the tablet row; un-promoted narrow
+      // cards revert to the half-width clause.
+      setTabletSizes(item, item.classList.contains('grid-item--wide') || promote[i]);
+    });
+  }
 
   // Filter functionality
   function applyFilter(filter: string, filterChips: NodeListOf<HTMLElement>, gridItems: NodeListOf<HTMLElement>) {
@@ -501,6 +556,8 @@ const schemas = [
         item.classList.add('hidden');
       }
     });
+
+    rebalanceGrid(gridItems);
   }
 
   function initFilters() {
