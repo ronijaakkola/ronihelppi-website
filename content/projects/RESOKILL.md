@@ -1,6 +1,6 @@
 ---
 date: 2025-12-01
-order: 1
+order: 3
 span: 2
 description: "A retro rhythm shooter inspired by the PS1 era, created in one month for GitHub's Game Off 2025 Jam."
 subtitle: "Jam game"
