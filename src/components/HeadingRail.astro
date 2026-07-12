@@ -124,10 +124,22 @@ const { headings } = Astro.props;
 
   /* The section number ("01", "02" …), mirroring the inline TOC. Like the text
      it is clipped away when collapsed and revealed on hover/focus. */
-  /* The label reveal: max-width/margin-left SNAP (no transition — animating
-     them runs layout every frame) while opacity + a small translateX slide do
-     the visible entrance on the GPU. Collapse on mouse-leave is instant,
-     which is right anyway: dismissals should snap. */
+  /* The label reveal. Width/margin never animate per-frame — they SNAP (0s
+     duration) so the scroll-spy layout stays cheap. The visible motion is
+     opacity + a small translateX slide, entirely on the GPU. What makes both
+     directions feel smooth is *when* the snap fires, set by direction-aware
+     transition-delay:
+
+       Open (the :hover/:focus-within rules below): width/margin snap open
+       immediately (0s delay) so the panel is full width at once, then the label
+       fades/slides in.
+
+       Close (this base rule): the label fades/slides out first, and the
+       width/margin snap to 0 is held back by a delay equal to the fade. By the
+       time layout collapses, the label is already at opacity 0 — so the reset
+       is invisible and the eye only ever sees a clean fade-out, never a clip.
+
+     prefers-reduced-motion drops all of this to an instant snap (see below). */
   .heading-rail-number {
     flex-shrink: 0;
     max-width: 0;
@@ -142,7 +154,9 @@ const { headings } = Astro.props;
     color: var(--color-text-secondary);
     transition:
       opacity 0.2s var(--ease-out),
-      transform 0.2s var(--ease-out);
+      transform 0.2s var(--ease-out),
+      max-width 0s linear 0.2s,
+      margin-left 0s linear 0.2s;
   }
 
   .heading-rail:hover .heading-rail-number,
@@ -151,6 +165,11 @@ const { headings } = Astro.props;
     margin-left: var(--gap-2xs);
     opacity: 1;
     transform: translateX(0);
+    transition:
+      opacity 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out),
+      max-width 0s linear 0s,
+      margin-left 0s linear 0s;
   }
 
   .heading-rail-text {
@@ -168,7 +187,9 @@ const { headings } = Astro.props;
     color: inherit;
     transition:
       opacity 0.2s var(--ease-out),
-      transform 0.2s var(--ease-out);
+      transform 0.2s var(--ease-out),
+      max-width 0s linear 0.2s,
+      margin-left 0s linear 0.2s;
   }
 
   .heading-rail:hover .heading-rail-text,
@@ -177,6 +198,11 @@ const { headings } = Astro.props;
     margin-left: var(--gap-2xs);
     opacity: 1;
     transform: translateX(0);
+    transition:
+      opacity 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out),
+      max-width 0s linear 0s,
+      margin-left 0s linear 0s;
   }
 
   /* In-view section (the scroll-spy script sets aria-current="location").
