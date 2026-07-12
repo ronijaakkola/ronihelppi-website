@@ -848,13 +848,19 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         separator.classList.add('visible');
         breadcrumb.textContent = sectionName;
       } else {
+        // Cancel any in-flight scramble before starting a new one. Otherwise
+        // two rAF loops write to the same element and race — switching sections
+        // within the ~0.9s effect would garble the breadcrumb or resolve it to
+        // the stale label, depending on which loop finished last.
+        textScramble?.cancel();
         // Always create fresh scramble instance to avoid stale state.
-        // Spreads tuned so the effect resolves in ~0.9s — the near-1s scramble
-        // is a deliberate signature moment, just a touch tighter than default.
+        // Spreads tuned so the effect resolves in ~1.4s — a deliberate,
+        // lingering signature moment. Values are rAF frames (~16.7ms each);
+        // max resolve ≈ startSpread + minDuration + durationSpread.
         textScramble = new TextScramble(breadcrumb, {
-          startSpread: 18,
-          minDuration: 18,
-          durationSpread: 18,
+          startSpread: 28,
+          minDuration: 28,
+          durationSpread: 28,
         });
         // Force browser to render opacity:0 before transitioning
         void separator.offsetWidth;

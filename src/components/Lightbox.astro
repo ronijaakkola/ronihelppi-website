@@ -300,6 +300,7 @@
     let currentIndex = 0;
     let triggerElement: HTMLElement | null = null;
     let isClosing = false;
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
     let swapToken = 0;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -369,6 +370,16 @@
       images = collectImages();
       if (images.length === 0) return;
 
+      // Interrupt an in-flight close: cancel its pending finalization so we
+      // reopen from the current state. Without this, reopening inside the exit
+      // window either throws (the dialog is still open, so showModal() fails
+      // with InvalidStateError) or gets torn down by the stale timer.
+      if (closeTimer !== null) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+        isClosing = false;
+      }
+
       currentIndex = Math.max(0, Math.min(index, images.length - 1));
       triggerElement = trigger;
 
@@ -382,7 +393,8 @@
       // Lock body scroll
       document.body.classList.add('scroll-lock');
 
-      dialog.showModal();
+      // Only open if not already open (an interrupted close leaves it open).
+      if (!dialog.open) dialog.showModal();
 
       // Trigger animation after a frame
       requestAnimationFrame(() => {
@@ -401,8 +413,12 @@
       dialog.classList.add('is-closing');
       dialog.classList.remove('is-open');
 
-      // Wait for the (faster) exit transition to complete before closing
-      setTimeout(() => {
+      // Wait for the (faster) exit transition to complete before closing.
+      // Under reduced motion there is no transition, so finalize immediately
+      // instead of freezing the fully-opaque dialog for a dead 200ms.
+      const delay = reducedMotion.matches ? 0 : 200;
+      closeTimer = setTimeout(() => {
+        closeTimer = null;
         dialog.close();
         dialog.classList.remove('is-animating', 'is-closing');
         isClosing = false;
@@ -413,7 +429,7 @@
           triggerElement.focus();
           triggerElement = null;
         }
-      }, 200);
+      }, delay);
     }
 
     function showPrev() {
