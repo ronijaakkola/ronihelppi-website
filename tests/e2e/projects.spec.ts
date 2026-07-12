@@ -257,3 +257,135 @@ test.describe('Project card layout — ordering and span', () => {
     expect(clearSkies.y).toBeGreaterThan(vuoro.y + 1);
   });
 });
+
+// A transform with no visual displacement: either `none`, or the 2D identity
+// matrix that the finished cascade-in animation (fill: both) leaves on cascade
+// cards. Neither means a card is stuck mid-glide.
+const isIdentityTransform = (t: string) => t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)';
+
+test.describe('Project card filter animation', () => {
+  // Vuoro is #apps; Clear Skies and RESOKILL are #games. Filtering to "games"
+  // therefore removes Vuoro and reflows the two survivors across the grid.
+  test('filtering hides non-matching cards and reveals matching ones', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    await page.waitForTimeout(700); // let the cascade entrance settle
+
+    await page.locator('.filter-chip', { hasText: 'games' }).click();
+    await page.waitForTimeout(500); // let the transition settle
+
+    // Vuoro (#apps) is gone; the two #games cards remain.
+    await expect(page.locator('.grid-item[href="/projects/vuoro"]')).toBeHidden();
+    await expect(page.locator('.grid-item[href="/projects/clear-skies"]')).toBeVisible();
+    await expect(page.locator('.grid-item[href="/projects/resokill"]')).toBeVisible();
+    await expect(page.locator('.grid-item:not(.hidden):not(.is-leaving)')).toHaveCount(2);
+  });
+
+  test('surviving cards glide to their new grid positions', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    await page.waitForTimeout(700);
+
+    const clearSkies = page.locator('.grid-item[href="/projects/clear-skies"]');
+    const before = (await clearSkies.boundingBox())!;
+
+    await page.locator('.filter-chip', { hasText: 'games' }).click();
+
+    // Shortly after the click the survivor is mid-glide: it carries a running
+    // Web Animations transform. The 300ms duration gives a wide, non-flaky window.
+    await page.waitForTimeout(80);
+    const gliding = await clearSkies.evaluate((el) =>
+      el.getAnimations().some((a) => a.playState === 'running')
+    );
+    expect(gliding, 'survivor should be animating to its new slot').toBe(true);
+
+    // And it ends up in a different (left-shifted) column, with no stuck transform.
+    await page.waitForTimeout(500);
+    const after = (await clearSkies.boundingBox())!;
+    expect(after.x).toBeLessThan(before.x - 50);
+    const transform = await clearSkies.evaluate((el) => getComputedStyle(el).transform);
+    expect(isIdentityTransform(transform)).toBe(true);
+  });
+
+  test('a leaving card is pinned out of flow while it fades, then removed', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    await page.waitForTimeout(700);
+
+    const vuoro = page.locator('.grid-item[href="/projects/vuoro"]');
+    await page.locator('.filter-chip', { hasText: 'games' }).click();
+
+    await page.waitForTimeout(80);
+    const mid = await vuoro.evaluate((el) => ({
+      leaving: el.classList.contains('is-leaving'),
+      position: getComputedStyle(el).position,
+      opacity: parseFloat(getComputedStyle(el).opacity),
+    }));
+    expect(mid.leaving).toBe(true);
+    expect(mid.position).toBe('absolute');
+    expect(mid.opacity).toBeLessThan(1);
+
+    // After the exit finishes the card is fully hidden with its pin styles cleared.
+    await page.waitForTimeout(500);
+    const done = await vuoro.evaluate((el) => ({
+      display: getComputedStyle(el).display,
+      leaving: el.classList.contains('is-leaving'),
+      inlinePosition: el.style.position,
+    }));
+    expect(done.display).toBe('none');
+    expect(done.leaving).toBe(false);
+    expect(done.inlinePosition).toBe('');
+  });
+
+  test('rapid re-filtering settles to a correct, clean final state', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    await page.waitForTimeout(700);
+
+    // Interrupt each transition with the next click.
+    await page.locator('.filter-chip', { hasText: 'apps' }).click();
+    await page.waitForTimeout(20);
+    await page.locator('.filter-chip', { hasText: 'games' }).click();
+    await page.waitForTimeout(20);
+    await page.locator('.filter-chip', { hasText: 'All' }).click();
+    await page.waitForTimeout(600);
+
+    // "All" is active → every card visible, none orphaned in a pinned/leaving
+    // state, no stuck transforms. This is the regression guard for the stateful
+    // FLIP pass being driven twice (duplicate listeners) or interrupted.
+    await expect(page.locator('.grid-item:not(.hidden):not(.is-leaving)')).toHaveCount(3);
+    const clean = await page.locator('.bento-grid .grid-item').evaluateAll((els) =>
+      els.map((el) => ({
+        leaving: el.classList.contains('is-leaving'),
+        position: getComputedStyle(el).position,
+        inlinePosition: (el as HTMLElement).style.position,
+        transform: getComputedStyle(el).transform,
+      }))
+    );
+    for (const c of clean) {
+      expect(c.leaving).toBe(false);
+      expect(c.position).toBe('relative');
+      expect(c.inlinePosition).toBe('');
+      expect(isIdentityTransform(c.transform)).toBe(true);
+    }
+  });
+
+  test('reduced motion snaps instantly with no glide or pinning', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/projects');
+    await page.waitForTimeout(300);
+
+    await page.locator('.filter-chip', { hasText: 'games' }).click();
+    await page.waitForTimeout(30);
+
+    const snap = await page.locator('.bento-grid .grid-item').evaluateAll((els) => ({
+      anyLeaving: els.some((el) => el.classList.contains('is-leaving')),
+      anyRunning: els.some((el) => el.getAnimations().some((a) => a.playState === 'running')),
+    }));
+    expect(snap.anyLeaving, 'no absolute pinning under reduced motion').toBe(false);
+    expect(snap.anyRunning, 'no running filter animation under reduced motion').toBe(false);
+    // The non-matching card is hidden immediately, with no transition.
+    await expect(page.locator('.grid-item[href="/projects/vuoro"]')).toBeHidden();
+  });
+});

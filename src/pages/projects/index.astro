@@ -268,6 +268,9 @@ const schemas = [
   /* Bento Grid */
   .bento-grid {
     display: grid;
+    /* Positioned so a leaving card can be pinned absolutely at its old slot
+       (see the filter script) while the surviving cards reflow and glide. */
+    position: relative;
     grid-template-columns: repeat(3, 1fr);
     /* Author-order row placement, never dense: a wide card that cannot fit the
        remaining columns wraps to the next row and leaves the trailing slot
@@ -313,31 +316,15 @@ const schemas = [
 
   .grid-item.hidden {
     display: none;
-    opacity: 0;
-    transform: scale(0.98);
   }
 
-  /* Filtering: cards fade/scale in and out. `data-filtering` is stamped by the
-     filter script on the first user interaction, so the initial render and the
-     cascade entrance are unaffected (`animation: none` cancels the long-done
-     cascade fill so transitions can drive opacity/transform). Interruptible by
-     design — rapid re-filtering retargets mid-fade. Browsers without
-     allow-discrete support snap display, exactly as before. */
-  .bento-grid[data-filtering] .grid-item {
-    animation: none;
-    transition:
-      opacity 150ms var(--ease-out),
-      transform 150ms var(--ease-out),
-      display 150ms,
-      border-color 150ms ease;
-    transition-behavior: allow-discrete;
-  }
-
-  @starting-style {
-    .bento-grid[data-filtering] .grid-item:not(.hidden) {
-      opacity: 0;
-      transform: scale(0.98);
-    }
+  /* Filtering motion is driven in JS via the Web Animations API — a FLIP glide
+     for surviving cards, plus fade/scale for entering and leaving ones (see the
+     filter script below). A leaving card is pinned out of grid flow while it
+     fades, so the grid reflows immediately and the survivors glide into place
+     rather than teleporting. Only transform/opacity animate — GPU-friendly. */
+  .grid-item.is-leaving {
+    pointer-events: none;
   }
 
   .grid-item-image {
@@ -416,10 +403,8 @@ const schemas = [
       animation: none;
     }
 
-    /* Filtering snaps: keep only the hover border feedback */
-    .bento-grid[data-filtering] .grid-item {
-      transition: border-color 150ms ease;
-    }
+    /* Filtering snaps to the new layout: the filter script skips all FLIP/fade
+       animation under reduced motion, so no CSS is needed here. */
 
     .grid-item-image {
       transition: none;
@@ -525,7 +510,9 @@ const schemas = [
   function rebalanceGrid(gridItems: NodeListOf<HTMLElement>) {
     gridItems.forEach((item) => item.classList.remove('grid-item--balance'));
 
-    const visible = Array.from(gridItems).filter((item) => !item.classList.contains('hidden'));
+    const visible = Array.from(gridItems).filter(
+      (item) => !item.classList.contains('hidden') && !item.classList.contains('is-leaving')
+    );
     const promote = balanceTabletGrid(visible.map((item) => item.classList.contains('grid-item--wide')));
     visible.forEach((item, i) => {
       if (promote[i]) item.classList.add('grid-item--balance');
@@ -560,25 +547,209 @@ const schemas = [
     rebalanceGrid(gridItems);
   }
 
+  // --- Filter transition (FLIP) --------------------------------------------
+  // Surviving cards glide to their new grid slots; entering cards fade + scale
+  // in; leaving cards fade + scale out. Only transform/opacity animate, so it's
+  // GPU-friendly with no layout thrash. Driven with the Web Animations API so
+  // glides are interruptible — rapid re-filtering retargets each card from its
+  // current on-screen position instead of snapping.
+  const FLIP_DURATION = 300; // survivor glide — on-screen movement
+  const ENTER_DURATION = 260;
+  const EXIT_DURATION = 200; // exits stay a touch snappier than entrances
+  // Mirror the site's motion tokens (--ease-out / --ease-in-out) so filtering
+  // feels of a piece with the rest of the page: ease-in-out for cards moving
+  // across the grid, ease-out for cards entering and leaving.
+  const EASE_OUT = 'cubic-bezier(0.25, 1, 0.5, 1)';
+  const EASE_IN_OUT = 'cubic-bezier(0.77, 0, 0.175, 1)';
+
+  let activeFilterAnimations: Animation[] = [];
+
+  function isCardVisible(item: HTMLElement) {
+    return !item.classList.contains('hidden') && !item.classList.contains('is-leaving');
+  }
+
+  function clearLeaveStyles(item: HTMLElement) {
+    for (const prop of ['position', 'top', 'left', 'width', 'height', 'z-index']) {
+      item.style.removeProperty(prop);
+    }
+    item.classList.remove('is-leaving');
+  }
+
+  function trackFilterAnimation(anim: Animation) {
+    activeFilterAnimations.push(anim);
+    const done = () => {
+      const i = activeFilterAnimations.indexOf(anim);
+      if (i >= 0) activeFilterAnimations.splice(i, 1);
+    };
+    anim.finished.then(done).catch(done);
+  }
+
+  // Cancel any in-flight glide/fade and settle a card caught mid-exit to fully
+  // hidden, so the next filter pass starts from a clean, correct DOM. The pass
+  // re-shows such a card if it matches the new filter.
+  function settleFilterAnimations(gridItems: NodeListOf<HTMLElement>) {
+    activeFilterAnimations.forEach((a) => a.cancel());
+    activeFilterAnimations = [];
+    gridItems.forEach((item) => {
+      if (item.classList.contains('is-leaving')) {
+        clearLeaveStyles(item);
+        item.classList.add('hidden');
+      }
+    });
+  }
+
+  function applyFilterAnimated(
+    filter: string,
+    filterChips: NodeListOf<HTMLElement>,
+    gridItems: NodeListOf<HTMLElement>,
+    grid: HTMLElement
+  ) {
+    // Reduced motion: snap straight to the filtered layout — no measuring, no
+    // animation — matching the rest of the page's reduced-motion behaviour.
+    if (prefersReducedMotion.matches) {
+      settleFilterAnimations(gridItems);
+      applyFilter(filter, filterChips, gridItems);
+      return;
+    }
+
+    // FIRST: record where every currently-visible card sits. getBoundingClientRect
+    // reflects any in-flight transform, so an interrupted glide continues from its
+    // current on-screen position rather than jumping back to a settled one.
+    const firstRects = new Map<HTMLElement, DOMRect>();
+    gridItems.forEach((item) => {
+      if (isCardVisible(item)) firstRects.set(item, item.getBoundingClientRect());
+    });
+    const gridRect = grid.getBoundingClientRect();
+    const wasVisible = new Set(firstRects.keys());
+
+    // Clear the previous transition so the measurements below reflect real layout.
+    settleFilterAnimations(gridItems);
+
+    // Chip active state (no layout impact).
+    filterChips.forEach((c) => {
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    const activeChip = Array.from(filterChips).find((c) => c.dataset.filter === filter);
+    if (activeChip) {
+      activeChip.classList.add('active');
+      activeChip.setAttribute('aria-pressed', 'true');
+    }
+
+    // Classify each card against the new filter and MUTATE the DOM to its final
+    // layout in one write-only batch, before measuring again.
+    const entering: HTMLElement[] = [];
+    const exiting: HTMLElement[] = [];
+    gridItems.forEach((item) => {
+      const categories = item.dataset.categories ? item.dataset.categories.split(',') : [];
+      const shouldShow = filter === 'all' || categories.includes(filter);
+      const wasShown = wasVisible.has(item);
+
+      if (shouldShow && !wasShown) {
+        item.classList.remove('hidden');
+        entering.push(item);
+      } else if (!shouldShow && wasShown) {
+        // Pin the leaving card out of flow at its old slot so the grid reflows
+        // immediately and survivors glide, while this card fades where it was.
+        // Offsets are relative to the grid's padding box (its containing block).
+        const r = firstRects.get(item)!;
+        item.style.position = 'absolute';
+        item.style.top = `${r.top - gridRect.top}px`;
+        item.style.left = `${r.left - gridRect.left}px`;
+        item.style.width = `${r.width}px`;
+        item.style.height = `${r.height}px`;
+        item.style.zIndex = '1';
+        item.classList.add('is-leaving');
+        exiting.push(item);
+      }
+    });
+
+    // Recompute tablet balancing over the post-change visible set.
+    rebalanceGrid(gridItems);
+
+    // LAST + INVERT + PLAY: glide every survivor from its old spot to its new one.
+    // All measuring and animate() calls happen in this one synchronous task, so
+    // the first painted frame is the animation's start — no FLIP flash.
+    wasVisible.forEach((item) => {
+      if (!isCardVisible(item)) return; // this one is leaving
+      const first = firstRects.get(item)!;
+      const last = item.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return; // didn't move
+      trackFilterAnimation(
+        item.animate(
+          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
+          { duration: FLIP_DURATION, easing: EASE_IN_OUT }
+        )
+      );
+    });
+
+    // Entering cards fade + scale in after a short beat, so the reflow reads
+    // first. `backwards` fill holds them invisible through the delay (no flash).
+    entering.forEach((item) => {
+      trackFilterAnimation(
+        item.animate(
+          [
+            { opacity: 0, transform: 'scale(0.94)' },
+            { opacity: 1, transform: 'scale(1)' },
+          ],
+          { duration: ENTER_DURATION, delay: 60, easing: EASE_OUT, fill: 'backwards' }
+        )
+      );
+    });
+
+    // Leaving cards fade + scale out, then drop to display:none.
+    exiting.forEach((item) => {
+      const anim = item.animate(
+        [
+          { opacity: 1, transform: 'scale(1)' },
+          { opacity: 0, transform: 'scale(0.94)' },
+        ],
+        { duration: EXIT_DURATION, easing: EASE_OUT }
+      );
+      trackFilterAnimation(anim);
+      anim.finished
+        .then(() => {
+          clearLeaveStyles(item);
+          item.classList.add('hidden');
+        })
+        .catch(() => {}); // interrupted — settleFilterAnimations already finalized it
+    });
+  }
+
   function initFilters() {
     const filterChips = document.querySelectorAll<HTMLElement>('.filter-chip');
     const gridItems = document.querySelectorAll<HTMLElement>('.grid-item');
     const filterStatus = document.getElementById('filter-status');
 
+    const grid = document.querySelector<HTMLElement>('.bento-grid');
+
+    // Initial render applies the URL filter with no animation, so the first
+    // paint (and the cascade entrance) is untouched. Interactions below animate.
     const params = new URLSearchParams(window.location.search);
     const initialFilter = params.get('filter') || 'all';
     applyFilter(initialFilter, filterChips, gridItems);
 
     filterChips.forEach((chip) => {
+      // initFilters runs both directly and on `astro:page-load` (which fires on
+      // the initial load too), so guard against binding the click handler twice
+      // on the same element — a double-fire would corrupt the stateful FLIP
+      // pass. View-transition navigations swap in fresh chips without the flag,
+      // so they still get bound.
+      if (chip.dataset.filterBound) return;
+      chip.dataset.filterBound = 'true';
+
       chip.addEventListener('click', () => {
         const filter = chip.dataset.filter!;
-        // Enable filter transitions only after a real interaction, so the
-        // initial render (and its cascade entrance) stays untouched.
-        document.querySelector('.bento-grid')?.setAttribute('data-filtering', '');
-        applyFilter(filter, filterChips, gridItems);
+        if (grid) {
+          applyFilterAnimated(filter, filterChips, gridItems, grid);
+        } else {
+          applyFilter(filter, filterChips, gridItems);
+        }
 
         if (filterStatus) {
-          const visibleCount = document.querySelectorAll('.grid-item:not(.hidden)').length;
+          const visibleCount = document.querySelectorAll('.grid-item:not(.hidden):not(.is-leaving)').length;
           const label = chip.querySelector('.filter-name')?.textContent || filter;
           filterStatus.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'project' : 'projects'}${filter !== 'all' ? ` in ${label}` : ''}`;
         }

@@ -26,3 +26,7 @@ pnpm-debug.log*
 
 # MCP local configurations
 .claude/settings.local.json
+
+# Playwright artifacts
+playwright-report/
+test-results/
