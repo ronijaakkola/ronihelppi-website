@@ -549,8 +549,19 @@ ol {
 
 .prose-content a[href^="http"]:hover::after,
 .prose-content a[href^="http"]:focus-visible::after {
-  transform: translate(1px, -1px);
   background-color: var(--color-text-primary);
+}
+
+/* Keyboard focus nudges the arrow; :hover is gated so a touch tap's sticky
+   hover doesn't shift it. Colour feedback (above) stays on both. */
+.prose-content a[href^="http"]:focus-visible::after {
+  transform: translate(1px, -1px);
+}
+
+@media (hover: hover) {
+  .prose-content a[href^="http"]:hover::after {
+    transform: translate(1px, -1px);
+  }
 }
 
 .prose-content code {
