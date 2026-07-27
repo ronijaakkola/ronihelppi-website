@@ -192,6 +192,175 @@ test.describe('Heading navigator rail', () => {
     await expect(firstText).toBeHidden();
   });
 
+  test('clicking a rail link activates only the target — no intermediate slide', async ({
+    page,
+  }) => {
+    await page.setViewportSize(WIDE);
+    // Force smooth scrolling on so the programmatic jump passes through the
+    // intermediate sections — this is precisely the case the fix must not slide
+    // the highlight through.
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await gotoFirstPost(page);
+
+    const links = page.locator('.heading-rail-link');
+    const count = await links.count();
+    expect(count).toBeGreaterThan(2);
+
+    // Jump to the last section, the furthest target: a naive scroll-spy would
+    // light up every heading between the top and the bottom on the way there.
+    const targetIndex = count - 1;
+    const targetId = await links
+      .nth(targetIndex)
+      .evaluate((l) => (l as HTMLElement).dataset.railLink ?? '');
+
+    // Record every heading id that ever receives aria-current from this point on.
+    await page.evaluate(() => {
+      const w = window as unknown as { __activeLog: string[] };
+      w.__activeLog = [];
+      const rail = document.querySelector('[data-heading-rail]');
+      if (!rail) return;
+      const observer = new MutationObserver((records) => {
+        for (const record of records) {
+          const el = record.target as HTMLElement;
+          if (el.getAttribute('aria-current') === 'location') {
+            const id = el.getAttribute('data-rail-link');
+            if (id) w.__activeLog.push(id);
+          }
+        }
+      });
+      observer.observe(rail, {
+        attributes: true,
+        attributeFilter: ['aria-current'],
+        subtree: true,
+      });
+    });
+
+    await links.nth(targetIndex).click();
+
+    // The clicked heading becomes current immediately and remains the sole
+    // active link once the smooth scroll settles.
+    await expect(
+      page.locator(`[data-rail-link="${targetId}"]`)
+    ).toHaveAttribute('aria-current', 'location');
+    await expect(
+      page.locator('.heading-rail-link[aria-current="location"]')
+    ).toHaveCount(1);
+
+    // Let any (suppressed) scroll frames flush before reading the log.
+    await page.waitForTimeout(600);
+
+    const activatedOthers = await page.evaluate(() => {
+      const w = window as unknown as { __activeLog: string[] };
+      return [...new Set(w.__activeLog)];
+    });
+
+    // The only heading ever activated after the click is the target — no
+    // intermediate section lit up during the programmatic scroll.
+    expect(activatedOthers).toEqual([targetId]);
+  });
+
+  test('manual scrolling still updates the active heading after a click', async ({
+    page,
+  }) => {
+    await page.setViewportSize(WIDE);
+    await gotoFirstPost(page);
+
+    const links = page.locator('.heading-rail-link');
+
+    // Click a mid-article link, then let the scroll settle so suppression lifts.
+    await links.nth(1).click();
+    await page.waitForTimeout(600);
+
+    // Now scroll by hand to a different section: the scroll-spy must resume.
+    const targetId = await page.evaluate(() => {
+      const headings = Array.from(
+        document.querySelectorAll('.prose-content h2')
+      );
+      const target = headings[2] as HTMLElement;
+      window.scrollTo(
+        0,
+        window.scrollY + target.getBoundingClientRect().top - 100
+      );
+      return target.id;
+    });
+
+    await expect(page.locator(`[data-rail-link="${targetId}"]`)).toHaveAttribute(
+      'aria-current',
+      'location'
+    );
+    await expect(
+      page.locator('.heading-rail-link[aria-current="location"]')
+    ).toHaveCount(1);
+  });
+
+  test('a manual scroll gesture after a click resumes the scroll-spy immediately', async ({
+    page,
+  }) => {
+    await page.setViewportSize(WIDE);
+    // Instant scrolls so the click-scroll can't fight the scroll below; the
+    // suppression under test is independent of motion preference.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await gotoFirstPost(page);
+
+    // The reported bug: after clicking a nav link, scrolling by hand doesn't move
+    // the highlight until the very bottom, because the reader's own scroll events
+    // keep the click-suppression armed. The fix keys off the reader's intent — a
+    // wheel/touch/scroll-key gesture must lift suppression at once — while the
+    // programmatic click-scroll (which emits no such events) stays suppressed.
+    //
+    // Everything below runs in one synchronous pass — no rAF or timers between
+    // the mutations and the reads — so the result hinges purely on whether a
+    // manual-scroll gesture resumes the spy, never on idle-timeout timing.
+    const result = await page.evaluate(() => {
+      const activeId = () =>
+        document
+          .querySelector('.heading-rail-link[aria-current="location"]')
+          ?.getAttribute('data-rail-link') ?? '';
+
+      const rail = document.querySelector('[data-heading-rail]');
+      const links = Array.from(
+        rail?.querySelectorAll<HTMLElement>('.heading-rail-link') ?? []
+      );
+      const clicked = links[1];
+      const clickedId = clicked.dataset.railLink ?? '';
+
+      // Click the second section: the highlight jumps there and the scroll-spy is
+      // suppressed for the click-scroll.
+      clicked.click();
+      const activeAfterClick = activeId();
+
+      // Jump elsewhere the way a programmatic scroll would (no wheel/touch/key).
+      // The scroll-spy update is throttled to a frame, so synchronously the
+      // highlight is still on the clicked heading — suppression has had no chance
+      // to be tested yet.
+      const headings = Array.from(
+        document.querySelectorAll<HTMLElement>('.prose-content h2')
+      );
+      const target = headings[3];
+      const targetId = target.id;
+      window.scrollTo(
+        0,
+        window.scrollY + target.getBoundingClientRect().top - 100
+      );
+
+      // The reader takes over with a real wheel gesture. The fix handles this
+      // synchronously — lift suppression and re-evaluate the active heading — so
+      // immediately afterwards the highlight tracks the section now in view.
+      // Without a wheel handler the highlight stays frozen on the clicked one.
+      window.dispatchEvent(new WheelEvent('wheel', { deltaY: 20 }));
+      const activeAfterGesture = activeId();
+
+      return { clickedId, targetId, activeAfterClick, activeAfterGesture };
+    });
+
+    // The click marked its own heading active…
+    expect(result.activeAfterClick).toBe(result.clickedId);
+    // …and the manual gesture resumed tracking immediately, landing on the
+    // section actually in view rather than freezing on the clicked heading.
+    expect(result.activeAfterGesture).toBe(result.targetId);
+    expect(result.activeAfterGesture).not.toBe(result.clickedId);
+  });
+
   test('jumping to a section updates the URL hash', async ({ page }) => {
     await page.setViewportSize(WIDE);
     await gotoFirstPost(page);
