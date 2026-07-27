@@ -277,13 +277,23 @@ const { headings } = Astro.props;
     // activation (Enter/Space) reports detail === 0, so its focus is preserved
     // and keyboard users keep the rail open. `focus-visible` heuristics are not
     // relied on: only the pointer path is affected.
+    //
+    // Clicking a link also kicks off a smooth in-page scroll (CSS
+    // `scroll-behavior: smooth`) that sweeps past every intermediate heading. The
+    // scroll-spy fires for each one in turn, so the highlight would visibly slide
+    // through the sections on the way to the target. To avoid that, a click marks
+    // its target active immediately and suppresses the scroll-spy until the
+    // programmatic scroll settles — see `suppressSpyForClick`.
     function onRailClick(event: MouseEvent) {
-      if (event.detail === 0) return; // keyboard-activated click: keep focus
       const link =
         event.target instanceof Element
           ? event.target.closest<HTMLElement>('[data-rail-link]')
           : null;
-      link?.blur();
+      if (!link) return;
+      const id = link.dataset.railLink;
+      if (id) suppressSpyForClick(id);
+      if (event.detail === 0) return; // keyboard-activated click: keep focus
+      link.blur();
     }
     rail.addEventListener('click', onRailClick);
 
@@ -313,9 +323,80 @@ const { headings } = Astro.props;
       }
     }
 
+    // While a click-driven smooth scroll is in flight the scroll-spy is
+    // suppressed so it doesn't repaint the highlight through every heading the
+    // scroll passes. It re-enables when the reader takes over (a manual scroll
+    // gesture, see `onManualScroll`) or, failing that, once scrolling has been
+    // idle for a short beat — which also covers the case where the target was
+    // already in place and no scroll fired at all.
+    const SETTLE_IDLE_MS = 150;
+    let suppressSpy = false;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function endSuppression() {
+      if (settleTimer !== null) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      if (!suppressSpy) return;
+      suppressSpy = false;
+      // Reconcile with the section actually in view now that we're listening.
+      update();
+    }
+
+    function scheduleSettle() {
+      if (settleTimer !== null) clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        settleTimer = null;
+        suppressSpy = false;
+        // Reconcile with the section actually in view now that motion stopped.
+        update();
+      }, SETTLE_IDLE_MS);
+    }
+
+    function suppressSpyForClick(id: string) {
+      // Reflect the clicked target at once, before any scroll frame lands.
+      setActive(id);
+      suppressSpy = true;
+      // Arm the idle timer now: if the target is already on screen no scroll
+      // event fires, so this is what eventually lifts suppression.
+      scheduleSettle();
+    }
+
+    // A wheel, touch drag, or scroll key means the reader has taken over from the
+    // click-driven smooth scroll — resume the scroll-spy immediately. Without
+    // this, the reader's own scroll events keep re-arming the idle timer above
+    // (see `onScroll`), so the highlight would stay frozen on the clicked heading
+    // until scrolling stops (e.g. only at the bottom of the page). The
+    // programmatic smooth scroll itself emits no such events, so it stays
+    // suppressed as intended.
+    const SCROLL_KEYS = new Set([
+      'ArrowUp',
+      'ArrowDown',
+      'PageUp',
+      'PageDown',
+      'Home',
+      'End',
+      ' ',
+      'Spacebar',
+    ]);
+    function onManualScroll(event: Event) {
+      if (!suppressSpy) return;
+      if (
+        event.type === 'keydown' &&
+        !SCROLL_KEYS.has((event as KeyboardEvent).key)
+      ) {
+        return;
+      }
+      endSuppression();
+    }
+
     let ticking = false;
     function update() {
       ticking = false;
+      // Manual scrolling still tracks the active heading; only the programmatic
+      // click-scroll is ignored, until it settles.
+      if (suppressSpy) return;
       const positions: HeadingPosition[] = tracked.map((item) => ({
         id: item.id,
         top: item.heading.getBoundingClientRect().top,
@@ -328,6 +409,9 @@ const { headings } = Astro.props;
       setActive(pickActiveHeadingId(positions, ACTIVATION_OFFSET, atBottom));
     }
     function onScroll() {
+      // Keep suppression alive as long as the click-scroll is still moving; the
+      // timer fires SETTLE_IDLE_MS after the last scroll frame.
+      if (suppressSpy) scheduleSettle();
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(update);
@@ -336,12 +420,19 @@ const { headings } = Astro.props;
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+    window.addEventListener('wheel', onManualScroll, { passive: true });
+    window.addEventListener('touchmove', onManualScroll, { passive: true });
+    window.addEventListener('keydown', onManualScroll);
     update();
 
     cleanup = () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      window.removeEventListener('wheel', onManualScroll);
+      window.removeEventListener('touchmove', onManualScroll);
+      window.removeEventListener('keydown', onManualScroll);
       rail.removeEventListener('click', onRailClick);
+      if (settleTimer !== null) clearTimeout(settleTimer);
     };
   }
 
