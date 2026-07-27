@@ -751,6 +751,38 @@ ol {
   }
 }
 
+/* Print-style pull quote: a decorative repeat of a sentence that also lives
+   in the body text, placed well away from its source. Marked aria-hidden in
+   the markup so assistive tech reads the sentence only once. */
+.prose-content .pull-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(19px, calc(19px + 3 * ((100vw - 600px) / 360)), 22px);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--color-text-primary);
+  max-width: 40ch;
+  margin: 1.75em auto;
+}
+
+.prose-content .pull-quote::before,
+.prose-content .pull-quote::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background-color: var(--color-divider);
+  margin: 0 auto;
+}
+
+.prose-content .pull-quote::before {
+  margin-bottom: 1em;
+}
+
+.prose-content .pull-quote::after {
+  margin-top: 1em;
+}
+
 .prose-content ul,
 .prose-content ol {
   padding-left: 1.5rem;
@@ -772,13 +804,23 @@ ol {
   color: var(--color-text-secondary);
 }
 
-.prose-content img {
+.prose-content img,
+.prose-content video {
   display: block;
   border-radius: var(--radius-md);
   border: 0.5px solid var(--color-border);
 }
 
+/* Inline videos behave like images: full width of their container, with the
+   intrinsic aspect ratio (from the width/height attributes) preserved so the
+   layout doesn't shift once metadata loads. */
+.prose-content video {
+  width: 100%;
+  height: auto;
+}
+
 .prose-content img:not(.prose-figure img),
+.prose-content video:not(.prose-figure video),
 .prose-content .prose-figure {
   margin: 1.5em 0;
   position: relative;

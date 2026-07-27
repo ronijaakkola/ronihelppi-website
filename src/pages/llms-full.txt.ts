@@ -6,6 +6,9 @@ import type { APIContext } from 'astro';
 
 function stripMarkdownToPlainText(body: string): string {
   return body
+    // Remove aria-hidden asides (decorative pull quotes duplicating body text)
+    .replace(/<aside[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/aside>/g, '')
+    .replace(/^\[toc\]$/gm, '') // Remove the [toc] rendering directive
     .replace(/!\[\[.*?\]\]/g, '') // Remove Obsidian images
     .replace(/!\[.*?\]\(.*?\)/g, '') // Remove standard images
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text

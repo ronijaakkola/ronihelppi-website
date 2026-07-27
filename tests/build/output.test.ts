@@ -396,6 +396,18 @@ describe('Build Output Validation', () => {
       expect(content).not.toContain('www.ronihelppi.com');
     });
 
+    it('strips presentation-only markup from llms-full.txt', async () => {
+      const llmsFullPath = join(distPath, 'llms-full.txt');
+      const content = await readFile(llmsFullPath, 'utf-8');
+
+      // Decorative pull-quote asides duplicate a body sentence and are
+      // aria-hidden in HTML — they must not reach the plain-text output.
+      expect(content).not.toContain('<aside');
+      expect(content).not.toContain('pull-quote');
+      // The [toc] marker is a rendering directive, not content.
+      expect(content).not.toContain('[toc]');
+    });
+
     it('exposes an enriched Person schema on the home page', async () => {
       const indexPath = join(distPath, 'index.html');
       const content = await readFile(indexPath, 'utf-8');
