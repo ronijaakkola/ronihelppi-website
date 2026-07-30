@@ -1,5 +1,5 @@
 ---
-date: 2026-07-26
+date: 2026-07-30
 description: How I built an AI agent that curates a weekly magazine of human-written articles and ships it to my Kindle every Monday.
 heroImage: ../images/the-home-desk-cover.jpg
 heroImageAlt: A Kindle on a wooden side table, framed by houseplant leaves, showing the plain cover of The Home Desk — Issue 2, dated 2026.07.20.
