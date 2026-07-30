@@ -66,7 +66,7 @@ I left the visual style fully up to the agent. As a result the cover is very pla
 
 One example of a theme it came up with was the challenges and negative sides of AI. The agent had picked five pieces around it. A couple of articles discussed what happens when building software gets cheaper and it becomes easy to say yes to features. Then there was a piece about AI being used to create a biography of a person without their consent — that one evolved into a more philosophical discussion about the value of fully AI-generated literature. A very interesting issue with a clear theme.
 
-But I must admit this has not worked this well every week. It seems to depend on the number of articles the agent happens to get from the inbox and the newsletters. The more material it gets, the more opportunities it has to create a clear theme. Sometimes the "theme" is more all over the place, where the biggest shared factor is that all the pieces are, for example, AI-related.
+But I must admit this has not worked this well every week. Over the eight weeks I have been receiving the magazine, it seems to depend on the number of articles the agent happens to get from the inbox and the newsletters. The more material it gets, the more opportunities it has to create a clear theme. Sometimes the "theme" is more all over the place, where the biggest shared factor is that all the pieces are, for example, AI-related.
 
 ## Why not just use Readwise?
 
@@ -94,7 +94,21 @@ I have also quite enjoyed the idea that the agent tries to find themes that conn
 
 And I like that the full workflow runs even if I do not touch my computer the whole week. If there is nothing recent in my Obsidian inbox, the agent has permission to look at older inbox entries, and some content flows in from the newsletters regardless.
 
-## Lessons from the first four issues
+## A note about security
+
+I know, a boring topic for some. But whenever we are dealing with LLMs and untrusted sources, we need to consider security.
+
+Both sources, Obsidian Clips and newsletters, are untrusted by nature and may contain malicious instructions. Moreover, email is a potential attack vector as newsletter-looking messages could be something completely different.
+
+It is very difficult to protect yourself against attacks like this completely. You are always taking a risk even when asking the agent to browse the Internet. But there are a few things you should do to make it less likely to get attacked.
+
+1. **Do not use YOLO-mode**. While constant approval requests from the agent can be annoying, they just may save you from running a malicious command. Always pay attention to what is about to be run when you are prompted for approval.
+2. **Whitelist newsletter sources**. I whitelist newsletter senders both in the email provider and the agent end. This ensures that the agent only processes messages from wanted sources.
+3. **Run the agent with as little privileges and tools as possible**. To reduce blast radius, only give the agent privileges and tools it needs. Technically it would be possible to do the content gathering via a script, and only use an agent for curation process (with very little privileges).
+
+As I said, it is very difficult to stay completely safe when using agentic tools like Hermes or OpenClaw. They usually naturally tick all three boxes of [the lethal trifecta](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/). Personally, I don't give the agent access to my personal data (even the Obsidian vault access is restricted), making the potential damage smaller if it is compromised. I just wanted to point out security as that is often left out from most tutorials related to agent topics.
+
+## Lessons from the first eight issues
 
 Technically, this was a surprisingly easy project that I had running in just one short evening. Setting up something like this with Hermes is very straightforward: just describe what you need, and it will do some research and return to you with potential solution options.
 
