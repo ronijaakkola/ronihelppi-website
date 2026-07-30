@@ -42,7 +42,7 @@ The second source is the agent's own mailbox. Over the years I have subscribed t
 
 The agent behind the magazine is [Hermes](https://hermes-agent.nousresearch.com/), an open-source autonomous agent framework developed by Nous Research. In this project it acts as the whole editorial staff: it reads the sources, picks the pieces, and remembers my feedback from previous issues. It runs on my own server and uses a local LLM (maybe more about this in a separate blog post later).
 
-While I could get better results using cloud model providers, I do not feel comfortable feeding other authors' writing into cloud LLMs. Their texts have most likely ended up in AI training data already, but that should be each author's choice, not mine.
+While I could get better results using cloud model providers, I do not feel comfortable feeding other authors' writing into cloud LLMs. Their texts have most likely ended up in AI training data already, but that should be each author's choice, not mine. Moreover, if you have subscribed to paid newsletters, you probably do not have a right to "distribute" those to cloud LLMs (at least without making sure they are not used for training).
 
 First, Hermes reads its source pools: my Obsidian inbox (it has access to my inbox folder via [Obsidian Headless](https://obsidian.md/help/sync/headless)) and its own mailbox (via a Google Workspace integration), where it searches for newly arrived newsletters. For newsletters, it cuts through clutter like ads and promotions and finds the links to actual posts, articles, and essays. From these sources it builds a candidate pool.
 
