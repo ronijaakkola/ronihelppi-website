@@ -203,4 +203,133 @@ describe('remarkObsidianImages', () => {
     expect(html).toContain('[[link]]');
     expect(html).not.toContain('<img');
   });
+
+  it('transforms a video embed into a <video> element, not an <img>', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4]]');
+    const html = result.toString();
+
+    expect(html).toContain('<video');
+    expect(html).not.toContain('<img');
+  });
+
+  it('serves videos from the public /images path (not the ../images asset path)', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4]]');
+    const html = result.toString();
+
+    expect(html).toContain('<source src="/images/clip.mp4"');
+    expect(html).toContain('type="video/mp4"');
+    expect(html).not.toContain('../images/clip.mp4');
+  });
+
+  it('gives looping videos playback controls and loops muted inline', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4]]');
+    const html = result.toString();
+
+    expect(html).toContain('controls');
+    expect(html).toContain('loop');
+    expect(html).toContain('muted');
+    expect(html).toContain('playsinline');
+  });
+
+  it('marks the video for JS-driven autoplay but does not ship the autoplay attribute', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4]]');
+    const html = result.toString();
+
+    // Playback is started from JS only when motion is allowed, so the bare
+    // `autoplay` attribute must not be present (it would ignore reduced motion).
+    expect(html).toContain('data-autoplay');
+    expect(html).not.toMatch(/\sautoplay(?![-\w])/);
+  });
+
+  it('supports webm and ogv video extensions with correct MIME types', async () => {
+    const processor = createProcessor();
+
+    const webm = (await processor.process('![[clip.webm]]')).toString();
+    expect(webm).toContain('<source src="/images/clip.webm"');
+    expect(webm).toContain('type="video/webm"');
+
+    const ogv = (await processor.process('![[clip.ogv]]')).toString();
+    expect(ogv).toContain('<source src="/images/clip.ogv"');
+    expect(ogv).toContain('type="video/ogg"');
+  });
+
+  it('uses the pipe caption as the video title and reserves space via width/height', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4|A short demo clip|1280x720]]');
+    const html = result.toString();
+
+    expect(html).toContain('title="A short demo clip"');
+    expect(html).toContain('width="1280"');
+    expect(html).toContain('height="720"');
+  });
+
+  it('derives a matching -poster.webp still so the video never paints blank', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[clip.mp4]]');
+    const html = result.toString();
+
+    expect(html).toContain('poster="/images/clip-poster.webp"');
+  });
+
+  it('reassembles an embed whose caption contains a markdown link', async () => {
+    // remark parses `[text](url)` inside `![[...]]` into a real link node
+    // before this plugin runs, splitting the embed across sibling nodes —
+    // the plugin must stitch them back together.
+    const processor = createProcessor();
+    const input =
+      '![[photo.jpg|Reading on the Kindle. ([Every feature](https://example.com/post) by Karri Saarinen)]]';
+    const result = await processor.process(input);
+    const html = result.toString();
+
+    expect(html).toContain('<img src="../images/photo.jpg"');
+    // Alt text is plain — markdown link syntax stripped to its label.
+    expect(html).toContain(
+      'alt="Reading on the Kindle. (Every feature by Karri Saarinen)"',
+    );
+    // The raw caption (link syntax intact) rides on `title` for
+    // rehype-image-figure to render into the figcaption.
+    expect(html).toContain(
+      'title="Reading on the Kindle. ([Every feature](https://example.com/post) by Karri Saarinen)"',
+    );
+    expect(html).not.toContain('![[');
+  });
+
+  it('leaves links outside embeds untouched while reassembling captions', async () => {
+    const processor = createProcessor();
+    const input =
+      'See [docs](https://example.com) and ![[a.png|cap with [link](https://example.com/b)]] after';
+    const result = await processor.process(input);
+    const html = result.toString();
+
+    expect(html).toContain('<a href="https://example.com">docs</a>');
+    expect(html).toContain('<img src="../images/a.png"');
+    expect(html).toContain('alt="cap with link"');
+    expect(html).toContain(' after');
+    expect(html).not.toContain('![[');
+  });
+
+  it('does not swallow following nodes when an embed never closes', async () => {
+    const processor = createProcessor();
+    const input = '![[broken and [link](https://example.com) more text';
+    const result = await processor.process(input);
+    const html = result.toString();
+
+    expect(html).toContain('![[broken and');
+    expect(html).toContain('<a href="https://example.com">link</a>');
+    expect(html).toContain('more text');
+    expect(html).not.toContain('<img');
+  });
+
+  it('still renders images (not videos) for image extensions', async () => {
+    const processor = createProcessor();
+    const result = await processor.process('![[still.png]]');
+    const html = result.toString();
+
+    expect(html).toContain('<img src="../images/still.png"');
+    expect(html).not.toContain('<video');
+  });
 });

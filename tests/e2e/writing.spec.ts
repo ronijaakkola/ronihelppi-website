@@ -117,6 +117,183 @@ test.describe('Post Pages', () => {
   });
 });
 
+test.describe('Inline video embeds', () => {
+  const POST = '/writing/every-monday-my-agent-ships-me-a-magazine/';
+  // In document order.
+  const VIDEOS = [
+    { src: '/images/hermes-issue.mp4', poster: '/images/hermes-issue-poster.webp' },
+    { src: '/images/hermes-chat.mp4', poster: '/images/hermes-chat-poster.webp' },
+  ];
+
+  const videoBySrc = (page: import('@playwright/test').Page, src: string) =>
+    page.locator(`.prose-content video:has(source[src="${src}"])`);
+
+  test('renders each clip as a looping muted video with native playback controls', async ({ page }) => {
+    await page.goto(POST);
+
+    for (const { src } of VIDEOS) {
+      const video = videoBySrc(page, src);
+      await expect(video).toBeVisible();
+      await expect(video).toHaveJSProperty('controls', true);
+      await expect(video).toHaveJSProperty('loop', true);
+      await expect(video).toHaveJSProperty('muted', true);
+    }
+  });
+
+  test('serves each video from the public /images path and it loads', async ({ page }) => {
+    await page.goto(POST);
+
+    for (const { src } of VIDEOS) {
+      await expect(page.locator(`.prose-content video source[src="${src}"]`)).toBeAttached();
+
+      // The referenced file must actually exist and be served as a video.
+      const response = await page.request.get(src);
+      expect(response.status()).toBe(200);
+      expect(response.headers()['content-type']).toContain('video');
+    }
+  });
+
+  test('each has a poster still that exists, so it never paints blank when paused', async ({ page }) => {
+    await page.goto(POST);
+
+    for (const { src, poster } of VIDEOS) {
+      await expect(videoBySrc(page, src)).toHaveAttribute('poster', poster);
+
+      // The poster must actually be served (otherwise the box is blank when paused).
+      const response = await page.request.get(poster);
+      expect(response.status()).toBe(200);
+      expect(response.headers()['content-type']).toContain('image');
+    }
+  });
+
+  test('image caption renders its markdown link as a real anchor', async ({ page }) => {
+    await page.goto(POST);
+
+    const caption = page.locator('figure.prose-figure figcaption', {
+      hasText: 'Karri Saarinen',
+    });
+    const link = caption.locator(
+      'a[href="https://x.com/karrisaarinen/status/2043378194938777813"]',
+    );
+    await expect(link).toBeVisible();
+    // No raw markdown syntax may leak into the rendered caption or body.
+    await expect(caption).not.toContainText('](');
+    await expect(page.locator('.prose-content')).not.toContainText('![[');
+  });
+
+  test('captioned videos are wrapped in figures with figcaptions', async ({ page }) => {
+    await page.goto(POST);
+
+    const figures = page.locator('.prose-content figure.prose-figure', {
+      has: page.locator('video'),
+    });
+    await expect(figures).toHaveCount(VIDEOS.length);
+    for (let i = 0; i < VIDEOS.length; i++) {
+      await expect(figures.nth(i).locator('figcaption')).not.toBeEmpty();
+    }
+  });
+
+  test('plays only while in view: paused off-screen, plays once scrolled to', async ({ page }) => {
+    await page.goto(POST);
+
+    const isPaused = (src: string) =>
+      videoBySrc(page, src).evaluate((v: HTMLVideoElement) => v.paused);
+
+    // Every clip sits well below the fold, so none may be playing on load —
+    // they should not decode off-screen.
+    for (const { src } of VIDEOS) {
+      await expect.poll(() => isPaused(src)).toBe(true);
+    }
+
+    // Scrolling each clip into view starts its playback from the
+    // (still-at-start) loop.
+    for (const { src } of VIDEOS) {
+      await videoBySrc(page, src).scrollIntoViewIfNeeded();
+      await expect.poll(() => isPaused(src)).toBe(false);
+    }
+
+    // Scrolling away again pauses.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    for (const { src } of VIDEOS) {
+      await expect.poll(() => isPaused(src)).toBe(true);
+    }
+  });
+});
+
+test.describe('Pull quote', () => {
+  const POST = '/writing/every-monday-my-agent-ships-me-a-magazine/';
+  const SENTENCE = 'I am the only consumer of this magazine';
+
+  test('repeats a body sentence print-style, hidden from assistive tech', async ({ page }) => {
+    await page.goto(POST);
+
+    // The decorative pull quote renders visibly but is aria-hidden — the
+    // same words are read from the body paragraph, not twice.
+    const pull = page.locator('.prose-content .pull-quote');
+    await expect(pull).toBeVisible();
+    await expect(pull).toHaveAttribute('aria-hidden', 'true');
+    await expect(pull).toContainText(SENTENCE);
+
+    // The original sentence still lives in its body paragraph.
+    await expect(
+      page.locator('.prose-content p', { hasText: SENTENCE }),
+    ).toHaveCount(1);
+  });
+
+  test('sits far from the source sentence, in an earlier section', async ({ page }) => {
+    await page.goto(POST);
+
+    // The pull quote must precede the paragraph that owns the sentence —
+    // print-style pull quotes tease content the reader has not hit yet.
+    const positions = await page.evaluate((sentence) => {
+      const pull = document.querySelector('.prose-content .pull-quote');
+      const para = Array.from(
+        document.querySelectorAll('.prose-content p'),
+      ).find((p) => p.textContent?.includes(sentence));
+      if (!pull || !para) return null;
+      return {
+        pullTop: pull.getBoundingClientRect().top + window.scrollY,
+        paraTop: para.getBoundingClientRect().top + window.scrollY,
+      };
+    }, SENTENCE);
+
+    expect(positions).not.toBeNull();
+    // "Far" = at least a viewport of reading between the two.
+    expect(positions!.paraTop - positions!.pullTop).toBeGreaterThan(800);
+  });
+});
+
+test.describe('You might also enjoy', () => {
+  // The two posts cross-link each other via relatedPosts frontmatter.
+  const POSTS = [
+    {
+      url: '/writing/every-monday-my-agent-ships-me-a-magazine/',
+      relatedHref: '/writing/a-practical-guide-to-writing-your-own-obsidian-skills',
+    },
+    {
+      url: '/writing/a-practical-guide-to-writing-your-own-obsidian-skills/',
+      relatedHref: '/writing/every-monday-my-agent-ships-me-a-magazine',
+    },
+  ];
+
+  for (const { url, relatedHref } of POSTS) {
+    test(`${url} ends with a divider and a link to the other post`, async ({ page }) => {
+      await page.goto(url);
+
+      // A divider separates the post body from the section.
+      await expect(page.locator('.prose .divider')).toBeAttached();
+
+      const section = page.locator('.related-posts');
+      await expect(section.locator('.section-heading')).toHaveText('You might also enjoy');
+
+      // A single plain link to the other post — no bullet/icon decoration.
+      const link = section.locator(`a[href="${relatedHref}"]`);
+      await expect(link).toBeVisible();
+      await expect(section.locator('.related-post-icon')).toHaveCount(0);
+    });
+  }
+});
+
 test.describe('Post heading anchor links', () => {
   const POST = '/writing/a-practical-guide-to-writing-your-own-obsidian-skills/';
 
