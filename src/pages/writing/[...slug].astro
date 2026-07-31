@@ -295,6 +295,16 @@ const schemas = [
     display: block;
   }
 
+  /* Below 960px the hero is fluid (see its `sizes`), so `height: auto` resolves
+     to a half pixel — 168.5px at 375px — and only the bottom edge falls off the
+     device pixel grid. Engines honouring sub-pixel borders round that edge away
+     and the frame reads as open, so widen the hairline to a whole pixel here. */
+  @media (max-width: 960px) {
+    .hero-image {
+      border-width: 1px;
+    }
+  }
+
   .post-content {
     margin-top: var(--gap-lg);
   }
