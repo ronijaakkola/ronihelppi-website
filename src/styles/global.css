@@ -871,6 +871,23 @@ ol {
     padding-left: var(--spacing-horizontal-tablet);
     padding-right: var(--spacing-horizontal-tablet);
   }
+
+  /* Fluid below 960px, so these article boxes land on fractional device pixels
+     (0.5 off-grid at 393px/DPR3) and engines honouring 0.5px borders round the
+     hairline away — same defect as the hero image in #109. Desktop keeps 0.5px. */
+  .toc-card {
+    border-width: 1px;
+  }
+
+  .toc-header,
+  .toc-row {
+    border-bottom-width: 1px;
+  }
+
+  .prose-content img,
+  .prose-content video {
+    border-width: 1px;
+  }
 }
 
 /* Phone */
