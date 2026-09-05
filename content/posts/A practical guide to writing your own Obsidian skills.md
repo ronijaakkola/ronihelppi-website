@@ -1,12 +1,18 @@
 ---
 date: 2026-03-10
-description: Stop copying skills. Build your own.
+dateModified: 2026-09-05
+description: Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI, tailored to your vault and workflow, not someone else's.
 heroImage: ../images/obsidian-skills-banner.png
-heroImageAlt: A cover image of the post, decipting the Obsidian logo rendered with ASCII characters.
+heroImageAlt: A cover image of the post, depicting the Obsidian logo rendered with ASCII characters.
+tags:
+  - Obsidian
+  - agent skills
+  - Claude Code
+  - AI agents
 relatedPosts:
   - every-monday-my-agent-ships-me-a-magazine
 ---
-Agentic skills have taken the AI world by storm. People are slowly starting to experiment on using them on other tasks than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
+Agent skills (or, *agentic* skills) have taken the AI world by storm. People are slowly starting to experiment with using them for tasks other than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
 
 Around two months ago, the Obsidian CEO kepano released a [GitHub repository](https://github.com/kepano/obsidian-skills) containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.
 
@@ -20,7 +26,7 @@ The latter category, skills that teach the agent a process, **should not be copi
 
 **Why should you consider creating skills by yourself?** Custom-made skills are endlessly more useful and reliable as they have been tailored to follow your needs and processes. Using skills created by someone else may not work well for your workflow and vault structure. Moreover, creating them is actually easier than you think. So easy, in fact, that it may be quicker than copy-pasting an unknown skill from a Git repository to your `.claude` folder.
 
-In this post, I will share concrete and practical examples how you can create your own skills and iterate them. After reading this post, you should feel very comfortable to try to extract your processes and routines to your AI agent of choosing. This guide is divided into steps that build upon each other. You can start small, and come back to this guide when you are ready to dive deeper.
+In this post, I will share concrete and practical examples of how you can create your own agent skills for Obsidian, and iterate them over time. After reading this post, you should feel very comfortable to try to extract your processes and routines to your AI agent of choosing. This guide is divided into steps that build upon each other. You can start small, and come back to this guide when you are ready to dive deeper.
 
 ## Before we start
 

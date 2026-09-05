@@ -415,6 +415,64 @@ describe('Build Output Validation', () => {
       expect(content).toContain('"knowsAbout"');
       expect(content).toContain('"alumniOf"');
     });
+
+    it('surfaces the strengthened Obsidian skills post description and keywords for search/LLM discovery', async () => {
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const postContent = await readFile(postPath, 'utf-8');
+
+      const expectedDescription =
+        "Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI, tailored to your vault and workflow, not someone else's.";
+
+      // Meta description carries the descriptive, keyword-bearing frontmatter
+      // description (not the old bare tagline).
+      const metaMatch = postContent.match(/<meta name="description" content="([^"]*)"/);
+      expect(metaMatch?.[1]).toBe(expectedDescription);
+
+      // Parse every ld+json block on the page and pick out the BlogPosting
+      // entry, so the assertion checks the actual structured-data fields
+      // rather than matching a raw substring against serialized JSON.
+      const ldJsonBlocks = Array.from(
+        postContent.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g),
+      ).map((match) => JSON.parse(match[1]));
+      const blogPosting = ldJsonBlocks.find((schema) => schema['@type'] === 'BlogPosting');
+
+      expect(blogPosting).toBeDefined();
+      expect(blogPosting.description).toBe(expectedDescription);
+      expect(blogPosting.keywords).toEqual(['Obsidian', 'agent skills', 'Claude Code', 'AI agents']);
+
+      const llmsFullPath = join(distPath, 'llms-full.txt');
+      const llmsFullContent = await readFile(llmsFullPath, 'utf-8');
+      expect(llmsFullContent).toContain(`Summary: ${expectedDescription}`);
+    });
+  });
+
+  describe('robots.txt', () => {
+    it('preserves every pre-existing named crawler and explicitly allows OAI-SearchBot', async () => {
+      const robotsPath = join(distPath, 'robots.txt');
+      const content = await readFile(robotsPath, 'utf-8');
+
+      // Every crawler that was already explicitly allowed must survive
+      // untouched, plus the newly added OAI-SearchBot.
+      const allowedUserAgents = [
+        '*',
+        'GPTBot',
+        'ChatGPT-User',
+        'OAI-SearchBot',
+        'Google-Extended',
+        'anthropic-ai',
+        'ClaudeBot',
+        'CCBot',
+        'PerplexityBot',
+        'Bytespider',
+        'cohere-ai',
+      ];
+
+      for (const userAgent of allowedUserAgents) {
+        expect(content).toContain(`User-agent: ${userAgent}\nAllow: /`);
+      }
+
+      expect(content).toContain('Sitemap: https://ronihelppi.com/sitemap-index.xml');
+    });
   });
 
   describe('HTML Validation', () => {
