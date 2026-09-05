@@ -415,6 +415,42 @@ describe('Build Output Validation', () => {
       expect(content).toContain('"knowsAbout"');
       expect(content).toContain('"alumniOf"');
     });
+
+    it('surfaces the strengthened Obsidian skills post description and keywords for search/LLM discovery', async () => {
+      const postPath = join(distPath, 'writing', 'a-practical-guide-to-writing-your-own-obsidian-skills', 'index.html');
+      const postContent = await readFile(postPath, 'utf-8');
+
+      // Meta description and BlogPosting JSON-LD both carry the descriptive,
+      // keyword-bearing frontmatter description (not the old bare tagline).
+      expect(postContent).toContain(
+        '<meta name="description" content="Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI — tailored to your vault and workflow, not someone else\'s."',
+      );
+      expect(postContent).toContain('"keywords":["Obsidian","agent skills","Claude Code","AI agents"]');
+
+      const llmsFullPath = join(distPath, 'llms-full.txt');
+      const llmsFullContent = await readFile(llmsFullPath, 'utf-8');
+      expect(llmsFullContent).toContain(
+        "Summary: Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI — tailored to your vault and workflow, not someone else's.",
+      );
+    });
+  });
+
+  describe('robots.txt', () => {
+    it('preserves existing crawler policy and explicitly allows OAI-SearchBot', async () => {
+      const robotsPath = join(distPath, 'robots.txt');
+      const content = await readFile(robotsPath, 'utf-8');
+
+      // Existing policy must survive untouched
+      expect(content).toContain('User-agent: *\nAllow: /');
+      expect(content).toContain('User-agent: GPTBot\nAllow: /');
+      expect(content).toContain('User-agent: ChatGPT-User\nAllow: /');
+      expect(content).toContain('User-agent: anthropic-ai\nAllow: /');
+      expect(content).toContain('User-agent: ClaudeBot\nAllow: /');
+      expect(content).toContain('Sitemap: https://ronihelppi.com/sitemap-index.xml');
+
+      // OpenAI's search-index crawler (distinct from GPTBot/ChatGPT-User) is now explicitly allowed
+      expect(content).toContain('User-agent: OAI-SearchBot\nAllow: /');
+    });
   });
 
   describe('HTML Validation', () => {
