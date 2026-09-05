@@ -1,5 +1,6 @@
 ---
 date: 2026-03-10
+dateModified: 2026-09-05
 description: Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI — tailored to your vault and workflow, not someone else's.
 heroImage: ../images/obsidian-skills-banner.png
 heroImageAlt: A cover image of the post, depicting the Obsidian logo rendered with ASCII characters.
