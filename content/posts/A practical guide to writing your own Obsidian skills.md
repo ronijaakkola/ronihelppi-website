@@ -1,7 +1,7 @@
 ---
 date: 2026-03-10
 dateModified: 2026-09-05
-description: Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI — tailored to your vault and workflow, not someone else's.
+description: Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI, tailored to your vault and workflow, not someone else's.
 heroImage: ../images/obsidian-skills-banner.png
 heroImageAlt: A cover image of the post, depicting the Obsidian logo rendered with ASCII characters.
 tags:
@@ -12,7 +12,7 @@ tags:
 relatedPosts:
   - every-monday-my-agent-ships-me-a-magazine
 ---
-Agent skills — sometimes called agentic skills — have taken the AI world by storm. People are slowly starting to experiment with using them for tasks other than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
+Agent skills (or, *agentic* skills) have taken the AI world by storm. People are slowly starting to experiment with using them for tasks other than just coding. Obsidian, a popular local note-taking tool, is an excellent candidate to build them on. As Obsidian stores all its notes locally in Markdown format, they are really easy for AI agents to read, edit, and act on.
 
 Around two months ago, the Obsidian CEO kepano released a [GitHub repository](https://github.com/kepano/obsidian-skills) containing a few skills designed to make it easier for agents to interact with Markdown files and your vault. Following that, many people in the community have started to share their own workflows. What I have noticed too, is that many people are asking others to share theirs so they could copy-paste and start using them right away.
 

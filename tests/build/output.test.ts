@@ -421,7 +421,7 @@ describe('Build Output Validation', () => {
       const postContent = await readFile(postPath, 'utf-8');
 
       const expectedDescription =
-        "Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI — tailored to your vault and workflow, not someone else's.";
+        "Stop copying skills. Build your own Obsidian agent skills for Claude Code, Codex, or Gemini CLI, tailored to your vault and workflow, not someone else's.";
 
       // Meta description carries the descriptive, keyword-bearing frontmatter
       // description (not the old bare tagline).
