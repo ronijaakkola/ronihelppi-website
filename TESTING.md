@@ -44,6 +44,10 @@ npm run check
 
 ```
 ├── src/
+│   ├── lab/
+│   │   ├── schema.test.ts                    # Lab metadata schema tests
+│   │   ├── index.test.ts                     # Lab registry (slug, sort, published) tests
+│   │   └── dialkit-stub.test.ts              # Production DialKit stub tests
 │   ├── utils/
 │   │   ├── remark-obsidian-images.test.ts    # Remark plugin tests
 │   │   ├── sortByDate.test.ts                # Date sorting tests
@@ -60,6 +64,7 @@ npm run check
         ├── writing.spec.ts                    # Writing pages E2E tests
         ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
         ├── projects.spec.ts                   # Project pages E2E tests
+        ├── lab.spec.ts                       # Lab list, demo pages, preview video, DialKit absence
         ├── 404.spec.ts                       # Error page tests
         ├── accessibility.spec.ts             # Accessibility tests (axe-core)
         └── mobile.spec.ts                    # Mobile/tablet viewport tests

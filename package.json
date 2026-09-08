@@ -12,7 +12,9 @@
     "test:ui": "vitest --ui",
     "test:build": "vitest run --config vitest.config.build.ts",
     "check": "astro check",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lab:preview": "node scripts/lab-preview.mjs",
+    "lab:record": "node scripts/lab-record.mjs"
   },
   "overrides": {
     "yaml-language-server": {
@@ -21,10 +23,17 @@
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.0",
+    "@astrojs/react": "^6.0.5",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
     "astro": "^7.3.1",
+    "dialkit": "^2.0.0",
     "github-slugger": "^2.0.0",
+    "motion": "^13.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "rehype-external-links": "^3.0.0",
     "sharp": "^0.35.3",
     "unist-util-visit": "^5.1.0"

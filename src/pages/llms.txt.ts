@@ -12,6 +12,7 @@ export function GET(context: APIContext) {
     { title: 'About', path: '/about', note: 'Background, experience, and contact info' },
     { title: 'Writing', path: '/writing', note: 'Articles on design, technology, and creative work' },
     { title: 'Projects', path: '/projects', note: 'UX design projects and case studies' },
+    { title: 'Lab', path: '/lab', note: 'Small interaction and animation prototypes built in React' },
     { title: 'Contact', path: '/contact', note: 'Email, LinkedIn, X, and GitHub links' },
   ];
 

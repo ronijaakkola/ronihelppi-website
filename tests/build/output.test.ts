@@ -32,6 +32,32 @@ describe('Build Output Validation', () => {
     });
   });
 
+  describe('Dynamic Routes - Lab', () => {
+    it('generates the lab index and one page per published demo', async () => {
+      const labPath = join(distPath, 'lab');
+      const index = await readFile(join(labPath, 'index.html'), 'utf-8');
+      const entries = await readdir(labPath, { withFileTypes: true });
+      const demoDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+      expect(demoDirs.length).toBeGreaterThan(0);
+      for (const dir of demoDirs) {
+        await expect(access(join(labPath, dir, 'index.html'))).resolves.not.toThrow();
+        expect(index).toContain(`href="/lab/${dir}"`);
+        // Every demo ships its preview assets under the same slug.
+        await expect(access(join(labPath, dir, 'preview.mp4'))).resolves.not.toThrow();
+        await expect(access(join(labPath, dir, 'poster.webp'))).resolves.not.toThrow();
+      }
+    });
+
+    it('does not bundle DialKit into production JS', async () => {
+      const astroDir = join(distPath, '_astro');
+      const files = (await readdir(astroDir)).filter((f) => f.endsWith('.js'));
+      for (const file of files) {
+        const js = await readFile(join(astroDir, file), 'utf-8');
+        expect(js, file).not.toMatch(/dialkit:|dialkit-panel/);
+      }
+    });
+  });
+
   describe('Dynamic Routes - Posts', () => {
     it('writing directory exists', async () => {
       const postsPath = join(distPath, 'writing');

@@ -1,0 +1,254 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Divider from '../../components/Divider.astro';
+import LabStage from '../../lab/LabStage';
+import { labEntries, labPreviewPaths, labSourceUrl, formatLabDate, type LabEntry } from '../../lab';
+
+export function getStaticPaths() {
+  return labEntries.map((entry, index) => ({
+    params: { slug: entry.slug },
+    props: {
+      entry,
+      // Entries are newest first. "Previous" links to the older entry (index + 1), "Next" to the newer one.
+      newer: labEntries[index - 1] ?? null,
+      older: labEntries[index + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  entry: LabEntry;
+  newer: LabEntry | null;
+  older: LabEntry | null;
+}
+
+const { entry, newer, older } = Astro.props;
+const { meta, slug } = entry;
+const preview = labPreviewPaths(slug);
+const pageURL = new URL(`/lab/${slug}/`, Astro.site).href;
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: meta.title,
+    ...(meta.description && { description: meta.description }),
+    datePublished: meta.date.toISOString(),
+    mainEntityOfPage: { '@type': 'WebPage', '@id': pageURL },
+    author: { '@type': 'Person', name: 'Roni Helppi', url: 'https://ronihelppi.com' },
+    image: new URL(preview.poster, Astro.site).href,
+    ...(meta.tags.length && { keywords: meta.tags }),
+  },
+];
+---
+
+<BaseLayout
+  title={`${meta.title} — Lab — Roni Helppi`}
+  description={meta.description ?? `${meta.title}, an interaction prototype from Roni Helppi's lab.`}
+  image={preview.poster}
+  type="article"
+  publishedTime={meta.date.toISOString()}
+  schemas={schemas}
+>
+  <main id="main-content" class="main">
+    <article class="layout">
+      <div class="prose">
+        <header class="lab-header">
+          <div class="lab-heading">
+            <h1 class="lab-title">{meta.title}</h1>
+            <span class="lab-separator" aria-hidden="true">/</span>
+            <time class="lab-date" datetime={meta.date.toISOString().split('T')[0]}>{formatLabDate(meta.date)}</time>
+          </div>
+          <a href={labSourceUrl(slug)} class="meta-link" target="_blank" rel="noopener noreferrer">
+            Source
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2.5 9.5L9.5 2.5M9.5 2.5V8.5M9.5 2.5H3.5" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="visually-hidden"> (opens in new tab)</span>
+          </a>
+        </header>
+
+        {meta.requiresPointer && (
+          <p class="lab-note">Requires a pointer device</p>
+        )}
+
+        <LabStage client:only="react" slug={slug} aspectRatio={meta.aspectRatio} poster={preview.poster} />
+
+        {(meta.description || meta.post) && (
+          <div class="lab-body">
+            {meta.description && <p class="lab-description">{meta.description}</p>}
+            {meta.post && (
+              <a href={`/writing/${meta.post}`} class="meta-link">Read the post</a>
+            )}
+          </div>
+        )}
+
+        {(older || newer) && (
+          <>
+            <Divider class="lab-divider" />
+            <nav class="lab-nav" aria-label="Neighbouring demos">
+              {older ? (
+                <a href={`/lab/${older.slug}`} class="lab-nav-link lab-nav-prev" rel="prev">
+                  <span class="lab-nav-label">Previous</span>
+                  <span class="lab-nav-title">{older.meta.title}</span>
+                </a>
+              ) : <span />}
+              {newer && (
+                <a href={`/lab/${newer.slug}`} class="lab-nav-link lab-nav-next" rel="next">
+                  <span class="lab-nav-label">Next</span>
+                  <span class="lab-nav-title">{newer.meta.title}</span>
+                </a>
+              )}
+            </nav>
+          </>
+        )}
+      </div>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+  }
+
+  .lab-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--gap-sm);
+  }
+
+  .lab-heading {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--gap-4xs) var(--gap-3xs);
+  }
+
+  /* Deliberately quiet: the demo is the headline, not the title. */
+  .lab-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    font-weight: 400;
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-secondary);
+  }
+
+  .lab-separator,
+  .lab-date {
+    font-family: var(--font-sans);
+    font-size: var(--text-small);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-secondary);
+  }
+
+  .lab-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  .lab-description {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-primary);
+  }
+
+  /* Only shown where there is no fine pointer; the demo still mounts. */
+  .lab-note {
+    display: none;
+    margin-top: calc(-1 * var(--gap-2xs));
+    font-family: var(--font-mono);
+    font-size: var(--text-code);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+  }
+  @media (pointer: coarse) {
+    .lab-note {
+      display: block;
+    }
+  }
+
+  .meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 10px;
+    min-height: 26px;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: -0.65px;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: border-color 100ms ease, color 100ms ease, transform 150ms var(--ease-out);
+    width: fit-content;
+  }
+  .meta-link:active {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  .meta-link:hover,
+  .meta-link:focus-visible {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    text-decoration: none;
+  }
+  .meta-link:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+  .meta-link svg {
+    flex-shrink: 0;
+  }
+
+  :global(.lab-divider) {
+    margin-block: var(--gap-sm);
+  }
+
+  .lab-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--gap-md);
+  }
+
+  .lab-nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-4xs);
+    text-decoration: none;
+    width: fit-content;
+  }
+  .lab-nav-next {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .lab-nav-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-code);
+    letter-spacing: var(--tracking-small);
+    color: var(--color-text-secondary);
+  }
+
+  .lab-nav-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    color: var(--color-text-primary);
+    text-decoration: underline;
+    text-decoration-color: var(--color-text-secondary);
+    text-underline-offset: 2px;
+  }
+  .lab-nav-link:hover .lab-nav-title,
+  .lab-nav-link:focus-visible .lab-nav-title {
+    text-decoration-color: var(--color-text-primary);
+  }
+</style>

@@ -1,0 +1,263 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CascadeAnimation from '../../components/CascadeAnimation.astro';
+import Divider from '../../components/Divider.astro';
+import { labEntries, labPreviewPaths, formatLabDate } from '../../lab';
+
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Lab',
+    url: 'https://ronihelppi.com/lab/',
+    description: 'Small interaction and animation prototypes by Roni Helppi.',
+    hasPart: labEntries.map((entry) => ({
+      '@type': 'CreativeWork',
+      name: entry.meta.title,
+      url: new URL(`/lab/${entry.slug}/`, Astro.site).href,
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title="Lab — Roni Helppi"
+  description="Small prototypes and component demos exploring animation and interaction. Built in React, tuned by hand."
+  schemas={schemas}
+>
+  <main id="main-content" class="main">
+    <div class="layout">
+      <div class="prose">
+        <div class="content">
+          <header class="page-header">
+            <h1 class="page-title">Lab<span class="visually-hidden"> — Interaction & Animation Prototypes</span></h1>
+            <div class="intro">
+              <p>
+                Small prototypes and component demos, mostly about how things move and respond. Each one is a single idea taken far enough to feel right.
+              </p>
+            </div>
+          </header>
+          <Divider class="intro-divider" />
+          <section class="lab-section" aria-label="Demos">
+            <ul class="lab-list">
+              {labEntries.map((entry, index) => {
+                const preview = labPreviewPaths(entry.slug);
+                return (
+                  <li
+                    class:list={['lab-item', { 'cascade-item': index > 0 }]}
+                    style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
+                  >
+                    <a href={`/lab/${entry.slug}`} class="lab-card">
+                      <div class="lab-preview" style={`aspect-ratio: ${entry.meta.aspectRatio}`}>
+                        <video
+                          class="lab-video"
+                          src={preview.video}
+                          poster={preview.poster}
+                          muted
+                          loop
+                          playsinline
+                          preload={index === 0 ? 'auto' : 'metadata'}
+                          data-autoplay
+                          aria-hidden="true"
+                          tabindex="-1"
+                        ></video>
+                        <div class="lab-overlay">
+                          <span class="lab-title">{entry.meta.title}</span>
+                          <time class="lab-date" datetime={entry.meta.date.toISOString().split('T')[0]}>
+                            {formatLabDate(entry.meta.date)}
+                          </time>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <CascadeAnimation selector=".lab-list" />
+</BaseLayout>
+
+<style>
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-md);
+  }
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-sm);
+  }
+
+  :global(.intro-divider) {
+    margin-block: var(--gap-2xs);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xs);
+    font-size: var(--text-body);
+    letter-spacing: var(--tracking-body-tight);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+    max-width: 40rem;
+  }
+
+  .lab-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-lg);
+  }
+
+  .lab-card {
+    display: block;
+    text-decoration: none;
+  }
+
+  .lab-preview {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--color-border);
+    background: var(--color-overlay-light);
+    transition: border-color 150ms ease, transform 150ms var(--ease-out);
+  }
+
+  .lab-card:hover .lab-preview,
+  .lab-card:focus-visible .lab-preview {
+    border-color: var(--color-text-primary);
+  }
+
+  .lab-card:focus-visible {
+    outline: none;
+  }
+
+  .lab-card:focus-visible .lab-preview {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px;
+  }
+
+  @media (hover: none) {
+    .lab-card:active {
+      opacity: 1;
+    }
+    .lab-card:active .lab-preview {
+      transform: scale(0.99);
+    }
+  }
+
+  .lab-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Same treatment as the Work cards: mono pills pinned to the bottom edge,
+     over the preview. Always visible here, since the card has no other label. */
+  .lab-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--gap-sm);
+    padding: 12px 16px;
+    pointer-events: none;
+  }
+
+  .lab-title,
+  .lab-date {
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    background: var(--color-overlay-light);
+    backdrop-filter: blur(8px);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    letter-spacing: var(--tracking-mono);
+  }
+
+  .lab-title {
+    font-size: var(--text-code);
+  }
+
+  .lab-date {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  @keyframes cascade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .cascade-animate .cascade-item {
+    animation: cascade-in 0.4s var(--ease-out) both;
+    animation-delay: var(--cascade-delay, 0ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cascade-animate .cascade-item {
+      animation: none;
+    }
+    .lab-preview {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Previews loop silently like animated images, playing only while on screen
+  // so the visitor meets each clip at the start of its loop. Under reduced
+  // motion they stay on their poster; the demo page itself still runs motion.
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let observer: IntersectionObserver | null = null;
+
+  function initLabPreviews() {
+    observer?.disconnect();
+    observer = null;
+
+    const videos = document.querySelectorAll<HTMLVideoElement>('.lab-video[data-autoplay]');
+    if (!videos.length) return;
+
+    if (reducedMotion.matches) {
+      videos.forEach((video) => video.pause());
+      return;
+    }
+
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            video.muted = true;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.4 },
+    );
+    videos.forEach((video) => observer!.observe(video));
+  }
+
+  initLabPreviews();
+  document.addEventListener('astro:page-load', initLabPreviews);
+</script>
