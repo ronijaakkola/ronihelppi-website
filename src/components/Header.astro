@@ -193,7 +193,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   /* View transition animations for breadcrumb fade-out */
   ::view-transition-old(breadcrumb-text),
   ::view-transition-old(breadcrumb-separator) {
-    animation: fade-out 0.3s ease-out forwards;
+    animation: fade-out 0.2s var(--ease-out) forwards;
   }
 
   ::view-transition-new(breadcrumb-text),
@@ -428,9 +428,9 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     color: var(--color-text-secondary);
     text-decoration: none;
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-8px);
     /* Destination state when closing — links exit faster than they enter */
-    transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out), color 0.2s ease;
+    transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), color 0.2s ease;
   }
 
   .mobile-menu-link:hover,
@@ -446,7 +446,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   .mobile-menu.open .mobile-menu-link {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out), color 0.2s ease;
+    transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out), color 0.2s ease;
   }
 
   /* Cascading animation delays */
@@ -455,19 +455,19 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   }
 
   .mobile-menu.open .mobile-menu-link:nth-child(2) {
-    transition-delay: 50ms;
+    transition-delay: 35ms;
   }
 
   .mobile-menu.open .mobile-menu-link:nth-child(3) {
-    transition-delay: 100ms;
+    transition-delay: 70ms;
   }
 
   .mobile-menu.open .mobile-menu-link:nth-child(4) {
-    transition-delay: 150ms;
+    transition-delay: 105ms;
   }
 
   .mobile-menu.open .mobile-menu-link:nth-child(5) {
-    transition-delay: 200ms;
+    transition-delay: 140ms;
   }
 
   /* Reset delays when closing */
@@ -716,19 +716,24 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       if (!toggle) return;
 
       // Stamp the click point on <html> so the circular-reveal view-transition
-      // CSS (in BaseLayout) can grow the wipe from the button. Radius = distance
-      // to the farthest viewport corner, so the circle always fills the screen.
+      // CSS (in BaseLayout) can grow the wipe from the button. Everything is
+      // expressed as PERCENTAGES of the viewport, never px: on 2x displays
+      // Chromium applies px clip-path lengths to the root snapshot in device
+      // pixels, so a px circle covered only half the screen and the transition
+      // ended with a hard cut. Percentages resolve against the snapshot box in
+      // whichever pixel space it uses. circle() percentages are relative to
+      // hypot(w, h) / sqrt(2), so the radius is scaled to that reference.
       const rect = toggle.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
-      const r = Math.hypot(
-        Math.max(x, window.innerWidth - x),
-        Math.max(y, window.innerHeight - y)
-      );
+      const r = Math.hypot(Math.max(x, vw - x), Math.max(y, vh - y));
+      const rRef = Math.hypot(vw, vh) / Math.SQRT2;
       const root = document.documentElement;
-      root.style.setProperty('--reveal-x', `${x}px`);
-      root.style.setProperty('--reveal-y', `${y}px`);
-      root.style.setProperty('--reveal-r', `${r}px`);
+      root.style.setProperty('--reveal-x', `${(x / vw) * 100}%`);
+      root.style.setProperty('--reveal-y', `${(y / vh) * 100}%`);
+      root.style.setProperty('--reveal-r', `${(r / rRef) * 100}%`);
 
       w.__setTheme?.(getTheme() === 'light' ? 'dark' : 'light');
     });
@@ -854,13 +859,14 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         // the stale label, depending on which loop finished last.
         textScramble?.cancel();
         // Always create fresh scramble instance to avoid stale state.
-        // Spreads tuned so the effect resolves in ~1.4s — a deliberate,
-        // lingering signature moment. Values are rAF frames (~16.7ms each);
+        // Spreads tuned so the effect resolves in ~0.9s — long enough to read
+        // as a deliberate signature moment, short enough not to linger far past
+        // the 250ms page dissolve. Values are rAF frames (~16.7ms each);
         // max resolve ≈ startSpread + minDuration + durationSpread.
         textScramble = new TextScramble(breadcrumb, {
-          startSpread: 28,
-          minDuration: 28,
-          durationSpread: 28,
+          startSpread: 18,
+          minDuration: 18,
+          durationSpread: 18,
         });
         // Force browser to render opacity:0 before transitioning
         void separator.offsetWidth;

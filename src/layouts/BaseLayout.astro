@@ -429,7 +429,7 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
       }
       to {
         clip-path: circle(
-          var(--reveal-r, 150vmax) at var(--reveal-x, 50%) var(--reveal-y, 50%)
+          var(--reveal-r, 100%) at var(--reveal-x, 50%) var(--reveal-y, 50%)
         );
       }
     }
@@ -439,7 +439,10 @@ const allSchemas = [...schemas, ...(breadcrumbSchema ? [breadcrumbSchema] : [])]
     }
 
     html.theme-transition::view-transition-new(root) {
-      animation: theme-reveal 0.5s var(--ease-in-out);
+      /* Mild ease-out: the wipe leaves the button promptly but the wavefront
+         keeps a steady speed across the screen. Steeper curves front-load the
+         radius growth so the far corners appear to stall, then snap. */
+      animation: theme-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
   }
 </style>

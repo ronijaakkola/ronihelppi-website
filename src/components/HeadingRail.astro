@@ -54,6 +54,26 @@ const { headings } = Astro.props;
     max-height: 80vh;
   }
 
+  /* Hover shadow lives on a pseudo whose opacity animates (composite-only)
+     instead of transitioning box-shadow, which repaints every frame. Sits on
+     the wrapper because the list's overflow:hidden would clip it. */
+  .heading-rail::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  .heading-rail:hover::after,
+  .heading-rail:focus-within::after {
+    opacity: 1;
+  }
+
   @media (min-width: 1200px) and (hover: hover) {
     .heading-rail {
       display: block;
@@ -74,15 +94,13 @@ const { headings } = Astro.props;
     background: transparent;
     transition:
       background-color 0.2s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      border-color 0.2s ease;
   }
 
   .heading-rail:hover .heading-rail-list,
   .heading-rail:focus-within .heading-rail-list {
     background: var(--color-bg);
     border-color: var(--color-border);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
     overflow-y: auto;
   }
 
@@ -233,6 +251,7 @@ const { headings } = Astro.props;
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .heading-rail::after,
     .heading-rail-list,
     .heading-rail-tick,
     .heading-rail-number,
