@@ -97,10 +97,21 @@ test.describe('Theme switching', () => {
         r: s.getPropertyValue('--reveal-r').trim(),
       };
     });
-    expect(vars.x).toMatch(/^[\d.]+px$/);
-    expect(vars.y).toMatch(/^[\d.]+px$/);
-    expect(vars.r).toMatch(/^[\d.]+px$/);
-    expect(parseFloat(vars.r)).toBeGreaterThan(0);
+    // Percentages, never px: on 2x displays Chromium applies px clip-path
+    // lengths to the root snapshot in device pixels, halving the wipe.
+    expect(vars.x).toMatch(/^[\d.]+%$/);
+    expect(vars.y).toMatch(/^[\d.]+%$/);
+    expect(vars.r).toMatch(/^[\d.]+%$/);
+    // Centre lies inside the viewport…
+    expect(parseFloat(vars.x)).toBeGreaterThan(0);
+    expect(parseFloat(vars.x)).toBeLessThan(100);
+    expect(parseFloat(vars.y)).toBeGreaterThan(0);
+    expect(parseFloat(vars.y)).toBeLessThan(100);
+    // …and the radius reaches the farthest corner. circle() percentages are
+    // relative to hypot(w, h) / sqrt(2); the smallest possible far-corner
+    // reach (a centre exactly mid-viewport) is ~70.7%, anything off-centre is
+    // larger.
+    expect(parseFloat(vars.r)).toBeGreaterThan(70);
 
     // The transient transition class is cleaned up once the wipe finishes.
     await expect(html(page)).not.toHaveClass(/theme-transition/);
