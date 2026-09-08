@@ -9,6 +9,16 @@ import { rehypeImageFigure } from './src/utils/rehype-image-figure';
 import { rehypeHeadingLinks } from './src/utils/rehype-heading-links';
 import { remarkCodeTitle } from './src/utils/remark-code-title';
 import { remarkToc } from './src/utils/remark-toc';
+import { fileURLToPath } from 'node:url';
+
+// DialKit is a dev-only tuning panel for the Lab demos. Production builds swap
+// it for a stub that returns each control's default, so demo code imports
+// "dialkit" unchanged and visitors download none of it.
+const isBuild = process.argv.includes('build');
+/** @param {string} file */
+const labPath = (file) => fileURLToPath(new URL(`./src/lab/${file}`, import.meta.url));
+
+import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
@@ -21,7 +31,17 @@ export default defineConfig({
     prefetchAll: true,
     defaultStrategy: 'viewport',
   },
-  integrations: [sitemap()],
+  integrations: [sitemap(), react()],
+  vite: {
+    resolve: {
+      alias: isBuild
+        ? [
+            { find: 'dialkit/styles.css', replacement: labPath('dialkit-empty.css') },
+            { find: /^dialkit$/, replacement: labPath('dialkit-stub.ts') },
+          ]
+        : [],
+    },
+  },
   markdown: {
     shikiConfig: {
       theme: 'github-dark',

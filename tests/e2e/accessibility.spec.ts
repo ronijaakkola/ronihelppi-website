@@ -31,6 +31,23 @@ test.describe('Accessibility', () => {
     expect(results.violations).toEqual([]);
   });
 
+  test('lab listing should have no accessibility violations', async ({ page }) => {
+    await page.goto('/lab');
+    await page.waitForTimeout(ANIMATION_WAIT);
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
+  test('individual lab demo page should have no accessibility violations', async ({ page }) => {
+    await page.goto('/lab');
+    const href = await page.locator('a[href^="/lab/"].lab-card').first().getAttribute('href');
+    expect(href).toBeTruthy();
+    await page.goto(href!);
+    await page.locator('[data-lab-stage] button, [data-lab-stage] canvas, [data-lab-stage] svg').first().waitFor();
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('individual post page should have no accessibility violations', async ({
     page,
   }) => {

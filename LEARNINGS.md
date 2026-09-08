@@ -129,3 +129,15 @@ A caption like `![[photo.jpg|See [this post](https://…) by X]]` works, but onl
 ## Pull quotes are `<aside class="pull-quote" aria-hidden="true">` raw HTML, not blockquotes
 
 A print-style pull quote repeats a sentence that stays in the body text, so it must be `aria-hidden` (otherwise screen readers read it twice) — and markdown `>` cannot carry attributes, so it is authored as a raw HTML `<aside>` block in the post (Astro passes HTML in markdown through). `>` blockquotes remain reserved for actual quotations from other sources. Styling lives in `global.css` under `.prose-content .pull-quote`. Place pull quotes at section boundaries, far from the source sentence, and not adjacent to other bolded emphasis.
+
+---
+
+## Astro 7 `astro preview` daemonizes — Playwright's webServer sees it "exit early"
+
+With Astro 7, `npm run preview` forks a background daemon and the foreground process exits, so Playwright's `webServer` reports `Process from config.webServer exited early` on the first run. The daemon is nevertheless up and serving `dist/`. Because `reuseExistingServer` is true locally, simply re-running `npx playwright test` works. Stop it with `lsof -ti :4321 | xargs kill` (or `astro preview stop`) before rebuilding, per the stale-server learning above.
+
+---
+
+## Dev-only libraries: alias them to a stub during `astro build`
+
+The Lab demos use DialKit for tuning. Rather than trusting its "hidden in production" flag (which still ships the library), `astro.config.mjs` adds a Vite `resolve.alias` only when `process.argv.includes('build')`, mapping `dialkit` to `src/lab/dialkit-stub.ts` and its stylesheet to an empty CSS file. Demo code imports `dialkit` unchanged. `tests/build/output.test.ts` greps `dist/_astro/*.js` for DialKit markers so a broken alias fails CI.

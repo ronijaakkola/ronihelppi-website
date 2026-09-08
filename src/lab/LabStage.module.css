@@ -1,0 +1,23 @@
+/* The stage is the one place site styles meet demo styles. Reset the inherited
+   text properties so a demo looks the same as it did standalone; demos opt in
+   to site tokens explicitly if they want to match the theme. */
+.stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #111;
+  color: #f4f4f4;
+  font: 16px/1.4 system-ui, -apple-system, sans-serif;
+  letter-spacing: normal;
+  isolation: isolate;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
