@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CascadeAnimation from '../../components/CascadeAnimation.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { getTitleFromEntry } from '../../utils/title';
@@ -131,7 +130,7 @@ const schemas = [
                 {coverImage ? (
                   <Image
                     src={coverImage}
-                    alt={title}
+                    alt=""
                     class="grid-item-image"
                     widths={isWide ? [372, 605, 744, 1168] : [289, 372, 584, 744]}
                     sizes={imageSizes}
@@ -141,12 +140,10 @@ const schemas = [
                     fetchpriority={isPrimaryLcpCandidate ? 'high' : 'auto'}
                     style={`view-transition-name: project-cover-${item.id}`}
                   />
-                ) : (
-                  <span class="visually-hidden">{title}</span>
-                )}
+                ) : null}
                 <div class="grid-item-overlay">
-                  <span class="grid-item-title" data-text={title}></span>
-                  <span class="grid-item-year" data-text={String(item.data.date.getFullYear())}></span>
+                  <span class="grid-item-title">{title}</span>
+                  <span class="grid-item-year">{item.data.date.getFullYear()}</span>
                 </div>
               </a>
             );
@@ -215,14 +212,14 @@ const schemas = [
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 4px 8px;
-    min-height: 24px;
+    padding: 6px 10px;
+    min-height: 32px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--color-border);
     background: var(--color-bg);
     cursor: pointer;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: var(--tracking-mono);
     line-height: normal;
     transition: background-color 100ms ease, color 100ms ease, transform 150ms var(--ease-out);
@@ -238,7 +235,7 @@ const schemas = [
 
   .filter-chip .filter-count {
     color: var(--color-text-secondary);
-    font-weight: 300;
+    font-weight: 400;
     margin-left: 0.25em;
   }
 
@@ -252,7 +249,7 @@ const schemas = [
 
   .filter-chip.active .filter-count {
     color: var(--color-button-text-muted);
-    font-weight: 300;
+    font-weight: 400;
   }
 
   .filter-chip:not(.active):hover,
@@ -352,14 +349,8 @@ const schemas = [
     justify-content: space-between;
     align-items: flex-end;
     padding: 12px 16px;
-    opacity: 0;
-    transition: opacity 200ms ease;
+    gap: var(--gap-2xs);
     pointer-events: none;
-  }
-
-  .grid-item:hover .grid-item-overlay,
-  .grid-item:focus-visible .grid-item-overlay {
-    opacity: 1;
   }
 
   .grid-item-title,
@@ -374,10 +365,13 @@ const schemas = [
   }
 
   .grid-item-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: var(--text-code);
   }
 
   .grid-item-year {
+    flex-shrink: 0;
     font-size: 12px;
     color: var(--color-text-secondary);
   }
@@ -418,10 +412,6 @@ const schemas = [
       transition: none;
     }
 
-    .grid-item-overlay {
-      transition: none;
-    }
-
     /* Drop the touch press scale (movement). Cards forgo press feedback under
        reduced motion; they still navigate, and the reader opted out of motion. */
     .grid-item {
@@ -458,23 +448,12 @@ const schemas = [
     }
   }
 
-  /* Touch devices - larger tap targets via invisible hit area, always-visible overlay */
+  /* Touch devices: real hit areas keep wrapped filter rows separate. */
   @media (hover: none) {
     .filter-chip {
-      position: relative;
-      min-height: 30px;
-      padding: 6px 10px;
+      min-height: 44px;
     }
 
-    .filter-chip::after {
-      content: '';
-      position: absolute;
-      inset: -7px -4px;
-    }
-
-    .grid-item-overlay {
-      opacity: 1;
-    }
   }
 
   /* Responsive - Phone */
@@ -496,7 +475,6 @@ const schemas = [
 </style>
 
 <script>
-  import { TextScramble } from '../../utils/text-scramble';
   import { balanceTabletGrid } from '../../utils/balanceGrid';
 
   // Recompute tablet balancing over the currently visible cards, so a narrow
@@ -529,6 +507,8 @@ const schemas = [
       setTabletSizes(item, item.classList.contains('grid-item--wide') || promote[i]);
     });
   }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   // Filter functionality
   function applyFilter(filter: string, filterChips: NodeListOf<HTMLElement>, gridItems: NodeListOf<HTMLElement>) {
@@ -773,56 +753,6 @@ const schemas = [
     });
   }
 
-  // Text scramble overlay
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const isTouchDevice = !window.matchMedia('(hover: hover)').matches;
-
-  function initOverlayScramble() {
-    const gridItems = document.querySelectorAll<HTMLElement>('.grid-item');
-
-    gridItems.forEach((item) => {
-      const titleEl = item.querySelector<HTMLElement>('.grid-item-title');
-      const yearEl = item.querySelector<HTMLElement>('.grid-item-year');
-      if (!titleEl || !yearEl) return;
-
-      const titleText = titleEl.getAttribute('data-text') || '';
-      const yearText = yearEl.getAttribute('data-text') || '';
-
-      if (isTouchDevice) {
-        titleEl.textContent = titleText;
-        yearEl.textContent = yearText;
-        return;
-      }
-
-      const titleScramble = new TextScramble(titleEl);
-      const yearScramble = new TextScramble(yearEl);
-
-      item.addEventListener('mouseenter', onEnter);
-      item.addEventListener('focusin', onEnter);
-      item.addEventListener('mouseleave', onLeave);
-      item.addEventListener('focusout', onLeave);
-
-      function onEnter() {
-        if (prefersReducedMotion.matches) {
-          titleEl!.textContent = titleText;
-          yearEl!.textContent = yearText;
-        } else {
-          titleScramble.setText(titleText);
-          yearScramble.setText(yearText);
-        }
-      }
-
-      function onLeave() {
-        titleScramble.cancel();
-        yearScramble.cancel();
-        titleEl!.textContent = '';
-        yearEl!.textContent = '';
-      }
-    });
-  }
-
   initFilters();
-  initOverlayScramble();
   document.addEventListener('astro:page-load', initFilters);
-  document.addEventListener('astro:page-load', initOverlayScramble);
 </script>

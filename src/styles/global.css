@@ -525,13 +525,13 @@ ol {
   text-decoration-line: underline;
 }
 
-.prose-content a[href^="http"] {
+:is(.prose-content a[href^="http"], .contact-external-link) {
   display: inline-flex;
   align-items: center;
   gap: 2px;
 }
 
-.prose-content a[href^="http"]::after {
+:is(.prose-content a[href^="http"], .contact-external-link)::after {
   content: '';
   display: inline-block;
   width: 0.75em;
@@ -547,19 +547,19 @@ ol {
   transition: transform 150ms var(--ease-out), background-color 100ms;
 }
 
-.prose-content a[href^="http"]:hover::after,
-.prose-content a[href^="http"]:focus-visible::after {
+:is(.prose-content a[href^="http"], .contact-external-link):hover::after,
+:is(.prose-content a[href^="http"], .contact-external-link):focus-visible::after {
   background-color: var(--color-text-primary);
 }
 
 /* Keyboard focus nudges the arrow; :hover is gated so a touch tap's sticky
    hover doesn't shift it. Colour feedback (above) stays on both. */
-.prose-content a[href^="http"]:focus-visible::after {
+:is(.prose-content a[href^="http"], .contact-external-link):focus-visible::after {
   transform: translate(1px, -1px);
 }
 
 @media (hover: hover) {
-  .prose-content a[href^="http"]:hover::after {
+  :is(.prose-content a[href^="http"], .contact-external-link):hover::after {
     transform: translate(1px, -1px);
   }
 }
@@ -970,4 +970,11 @@ button:focus-visible,
 
 .scroll-lock {
   overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-external-link::after {
+    transition: none;
+    transform: none !important;
+  }
 }

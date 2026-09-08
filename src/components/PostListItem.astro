@@ -20,19 +20,60 @@ const formattedDate = dateFormat === 'short'
 const isoDate = date.toISOString().split('T')[0];
 ---
 
-<div class:list={['post-item', { 'post-item--row': layout === 'row' }]}>
+<a href={href} aria-label={title} class:list={['post-item', { 'post-item--row': layout === 'row' }]}>
   <div class="post-header">
     <time class="post-date" datetime={isoDate}>{formattedDate}</time>
-    <a href={href} class="post-title">{title}</a>
+    <span class="post-title">{title}</span>
   </div>
   {description && <p class="post-description">{description}</p>}
-</div>
+</a>
 
 <style>
   .post-item {
     display: flex;
     flex-direction: column;
     gap: var(--gap-3xs);
+    position: relative;
+    padding: var(--gap-2xs) var(--gap-xs);
+    margin-block: calc(-1 * var(--gap-2xs));
+    margin-inline: calc(-1 * var(--gap-xs));
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Offset padding to preserve list spacing; 8px per side fits the 16px row gap. */
+  .post-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-hover);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .post-item:focus-visible::before {
+    opacity: 1;
+  }
+
+  .post-item:focus-visible .post-title {
+    text-decoration-color: var(--color-text-primary);
+  }
+
+  @media (hover: hover) {
+    .post-item:hover::before {
+      opacity: 1;
+    }
+
+    .post-item:hover .post-title {
+      text-decoration-color: var(--color-text-primary);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .post-item::before {
+      transition: opacity 120ms var(--ease-out);
+    }
   }
 
   .post-header {
@@ -53,6 +94,8 @@ const isoDate = date.toISOString().split('T')[0];
     letter-spacing: var(--tracking-body-tight);
     color: var(--color-text-primary);
     text-decoration-line: underline;
+    text-decoration-color: var(--color-text-secondary);
+    text-underline-offset: 2px;
   }
 
   .post-description {
