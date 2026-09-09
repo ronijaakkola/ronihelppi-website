@@ -49,7 +49,7 @@ const schemas = [
                   >
                     <a href={`/lab/${entry.slug}`} class="lab-card">
                       <div
-                        class="lab-preview"
+                        class="lab-preview card-frame"
                         style={`aspect-ratio: ${entry.meta.aspectRatio}`}
                         transition:name={`lab-${entry.slug}`}
                       >
@@ -124,18 +124,17 @@ const schemas = [
     text-decoration: none;
   }
 
+  /* Clipping and the hairline come from `.card-frame` (global.css): the border
+     is drawn on `::after`, above the video, never on this clipping box. */
   .lab-preview {
-    position: relative;
     width: 100%;
-    overflow: hidden;
     border-radius: var(--radius-md);
-    border: 0.5px solid var(--color-border);
     background: var(--color-overlay-light);
-    transition: border-color 150ms ease, transform 150ms var(--ease-out);
+    transition: transform 150ms var(--ease-out);
   }
 
-  .lab-card:hover .lab-preview,
-  .lab-card:focus-visible .lab-preview {
+  .lab-card:hover .lab-preview::after,
+  .lab-card:focus-visible .lab-preview::after {
     border-color: var(--color-text-primary);
   }
 

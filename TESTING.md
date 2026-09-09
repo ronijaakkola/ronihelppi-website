@@ -91,7 +91,7 @@ npm run check
 - **404 Page** (9 tests): Error page display and navigation
 - **Breadcrumb** (3 tests): Navigation state across pages
 - **Accessibility** (8 tests): WCAG compliance via axe-core on all pages
-- **Mobile/Tablet** (8 tests): Responsive layout validation at 375px and 768px viewports
+- **Mobile/Tablet** (11 tests): Responsive layout validation at 375px and 768px viewports, card border frame (single `::after` border, integer geometry)
 
 ## Testing Flow
 

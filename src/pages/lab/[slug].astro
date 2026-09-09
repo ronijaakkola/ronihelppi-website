@@ -86,7 +86,7 @@ const schemas = [
             would snap to the demo. The shell reserves the exact box up front, with the
             poster in it, and shares a transition name with the preview on the list page
             so the router morphs one into the other. */}
-        <div class="lab-shell" style={`aspect-ratio: ${meta.aspectRatio}`} transition:name={`lab-${slug}`} data-lab-shell>
+        <div class="lab-shell card-frame" style={`aspect-ratio: ${meta.aspectRatio}`} transition:name={`lab-${slug}`} data-lab-shell>
           <img class="lab-shell-poster" src={preview.poster} alt="" />
           <LabStage client:only="react" slug={slug} poster={preview.poster} />
         </div>
@@ -167,11 +167,10 @@ const schemas = [
     color: var(--color-text-secondary);
   }
 
+  /* Clipping and the hairline come from `.card-frame` (global.css): the border
+     is drawn on `::after`, above the stage, never on this clipping box. */
   .lab-shell {
-    position: relative;
     width: 100%;
-    overflow: hidden;
-    border: 0.5px solid var(--color-border);
     border-radius: var(--radius-md);
     background: #111;
   }

@@ -152,3 +152,20 @@ The Lab demos use DialKit for tuning. Rather than trusting its "hidden in produc
 1. Wrap any `client:only` island in a server-rendered shell that already has the final size (`aspect-ratio`) and a static stand-in (the poster) — the island fills it with `position: absolute; inset: 0`.
 2. Give the list preview and the shell the same `transition:name` so the router morphs one box into the other instead of a root crossfade.
 3. Hide the stand-in from state, not a timer: a `Mounted` sibling inside the same `Suspense` boundary as the lazy demo runs its effect only once the demo has committed, then the poster fades (opacity + blur, 250ms, none under `prefers-reduced-motion`).
+
+---
+
+## Never draw a card's border on the element that clips its media — use a `::after` overlay (`.card-frame`)
+
+The projects grid cards, Lab previews and the Lab demo stage had `border: 0.5px` + `border-radius` + `overflow: hidden` on ONE element with an image/video child. On iPhone (DPR 3, Safari and Arc alike — it is WebKit) the corner arcs looked hairline-thin next to the straight edges, and the Lab cards showed a second, offset line hugging the real border. Two earlier fixes (#109, #110) only widened individual article borders to `1px` on mobile and never touched the cards, so the bug kept coming back.
+
+**Root cause (measured with Playwright WebKit, `devices['iPhone 15 Pro']`, `deviceScaleFactor: 3`):**
+1. WebKit floors `0.5px` to exactly one device pixel (`getComputedStyle` reports `0.333333px`). That stroke is then painted on the same rounded box that clips the child. The clip edge is anti-aliased separately, so on the arcs the media's partial-coverage pixels land on the same device pixels as the stroke and blend over it — the corners fade while the straight edges (which have no clip coverage on top) keep their full pixel. That is the "thin corners".
+2. `aspect-ratio` boxes end up off the device grid (the Lab preview is `264.75px` tall at 393px). A one-device-pixel bottom border straddling a fractional row is split over two rows at partial alpha, and the media's clip edge lands on a different fraction — two faint lines a fraction of a pixel apart. That is the "doubled edge".
+
+**Fix:** `.card-frame` in `global.css`. The host only clips (`position: relative; overflow: hidden; border-radius`), and the hairline is drawn by `::after` (`position: absolute; inset: 0; border-radius: inherit; pointer-events: none`) which paints ABOVE the media, so the clip can never thin it. Hover colour moves to `.host:hover::after`. Below 960px the overlay border is `1px`, matching the rule the article boxes already follow, so a fractional edge cannot round it away. `tests/e2e/mobile.spec.ts` ("Card border frame") asserts each card's host paints no border, exactly the `::after` does, no descendant draws an edge, and the card sits on integer x/width.
+
+**Steps to avoid this:**
+1. New media card? Add `card-frame` to the clipping element and set the radius on it; do not write `border:` on it.
+2. Do not reach for `translateZ(0)`/`will-change`/thicker borders first — check `getComputedStyle().borderTopWidth` and `getBoundingClientRect()` at DPR 3 in WebKit; a `0.333333px` border on a clipping element with a fractional edge is the smoking gun.
+3. Remaining `0.5px` borders on non-clipping elements (`.toc-card`, `.prose-content img`, `.filter-chip`) are unaffected: they have no clipped child bleeding over the stroke.

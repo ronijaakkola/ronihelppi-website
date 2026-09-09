@@ -345,3 +345,65 @@ test.describe('Desktop - No Mobile Menu', () => {
     await expect(page.locator('.contact-button')).toBeVisible();
   });
 });
+
+// Media cards (projects grid, Lab previews, the Lab demo stage) share one border
+// strategy: the host clips the media (overflow: hidden + border-radius) and a
+// dedicated `::after` overlay draws the hairline ABOVE it. Drawing the border on
+// the clipping element itself let WebKit blend the media's anti-aliased clip
+// edge over the 1-device-pixel stroke on high-DPR phones, so corner arcs
+// vanished and fractional edges read as a doubled line.
+test.describe('Card border frame', () => {
+  const cards = [
+    { url: '/projects', selector: '.grid-item' },
+    { url: '/lab', selector: '.lab-preview' },
+    { url: '/lab/sliding-tabs', selector: '.lab-shell' },
+  ];
+
+  for (const { url, selector } of cards) {
+    test(`${selector} on ${url} draws exactly one border, on a non-clipping overlay`, async ({ page }) => {
+      await page.goto(url);
+      const card = page.locator(selector).first();
+      await expect(card).toBeVisible();
+
+      const frame = await card.evaluate((el) => {
+        const host = getComputedStyle(el);
+        const after = getComputedStyle(el, '::after');
+        const painted = (cs: CSSStyleDeclaration) =>
+          [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth].some((w) => parseFloat(w) > 0) ||
+          (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0) ||
+          cs.boxShadow.includes('inset');
+        const descendantsWithEdges = Array.from(el.querySelectorAll('*')).filter((child) =>
+          painted(getComputedStyle(child)),
+        ).length;
+        const rect = el.getBoundingClientRect();
+        return {
+          hostClips: host.overflow === 'hidden',
+          hostPainted: painted(host),
+          afterPosition: after.position,
+          afterBorderWidth: parseFloat(after.borderTopWidth),
+          afterRadius: after.borderTopLeftRadius,
+          hostRadius: host.borderTopLeftRadius,
+          afterPointerEvents: after.pointerEvents,
+          descendantsWithEdges,
+          x: rect.x,
+          width: rect.width,
+        };
+      });
+
+      // The host clips, the overlay draws — never both, and nothing inside draws an edge of its own.
+      expect(frame.hostClips).toBe(true);
+      expect(frame.hostPainted).toBe(false);
+      expect(frame.afterPosition).toBe('absolute');
+      expect(frame.afterPointerEvents).toBe('none');
+      expect(frame.afterRadius).toBe(frame.hostRadius);
+      expect(frame.descendantsWithEdges).toBe(0);
+      // Below 960px the hairline is a whole CSS pixel (3 device pixels on a 3× phone),
+      // the same rule the article boxes already follow, so a fractional edge cannot
+      // thin it away.
+      expect(frame.afterBorderWidth).toBe(1);
+      // The card sits on whole CSS pixels horizontally, so the vertical strokes land on the device grid.
+      expect(Number.isInteger(frame.x)).toBe(true);
+      expect(Number.isInteger(frame.width)).toBe(true);
+    });
+  }
+});
