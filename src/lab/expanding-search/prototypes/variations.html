@@ -1,12 +1,13 @@
 <!doctype html>
-<!-- PROTOTYPE — throwaway. Four variations of the expanding search, side by side.
-     Open this file directly in a browser. Nothing here ships; the shipped demo is
-     ../ExpandingSearch.tsx. Dimensions varied: expansion technique, loading style,
-     hover highlight, result entrance. -->
+<!-- PROTOTYPE — throwaway. Round two: four variations that all follow the confirmed
+     MOTION-BRIEF.md (320ms bottom-anchored height reveal, skeleton, shared highlight,
+     35ms stagger) and vary only what the brief left open: how the highlight moves,
+     when the search button arrives, whether the skeleton shimmers, whether the radius
+     morphs. Round one (technique comparison) is in git history. Nothing here ships. -->
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Expanding search — 4 variations</title>
+<title>Expanding search — round two</title>
 <style>
   :root { color-scheme: dark; }
   body { margin: 0; background: #0a0a0a; color: #f4f4f4; font: 14px/1.4 system-ui, -apple-system, sans-serif; padding: 24px; }
@@ -22,7 +23,7 @@
   .reset { position: absolute; top: 8px; right: 8px; background: none; border: 1px solid #333; color: #8e8e93; border-radius: 6px; font: inherit; font-size: 11px; padding: 2px 8px; cursor: pointer; }
 
   /* ---- shared card anatomy ---- */
-  .card { --dur: 420ms; --ease: cubic-bezier(0.32, 0.72, 0, 1); width: 320px; background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 22px; display: grid; grid-template-rows: 0fr auto; }
+  .card { --dur: 320ms; --ease: cubic-bezier(0.32, 0.72, 0, 1); width: 320px; background: #1c1c1e; border: 1px solid #2c2c2e; border-radius: 22px; display: grid; grid-template-rows: 0fr auto; }
   .card[data-state="idle"] { border-radius: 999px; }
   .body { min-height: 0; overflow: hidden; }
   .body-inner { padding: 8px 8px 4px; }
@@ -44,26 +45,19 @@
   .layer { transition: opacity 150ms ease; }
   .layer[hidden] { display: none; }
 
-  /* ---- A: grid-row height reveal, bottom-anchored ---- */
-  .vA .card { transition: grid-template-rows var(--dur) var(--ease), border-radius var(--dur) var(--ease); }
-  .vA .card:not([data-state="idle"]) { grid-template-rows: 1fr auto; }
-  /* ---- B: clip-path reveal ---- */
-  .vB .card { grid-template-rows: auto auto; clip-path: inset(calc(100% - 44px) 0 0 0 round 999px); transition: clip-path var(--dur) var(--ease); }
-  .vB .card:not([data-state="idle"]) { clip-path: inset(0 0 0 0 round 22px); }
-  .vB .body { visibility: hidden; } .vB .card:not([data-state="idle"]) .body { visibility: visible; }
-  /* ---- C: scaleY morph from the input ---- */
-  .vC .card { grid-template-rows: auto auto; transform-origin: 50% 100%; }
-  .vC .body-inner { transform-origin: 50% 100%; transform: scaleY(0); opacity: 0; transition: transform var(--dur) var(--ease), opacity 200ms ease; }
-  .vC .body { max-height: 0; transition: max-height var(--dur) var(--ease); }
-  .vC .card:not([data-state="idle"]) .body { max-height: 220px; }
-  .vC .card:not([data-state="idle"]) .body-inner { transform: none; opacity: 1; }
-  /* ---- D: height reveal with overshoot ---- */
-  .vD .card { --ease: cubic-bezier(0.34, 1.3, 0.64, 1); transition: grid-template-rows var(--dur) var(--ease), border-radius var(--dur) ease; }
-  .vD .card:not([data-state="idle"]) { grid-template-rows: 1fr auto; }
-
+  /* all four: grid-row height reveal, bottom-anchored */
+  .card { transition: grid-template-rows var(--dur) var(--ease), border-radius var(--dur) var(--ease); }
+  .card:not([data-state="idle"]) { grid-template-rows: 1fr auto; }
+  /* B: button arrives with the card, no delay; static skeleton */
+  .vB .card:not([data-state="idle"]) .go { transition-delay: 0s; }
+  .vB .sk i { animation: none; background: #2c2c2e; }
+  /* C: radius morphs pill → card while growing (default is constant) */
+  .vA .card, .vB .card, .vD .card { border-radius: 22px; }
+  .vA .card[data-state="idle"], .vB .card[data-state="idle"], .vD .card[data-state="idle"] { border-radius: 22px; }
   /* hover: shared highlight */
-  .hl { position: absolute; left: 0; width: 100%; border-radius: 12px; background: #2c2c2e; opacity: 0; pointer-events: none; transition: transform 220ms cubic-bezier(0.25, 1, 0.5, 1), height 220ms cubic-bezier(0.25, 1, 0.5, 1), opacity 150ms ease; top: 0; }
-  .hl.bouncy { transition-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1); }
+  .hl { position: absolute; left: 0; width: 100%; border-radius: 12px; background: #2c2c2e; opacity: 0; pointer-events: none; transition: opacity 100ms ease; top: 0; }
+  .hl.hard { transition: none; }
+  .hl.slide { transition: transform 120ms cubic-bezier(0.25, 1, 0.5, 1), height 120ms cubic-bezier(0.25, 1, 0.5, 1), opacity 100ms ease; }
   .hl.on { opacity: 1; }
   .row > * { position: relative; }
   /* hover: per-row */
@@ -79,7 +73,7 @@
 </style>
 </head>
 <body>
-<h1>Expanding search — four variations</h1>
+<h1>Expanding search — round two, four variations within the brief</h1>
 <p class="hint">Type anything and press Enter in each stage. Hover the results. Reset with the button in the corner.</p>
 <div class="grid" id="grid"></div>
 
@@ -104,29 +98,23 @@ const RESULTS = [
   ['About Roni', 'Page'],
 ];
 const VARIANTS = [
-  { key: 'A', name: 'Height reveal · skeleton · shared highlight · staggered', cls: 'vA', loading: 'skeleton', hover: 'shared', entrance: 'stagger',
-    notes: ['<b>Expansion:</b> <code>grid-template-rows 0fr→1fr</code>, bottom-anchored. Interruptible, no measuring, radius morphs pill→card.',
-            '<b>Skeleton</b> pre-draws the result shape so results feel like a fill-in, not a swap.',
-            '<b>Shared highlight</b> gives the list a single moving object to track; matches the sliding-tabs vocabulary.',
-            '<b>Stagger 35ms</b> reads as arrival without slowing the total past ~400ms.',
-            'Trade-off: most moving parts; needs a spring lib (or CSS top/height transitions) for the pill.'] },
-  { key: 'B', name: 'Clip-path reveal · spinner · per-row fade · at once', cls: 'vB', loading: 'spinner', hover: 'perrow fadeonly', entrance: 'atonce',
-    notes: ['<b>Clip-path</b> reveals a fully laid-out card: content never reflows, cheapest to composite.',
-            'But the card occupies its final box from the start, so it cannot shift siblings and the input must already sit at the bottom of the box.',
-            '<b>Spinner</b> is honest and small, but the 168px empty area feels vacant and the swap to results is abrupt.',
-            '<b>Per-row fade</b> is trivial CSS with no JS; loses the sense of one object moving.',
-            '<b>At once</b> is the fastest to results; lowest ceremony, least "designed".'] },
-  { key: 'C', name: 'ScaleY morph · skeleton · per-row scale-in · staggered', cls: 'vC', loading: 'skeleton', hover: 'perrow', entrance: 'stagger',
-    notes: ['<b>ScaleY from the input</b> gives a "growing out of" feel, but text squashes during the motion, which reads cheap at 4 rows.',
-            'Needs a paired max-height transition anyway, so it is not simpler than A.',
-            '<b>Per-row scale-in</b> (0.96→1) is a small, tasteful hover with zero JS.',
-            'Skeleton + stagger as in A.',
-            'Trade-off: the squash is the one thing people notice, and not in a good way.'] },
-  { key: 'D', name: 'Height reveal with overshoot · spinner→results · bouncy shared highlight · at once', cls: 'vD', loading: 'spinner', hover: 'shared bouncy', entrance: 'atonce',
-    notes: ['Same mechanics as A but with <b>bounce</b> on both the expansion and the highlight.',
-            'Reads playful on first view; the overshoot on the card edge makes the input appear to dip, which fights the "input stays put" goal.',
-            '<b>Spinner→results</b> crossfade at once is clean but the results pop in as a block.',
-            'Pick this if the site wanted personality; the rest of the site is quiet, so probably not.'] },
+  { key: 'A', name: 'The brief as written', cls: 'vA', hover: 'shared', notes: [
+      '<b>320ms</b> sheet curve, input pinned, constant 22px radius.',
+      '<b>Highlight jumps</b> to the row; only opacity animates, 100ms in and out.',
+      'Button fades/slides in from 40% of the growth. Skeleton shimmers.',
+      'Trade-off: the 100ms opacity fade is the one softening left; without it the highlight can flicker when skimming rows.'] },
+  { key: 'B', name: 'Hardest: no fades, button arrives with the card, static skeleton', cls: 'vB', hover: 'shared hard', notes: [
+      'Everything that could be instant is instant: highlight has <b>no opacity fade</b>, the button appears the moment the card starts growing, skeleton is flat grey.',
+      'Closest to Raycast. Very responsive, but the highlight flickers when the pointer crosses rows quickly, and a static skeleton reads as "stuck" after ~600ms.',
+      'Trade-off: cheapest and most honest, least crafted.'] },
+  { key: 'C', name: 'Radius morphs pill → card during growth', cls: 'vC', hover: 'shared', notes: [
+      'Same as A, but the card starts as a true pill (999px radius) and squares off to 22px as it grows.',
+      'Makes the "input becomes a card" idea explicit. Costs a border-radius transition (paint, not composite) and the corners look slightly rubbery mid-flight.',
+      'Trade-off: more storytelling, a little less crisp.'] },
+  { key: 'D', name: 'Control: 120ms slide instead of a jump', cls: 'vD', hover: 'shared slide', notes: [
+      'Identical to A except the highlight <b>slides</b> between rows in 120ms.',
+      'Kept as a control so the instant jump can be judged against the fastest slide that still reads as travel.',
+      'Trade-off: keeps the shared-object feel; loses a hair of snappiness.'] },
 ];
 
 function build(v) {
@@ -140,9 +128,7 @@ function build(v) {
   const loading = card.querySelector('.loading'), results = card.querySelector('.results');
   let token = 0, hl;
 
-  loading.innerHTML = v.loading === 'skeleton'
-    ? Array.from({length: 4}, () => '<div class="sk"><i></i><i></i></div>').join('')
-    : '<div class="spinner"><i></i></div>';
+  loading.innerHTML = Array.from({length: 4}, () => '<div class="sk"><i></i><i></i></div>').join('');
 
   function setState(s) { card.dataset.state = s; }
   async function search() {
@@ -151,19 +137,19 @@ function build(v) {
     const wasIdle = card.dataset.state === 'idle';
     setState('expanding');
     results.hidden = true; results.innerHTML = '';
-    if (wasIdle) await wait(v.cls === 'vB' || v.cls === 'vC' ? 200 : 260);
+    if (wasIdle) await wait(320);
     if (id !== token) return;
     setState('loading'); loading.hidden = false; loading.style.opacity = 1;
     await wait(900); if (id !== token) return;
     loading.style.opacity = 0; await wait(120); loading.hidden = true;
-    results.classList.remove('stagger', 'atonce'); results.classList.add(v.entrance);
+    results.classList.add('stagger');
     results.innerHTML = RESULTS.map(([t, s], i) => `<li class="row" style="--i:${i}" tabindex="0"><span class="t">${t} <span style="color:#8e8e93">· ${q}</span></span><span class="s">${s}</span></li>`).join('');
-    if (v.hover.includes('shared')) {
-      hl = document.createElement('div'); hl.className = 'hl' + (v.hover.includes('bouncy') ? ' bouncy' : '');
+    {
+      hl = document.createElement('div'); hl.className = 'hl' + (v.hover.includes('hard') ? ' hard' : '') + (v.hover.includes('slide') ? ' slide' : '');
       results.prepend(hl);
       results.addEventListener('pointerover', e => { const r = e.target.closest('.row'); if (!r) return; hl.style.transform = `translateY(${r.offsetTop}px)`; hl.style.height = r.offsetHeight + 'px'; hl.classList.add('on'); });
       results.addEventListener('pointerleave', () => hl.classList.remove('on'));
-    } else results.classList.add(...v.hover.split(' '));
+    }
     results.hidden = false; setState('results');
   }
   const wait = ms => new Promise(r => setTimeout(r, ms));

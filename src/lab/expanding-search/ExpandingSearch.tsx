@@ -7,6 +7,7 @@ import styles from './ExpandingSearch.module.css';
 export type LoadingStyle = 'skeleton' | 'spinner';
 export type HoverStyle = 'shared' | 'row';
 export type EntranceStyle = 'stagger' | 'once';
+export type HighlightMotion = 'instant' | 'slide';
 
 export interface ExpandingSearchProps {
   /** Seconds the card takes to grow. */
@@ -16,8 +17,10 @@ export interface ExpandingSearchProps {
   /** Seconds each result's entrance lasts, and the gap between rows. */
   resultDuration: number;
   stagger: number;
-  /** Spring for the shared highlight. */
-  highlight: { visualDuration: number; bounce: number };
+  /** How the shared highlight reaches the hovered row: a jump (brief) or a short tween. */
+  highlightMotion: HighlightMotion;
+  /** Seconds for the 'slide' variant's travel. */
+  highlightDuration: number;
   loading: LoadingStyle;
   hover: HoverStyle;
   entrance: EntranceStyle;
@@ -31,10 +34,11 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
 /**
  * A search input that turns into a results card. The card is pinned by its
  * bottom edge, so growing its body reveals the results *above* the input while
- * the input itself never moves. See MOTION-BRIEF.md for the decisions.
+ * the input itself never moves. See MOTION-BRIEF.md for the decisions (320ms
+ * sheet curve, skeleton, instant highlight, 35ms stagger).
  */
 export default function ExpandingSearch(props: ExpandingSearchProps) {
-  const { expandDuration, loadDelay, resultDuration, stagger, highlight, loading, hover, entrance } = props;
+  const { expandDuration, loadDelay, resultDuration, stagger, highlightMotion, highlightDuration, loading, hover, entrance } = props;
   const reduced = useReducedMotion() ?? false;
   const [state, dispatch] = useReducer(reduce, initialState);
   const [value, setValue] = useState('');
@@ -121,7 +125,8 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                   reduced={reduced}
                   duration={resultDuration}
                   stagger={stagger}
-                  highlight={highlight}
+                  highlightMotion={highlightMotion}
+                  highlightDuration={highlightDuration}
                 />
               )}
               {state.status === 'idle' && (
@@ -202,10 +207,11 @@ interface ResultsProps {
   reduced: boolean;
   duration: number;
   stagger: number;
-  highlight: { visualDuration: number; bounce: number };
+  highlightMotion: HighlightMotion;
+  highlightDuration: number;
 }
 
-function Results({ results, query, hover, entrance, reduced, duration, stagger, highlight }: ResultsProps) {
+function Results({ results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [rect, setRect] = useState<{ top: number; height: number } | null>(null);
@@ -265,10 +271,12 @@ function Results({ results, query, hover, entrance, reduced, duration, stagger, 
             aria-hidden="true"
             initial={{ opacity: 0, top: rect.top, height: rect.height }}
             animate={{ opacity: active === null ? 0 : 1, top: rect.top, height: rect.height }}
+            // Per the brief the highlight jumps: position changes instantly and
+            // only opacity eases, so skimming the list never shows it in transit.
             transition={
-              reduced
-                ? { duration: 0 }
-                : { type: 'spring', visualDuration: highlight.visualDuration, bounce: highlight.bounce, opacity: { duration: 0.15 } }
+              highlightMotion === 'slide' && !reduced
+                ? { duration: highlightDuration, ease: [0.25, 1, 0.5, 1], opacity: { duration: 0.1 } }
+                : { duration: 0, opacity: { duration: 0.1 } }
             }
             style={{ zIndex: -1 }}
           />
