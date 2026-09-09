@@ -8,7 +8,8 @@
 // that long instead of clicking (e.g. "Press me@0.6~0.25"), so whileTap-style
 // press animations have time to play. Two prefixes cover other input:
 // "type:<text>@<s>" fills the stage's search box with <text> and presses Enter,
-// "hover:<text>@<s>" moves the pointer onto the first button containing <text>.
+// "hover:<text>@<s>" moves the pointer onto the first button containing <text>,
+// "key:<Key>@<s>" presses a key (Playwright names, e.g. ArrowDown, Enter).
 // The page's requestAnimationFrame and performance.now are replaced with a
 // manual clock, so Motion advances exactly one frame per screenshot no matter
 // how slow the capture is. Pass --timers to also drive setTimeout from that
@@ -134,6 +135,10 @@ for (let i = 0; i < total; i++) {
       const input = stage.getByRole('searchbox').first();
       await input.fill(step.text.slice(5));
       await input.press('Enter');
+      continue;
+    }
+    if (step.text.startsWith('key:')) {
+      await page.keyboard.press(step.text.slice(4));
       continue;
     }
     if (step.text.startsWith('hover:')) {

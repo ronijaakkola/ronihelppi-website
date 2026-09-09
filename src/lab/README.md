@@ -20,7 +20,8 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
    `npm run lab:record -- <slug> "Balances@0.5,Billing@1.3" --duration 4`
    Steps are `<button text>@<seconds>`; add `~<seconds>` to hold a press
    (`"Press me@0.5~0.3"`), `type:<text>@<s>` to fill the stage's search box
-   and press Enter, `hover:<text>@<s>` to hover a button. Demos that fake
+   and press Enter, `hover:<text>@<s>` to hover a button, `key:<Key>@<s>` to
+   press a key (e.g. `key:ArrowDown`). Demos that fake
    latency with `setTimeout` need `--timers` so the timer runs on the virtual
    clock too. The recorder steps a virtual clock at 60fps and
    screenshots the stage at 2x, so the clip is smooth regardless of machine
