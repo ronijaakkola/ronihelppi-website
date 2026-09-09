@@ -73,14 +73,26 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
     e?.preventDefault();
     dispatch({ type: 'submit', query: value });
   };
+  // Choosing a result ends the search: back to an empty, focused input.
   const reset = () => {
     dispatch({ type: 'reset' });
     setValue('');
     inputRef.current?.focus();
   };
+  // Escape backs out but keeps the term, selected, so it can be typed over.
+  const escape = () => {
+    dispatch({ type: 'reset' });
+    const input = inputRef.current;
+    input?.focus();
+    input?.select();
+  };
   const listRef = useRef<HTMLUListElement>(null);
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') reset();
+    if (e.key === 'Escape') {
+      // Browsers clear a type="search" input on Escape; keep the term instead.
+      e.preventDefault();
+      escape();
+    }
     // Down from the input walks into the results, like a combobox.
     if (e.key === 'ArrowDown' && state.status === 'results') {
       e.preventDefault();
@@ -151,7 +163,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                 <Results
                   key={`results-${state.request}`}
                   listRef={listRef}
-                  onEscape={reset}
+                  onEscape={escape}
                   onSelect={reset}
                   onLeaveUp={() => inputRef.current?.focus()}
                   results={state.results}

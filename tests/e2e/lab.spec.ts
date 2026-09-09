@@ -294,6 +294,28 @@ test.describe('Lab: expanding search', () => {
     await page.waitForTimeout(1500);
     await expect(card(page)).toHaveAttribute('data-state', 'idle');
     await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
+    // The term survives Escape and is selected, ready to be typed over.
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('tabs');
+    expect(await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 4]);
+  });
+
+  test('Escape from a focused result keeps and selects the term', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('berry');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await input.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Escape');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('berry');
+    expect(await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 5]);
+    // Typing replaces the whole term.
+    await page.keyboard.type('pe');
+    await expect(input).toHaveValue('pe');
   });
 
   test('selecting a result by click or Enter collapses the card and clears the input', async ({ page }) => {
