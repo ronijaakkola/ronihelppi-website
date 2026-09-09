@@ -48,7 +48,11 @@ const schemas = [
                     style={`--cascade-delay: ${Math.max(index - 1, 0) * 60}ms`}
                   >
                     <a href={`/lab/${entry.slug}`} class="lab-card">
-                      <div class="lab-preview" style={`aspect-ratio: ${entry.meta.aspectRatio}`}>
+                      <div
+                        class="lab-preview"
+                        style={`aspect-ratio: ${entry.meta.aspectRatio}`}
+                        transition:name={`lab-${entry.slug}`}
+                      >
                         <video
                           class="lab-video"
                           src={preview.video}

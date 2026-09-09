@@ -80,3 +80,46 @@ test.describe('Lab', () => {
     expect(scripts.some((s) => /dialkit:|dialkit-panel|DialRoot/.test(s))).toBe(false);
   });
 });
+
+test.describe('Lab preview to demo handoff', () => {
+  for (const viewport of [
+    { name: 'mobile', width: 375, height: 667 },
+    { name: 'desktop', width: 1280, height: 800 },
+  ]) {
+    test(`${viewport.name}: the stage box is server-rendered and the poster only leaves once the demo is mounted`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto('/lab');
+      const card = page.locator('.lab-card').first();
+      const href = (await card.getAttribute('href'))!;
+      const slug = href.split('/').pop()!;
+
+      // The preview and the demo stage share a view-transition name so the router morphs one into the other.
+      await expect(card.locator('.lab-preview')).toHaveCSS('view-transition-name', `lab-${slug}`);
+
+      // Before any JavaScript runs, the demo page already reserves the stage box with the poster in it.
+      const html = await (await page.request.get(href)).text();
+      expect(html).toMatch(/<div[^>]*style="aspect-ratio: [^"]+"[^>]*data-lab-shell/);
+      expect(html).toContain(`src="/lab/${slug}/poster.webp"`);
+
+      await card.click();
+      await expect(page).toHaveURL(new RegExp(`${href}/?$`));
+      const shell = page.locator('[data-lab-shell]');
+      await expect(shell).toHaveCSS('view-transition-name', `lab-${slug}`);
+
+      // The preview video is gone and the demo has taken over; the poster fades out only after the demo mounts.
+      await expect(page.locator('video')).toHaveCount(0);
+      const poster = page.locator('[data-lab-stage] img[data-lab-poster]');
+      await expect(poster).toHaveAttribute('data-ready', 'true');
+      await expect(page.locator('[data-lab-stage] button').first()).toBeVisible();
+
+      // The React stage fills exactly the box the server reserved (inside the shell's border),
+      // so nothing jumps when it hydrates.
+      const shellInner = await shell.evaluate((el) => ({ width: el.clientWidth, height: el.clientHeight }));
+      const stageBox = (await page.locator('[data-lab-stage]').boundingBox())!;
+      expect(Math.abs(shellInner.width - stageBox.width)).toBeLessThan(1);
+      expect(Math.abs(shellInner.height - stageBox.height)).toBeLessThan(1);
+    });
+  }
+});

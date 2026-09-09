@@ -1,12 +1,10 @@
 /* The stage is the one place site styles meet demo styles. Reset the inherited
    text properties so a demo looks the same as it did standalone; demos opt in
-   to site tokens explicitly if they want to match the theme. */
+   to site tokens explicitly if they want to match the theme. The border, radius
+   and clipping live on the shell around it (see pages/lab/[slug].astro). */
 .stage {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border: 0.5px solid var(--color-border);
-  border-radius: var(--radius-md);
+  position: absolute;
+  inset: 0;
   background: #111;
   color: #f4f4f4;
   font: 16px/1.4 system-ui, -apple-system, sans-serif;
@@ -14,10 +12,25 @@
   isolation: isolate;
 }
 
+/* Sits over the demo until it has mounted, then dissolves into it. */
 .poster {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  pointer-events: none;
+  transition: opacity 250ms ease-out, filter 250ms ease-out, visibility 0s 250ms;
+}
+
+.poster[data-ready='true'] {
+  opacity: 0;
+  filter: blur(6px);
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster {
+    transition: none;
+  }
 }
