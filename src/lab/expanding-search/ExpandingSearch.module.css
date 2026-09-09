@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+/* Everything is in em so the card scales with the stage: at 750px the base is
+   14px, on a 375px stage it is 9px and the open card still fits above the input. */
+.search {
+  position: absolute;
+  inset: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: clamp(9px, 2.4cqw, 14px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #f4f4f4;
+}
+
+/* The card is pinned by its bottom edge, so it can only grow upward and the
+   input never moves. 26% up leaves room for four rows on a 4:3 stage. */
+.card {
+  position: absolute;
+  left: 50%;
+  bottom: 26%;
+  transform: translateX(-50%);
+  width: min(23em, 88%);
+  background: #1c1c1e;
+  border: 1px solid #2c2c2e;
+  border-radius: 1.55em;
+  box-shadow: 0 1.2em 3em -1.2em rgba(0, 0, 0, 0.7);
+}
+
+.body {
+  overflow: hidden;
+}
+
+.bodyInner {
+  display: grid;
+  padding: 0.55em 0.55em 0.25em;
+}
+/* Skeleton and results stack in the same cell so the crossfade never reflows. */
+.bodyInner > * {
+  grid-area: 1 / 1;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.45em;
+  margin: 0;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 2.4em;
+  padding: 0 0.95em;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  outline: none;
+}
+.input::placeholder {
+  color: #8e8e93;
+}
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+.card:has(.input:focus-visible) {
+  /* Typing is the normal state here, so the ring is a brighter border rather
+     than a halo around the whole card. */
+  border-color: #8e8e93;
+}
+
+.go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.4em;
+  height: 2.4em;
+  border: 0;
+  border-radius: 999px;
+  background: #f4f4f4;
+  color: #111;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.go svg {
+  width: 1em;
+  height: 1em;
+}
+.go:focus-visible {
+  outline: 2px solid #f4f4f4;
+  outline-offset: 2px;
+}
+
+.list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  margin: 0;
+}
+
+.rowButton {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15em;
+  width: 100%;
+  padding: 0.55em 0.85em;
+  border: 0;
+  border-radius: 0.85em;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rowButton:focus-visible {
+  outline: 2px solid #f4f4f4;
+  outline-offset: -2px;
+}
+.title {
+  font-weight: 500;
+}
+.query {
+  color: #8e8e93;
+  font-weight: 400;
+}
+.meta {
+  color: #8e8e93;
+  font-size: 0.9em;
+}
+
+/* Shared highlight: one element that springs between rows. */
+.highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  border-radius: 0.85em;
+  background: #2c2c2e;
+  pointer-events: none;
+}
+
+/* Per-row variant: each row paints its own background instead. */
+.rowBackground {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.85em;
+  background: #2c2c2e;
+  pointer-events: none;
+}
+
+.skeleton {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.skeletonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.75em 0.85em;
+}
+.bone {
+  height: 0.7em;
+  border-radius: 0.35em;
+  background: linear-gradient(90deg, #2c2c2e 0%, #3a3a3c 50%, #2c2c2e 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.bone:first-child {
+  width: 72%;
+}
+.bone:last-child {
+  width: 45%;
+  height: 0.6em;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.spinnerWrap {
+  display: grid;
+  place-items: center;
+  /* Same height as four result rows so the card does not resize on swap. */
+  min-height: 12em;
+}
+.spinner {
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 50%;
+  border: 2px solid #3a3a3c;
+  border-top-color: #f4f4f4;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bone {
+    animation: none;
+    background: #2c2c2e;
+  }
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

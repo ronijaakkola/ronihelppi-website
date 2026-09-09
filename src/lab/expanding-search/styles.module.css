@@ -1,0 +1,5 @@
+.root {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+}
