@@ -141,3 +141,14 @@ With Astro 7, `npm run preview` forks a background daemon and the foreground pro
 ## Dev-only libraries: alias them to a stub during `astro build`
 
 The Lab demos use DialKit for tuning. Rather than trusting its "hidden in production" flag (which still ships the library), `astro.config.mjs` adds a Vite `resolve.alias` only when `process.argv.includes('build')`, mapping `dialkit` to `src/lab/dialkit-stub.ts` and its stylesheet to an empty CSS file. Demo code imports `dialkit` unchanged. `tests/build/output.test.ts` greps `dist/_astro/*.js` for DialKit markers so a broken alias fails CI.
+
+---
+
+## `client:only` islands ship a zero-height hole — reserve the box server-side
+
+`LabStage` is `client:only="react"`, so the demo page's HTML had no stage at all. Navigating from the Lab list (looping `<video>` previews) the View Transition crossfaded into a page with an empty slot, the stage then popped in on hydration (layout shift, the content below jumped up and back down), the Suspense poster appeared, and finally the demo replaced the poster — three separate snaps that read as "the video is still playing, then the demo snaps in", worst on mobile where the widths differ.
+
+**Steps to avoid this:**
+1. Wrap any `client:only` island in a server-rendered shell that already has the final size (`aspect-ratio`) and a static stand-in (the poster) — the island fills it with `position: absolute; inset: 0`.
+2. Give the list preview and the shell the same `transition:name` so the router morphs one box into the other instead of a root crossfade.
+3. Hide the stand-in from state, not a timer: a `Mounted` sibling inside the same `Suspense` boundary as the lazy demo runs its effect only once the demo has committed, then the poster fades (opacity + blur, 250ms, none under `prefers-reduced-motion`).

@@ -9,7 +9,7 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
      optional `description` (shown under the demo), `tags`, `aspectRatio` like `"16 / 9"`, `requiresPointer`,
      `post`). See `schema.ts`. The folder name is the slug.
    - `index.tsx` — default-exports the demo component. It renders inside
-     `LabStage`, a `position: relative; overflow: hidden` box with a reset font
+     `LabStage`, a `position: absolute; inset: 0` box (clipped by its shell) with a reset font
      and colour; position your content absolutely or fill it with a grid.
    - `styles.module.css` — CSS Modules keep each demo's styles to itself.
 2. Render the preview. Build and start the preview server

@@ -72,7 +72,16 @@ const schemas = [
           <p class="lab-note">Requires a pointer device</p>
         )}
 
-        <LabStage client:only="react" slug={slug} aspectRatio={meta.aspectRatio} poster={preview.poster} />
+        {/* The stage is a client-only island, so without this shell the page would
+            ship a zero-height hole where the demo goes: the view transition would land
+            on a page with no stage, the box would pop in on hydration and then the poster
+            would snap to the demo. The shell reserves the exact box up front, with the
+            poster in it, and shares a transition name with the preview on the list page
+            so the router morphs one into the other. */}
+        <div class="lab-shell" style={`aspect-ratio: ${meta.aspectRatio}`} transition:name={`lab-${slug}`} data-lab-shell>
+          <img class="lab-shell-poster" src={preview.poster} alt="" />
+          <LabStage client:only="react" slug={slug} poster={preview.poster} />
+        </div>
 
         {(meta.description || meta.post) && (
           <div class="lab-body">
@@ -143,6 +152,23 @@ const schemas = [
     font-size: var(--text-small);
     letter-spacing: var(--tracking-body-tight);
     color: var(--color-text-secondary);
+  }
+
+  .lab-shell {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: #111;
+  }
+
+  .lab-shell-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .lab-body {
