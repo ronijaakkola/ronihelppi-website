@@ -47,6 +47,8 @@ npm run check
 │   ├── lab/
 │   │   ├── schema.test.ts                    # Lab metadata schema tests
 │   │   ├── index.test.ts                     # Lab registry (slug, sort, published) tests
+│   │   ├── expanding-search/machine.test.ts  # Search state machine (idle → expanding → loading → results)
+│   │   ├── expanding-search/mockSearch.test.ts # Fake result ranking
 │   │   └── dialkit-stub.test.ts              # Production DialKit stub tests
 │   ├── utils/
 │   │   ├── remark-obsidian-images.test.ts    # Remark plugin tests
@@ -64,7 +66,7 @@ npm run check
         ├── writing.spec.ts                    # Writing pages E2E tests
         ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
         ├── projects.spec.ts                   # Project pages E2E tests
-        ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, DialKit absence
+        ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, DialKit absence, expanding search demo
         ├── 404.spec.ts                       # Error page tests
         ├── accessibility.spec.ts             # Accessibility tests (axe-core)
         └── mobile.spec.ts                    # Mobile/tablet viewport tests

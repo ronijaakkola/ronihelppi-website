@@ -152,3 +152,17 @@ The Lab demos use DialKit for tuning. Rather than trusting its "hidden in produc
 1. Wrap any `client:only` island in a server-rendered shell that already has the final size (`aspect-ratio`) and a static stand-in (the poster) — the island fills it with `position: absolute; inset: 0`.
 2. Give the list preview and the shell the same `transition:name` so the router morphs one box into the other instead of a root crossfade.
 3. Hide the stand-in from state, not a timer: a `Mounted` sibling inside the same `Suspense` boundary as the lazy demo runs its effect only once the demo has committed, then the poster fades (opacity + blur, 250ms, none under `prefers-reduced-motion`).
+
+---
+
+## The Lab recorder only sees rAF time — CSS transitions and `setTimeout` run on the wall clock
+
+`scripts/lab-record.mjs` drives Motion by mocking `requestAnimationFrame` and `performance.now`, then screenshots one frame per virtual tick. Anything not on that clock is captured wrong: a CSS `transition` finishes in a couple of frames because each screenshot takes ~50ms of real time, and a `setTimeout`-based fake fetch fires at the wrong virtual moment. The expanding-search demo therefore animates with `motion/react` rather than CSS transitions, and the recorder gained `--timers` (virtual `setTimeout`, installed after hydration so it cannot stall loading) plus `type:`/`hover:` steps for demos that need more than button clicks.
+
+**Also:** the recorder's "demo has mounted" check used to wait for the poster `<img>` to be removed; since the stage shell change (#121) the poster stays in the DOM with `data-ready`, so the old check timed out after 30s. It now waits for `[data-lab-poster][data-ready="true"]`. If `lab:record` hangs on `waitForFunction`, suspect a stale readiness check before suspecting the demo.
+
+---
+
+## Generic Lab E2E checks must not assume a demo renders a `<button>`
+
+`accessibility.spec.ts` and the preview→demo handoff test used "a `button` is visible inside the stage" as the proxy for "the demo has mounted". The expanding-search demo is input-only in its idle state, so those tests timed out on the newest demo. The selectors now also accept `input`; when adding a demo whose first paint is something else (canvas-only, an `<a>`, plain text), extend that selector list rather than adding a decoy button.
