@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
 /* Everything is in em so the card scales with the stage: at 750px the base is
    14px, on a 375px stage it is 9px and the open card still fits below the input. */
@@ -129,19 +129,18 @@
   outline: 2px solid #f4f4f4;
   outline-offset: -2px;
 }
-/* When a name contains the query, the rest of the name steps back to a light
-   grey and the matched letters stay white and heavier, so the hit is read at
-   a glance. A name with no hit is plain white. */
+/* Every name is plain white; the matched letters carry a highlighter mark
+   behind them, so a hit is emphasis added, never emphasis taken from the rest. */
 .title {
   font-weight: 500;
 }
-.title:has(.hit) {
-  color: #a1a1a6;
-  font-weight: 400;
-}
 .hit {
-  color: #f4f4f4;
-  font-weight: 600;
+  padding: 0.05em 0.12em;
+  margin: -0.05em -0.12em;
+  border-radius: 0.25em;
+  background: rgba(244, 244, 244, 0.18);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 .meta {
   color: #8e8e93;
