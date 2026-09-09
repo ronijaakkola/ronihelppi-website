@@ -31,3 +31,5 @@ details this brief leaves open.
 **Keyboard:** ArrowDown from the input enters the list; ArrowUp/ArrowDown, Home and End move within it with a roving tabindex so Tab leaves the list; ArrowUp on the first row returns to the input; Escape anywhere collapses and refocuses the input. Choosing a result (click, or Enter on a focused row) does the same: the search is over, so the card collapses, the field clears and takes focus again. The highlight follows focus.
 
 **Open risk:** at 320ms the growth may be too quick to register as "growing out of" on a large stage. DialKit exposes the duration; compare against 380ms live before locking it.
+
+**Data (decided 2026-09-09):** fruit with kcal per 100 g, placeholder "Search fruit…". Any query returns four rows so the card height never changes; the matched letters in a name are set at weight 500 against a 400 title, and a row without a hit shows a plain name. Places-and-weather was considered and dropped because viewers could not guess what to type.

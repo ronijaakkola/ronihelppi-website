@@ -130,11 +130,10 @@
   outline-offset: -2px;
 }
 .title {
-  font-weight: 500;
-}
-.query {
-  color: #8e8e93;
   font-weight: 400;
+}
+.hit {
+  font-weight: 500;
 }
 .meta {
   color: #8e8e93;
@@ -181,7 +180,7 @@
   display: flex;
   align-items: center;
   height: 1.4em; /* title line: 1em × 1.4 line-height */
-  width: 72%;
+  width: 38%;
 }
 .bone:last-child {
   height: calc(0.9em * 1.4); /* meta line */

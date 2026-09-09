@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from 'react';
 import { AnimatePresence, motion, useReducedMotion, type Transition } from 'motion/react';
 import { initialState, reduce, type SearchResult } from './machine';
-import { rankResults } from './mockSearch';
+import { matchRange, rankResults } from './mockSearch';
 import styles from './ExpandingSearch.module.css';
 
 export type LoadingStyle = 'skeleton' | 'spinner';
@@ -101,7 +101,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             ref={inputRef}
             className={styles.input}
             type="search"
-            placeholder="Search…"
+            placeholder="Search fruit…"
             aria-label="Search"
             autoComplete="off"
             spellCheck={false}
@@ -316,7 +316,7 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
               }}
             >
               <span className={styles.title}>
-                {r.title} <span className={styles.query}>· {query}</span>
+                <Highlighted title={r.title} query={query} />
               </span>
               <span className={styles.meta}>{r.meta}</span>
             </button>
@@ -341,5 +341,20 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
         )}
       </ul>
     </motion.div>
+  );
+}
+
+// The matched letters are set heavier than the rest of the name, which is all
+// the explanation the ranking needs; a row with no hit shows a plain name.
+function Highlighted({ title, query }: { title: string; query: string }) {
+  const range = matchRange(title, query);
+  if (!range) return <>{title}</>;
+  const [start, end] = range;
+  return (
+    <>
+      {title.slice(0, start)}
+      <span className={styles.hit}>{title.slice(start, end)}</span>
+      {title.slice(end)}
+    </>
   );
 }

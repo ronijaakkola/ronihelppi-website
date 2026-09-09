@@ -157,7 +157,7 @@ test.describe('Lab: expanding search', () => {
       });
     });
 
-    await input.fill('tabs');
+    await input.fill('berry');
     await input.press('Enter');
 
     await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
@@ -165,7 +165,10 @@ test.describe('Lab: expanding search', () => {
 
     const rows = stage(page).locator('[data-search-results] li');
     await expect(rows).toHaveCount(4);
-    await expect(rows.first()).toContainText('Sliding tabs');
+    await expect(rows.first()).toContainText('Strawberry');
+    // The matched letters are emphasised inside the name.
+    await expect(rows.first().locator('span[class*="hit"]')).toHaveText('berry');
+    await expect(rows.last().locator('span[class*="hit"]')).toHaveCount(0);
     await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toBeVisible();
     // The input is the anchor: it has not moved while the card grew below it.
     const box = await input.boundingBox();
@@ -189,7 +192,7 @@ test.describe('Lab: expanding search', () => {
   test('hovering a result moves the shared highlight behind that row', async ({ page }) => {
     await page.goto('/lab/expanding-search');
     const input = stage(page).getByRole('searchbox');
-    await input.fill('about');
+    await input.fill('pe');
     await input.press('Enter');
     await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
     const rows = stage(page).locator('[data-search-results] li');
