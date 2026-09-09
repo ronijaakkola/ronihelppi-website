@@ -65,6 +65,16 @@ test.describe('Lab', () => {
     }
   });
 
+  test('demo page renders the markdown write-up as prose', async ({ page }) => {
+    await page.goto('/lab/sliding-tabs');
+    const writeup = page.locator('.lab-writeup.prose-content');
+    await expect(writeup).toBeVisible();
+    await expect(writeup.locator('p').first()).toBeVisible();
+    // Markdown was processed, not dumped raw: inline code is an element.
+    await expect(writeup.locator('code').first()).toBeVisible();
+    await expect(writeup).not.toContainText('`');
+  });
+
   test('ships no DialKit in production', async ({ page }) => {
     await page.goto('/lab');
     const href = await page.locator('.lab-card').first().getAttribute('href');
