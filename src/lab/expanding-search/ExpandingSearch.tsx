@@ -33,7 +33,7 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
 
 /**
  * A search input that turns into a results card. The card is pinned by its
- * bottom edge, so growing its body reveals the results *above* the input while
+ * top edge, so growing its body reveals the results *below* the input while
  * the input itself never moves. See MOTION-BRIEF.md for the decisions (320ms
  * sheet curve, skeleton, instant highlight, 35ms stagger).
  */
@@ -94,6 +94,41 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
   return (
     <div className={styles.search}>
       <div className={styles.card} data-search-card data-state={state.status}>
+        <form className={styles.bar} role="search" onSubmit={submit}>
+          <input
+            ref={inputRef}
+            className={styles.input}
+            type="search"
+            placeholder="Search…"
+            aria-label="Search"
+            autoComplete="off"
+            spellCheck={false}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          <AnimatePresence initial={false}>
+            {open && (
+              <motion.button
+                type="submit"
+                className={styles.go}
+                aria-label="Search"
+                initial={{ opacity: 0, x: reduced ? 0 : 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: reduced ? 0 : 8, transition: { duration: 0.15 } }}
+                // Arrives once the card is well on its way up, so it reads as
+                // part of the reveal rather than a separate pop.
+                transition={reduced ? { duration: 0.15 } : { duration: 0.26, ease: SHEET, delay: expandDuration * 0.4 }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </form>
+
         <motion.div
           className={styles.body}
           data-search-body
@@ -151,40 +186,6 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
           </div>
         </motion.div>
 
-        <form className={styles.bar} role="search" onSubmit={submit}>
-          <input
-            ref={inputRef}
-            className={styles.input}
-            type="search"
-            placeholder="Search…"
-            aria-label="Search"
-            autoComplete="off"
-            spellCheck={false}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={onKeyDown}
-          />
-          <AnimatePresence initial={false}>
-            {open && (
-              <motion.button
-                type="submit"
-                className={styles.go}
-                aria-label="Search"
-                initial={{ opacity: 0, x: reduced ? 0 : 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: reduced ? 0 : 8, transition: { duration: 0.15 } }}
-                // Arrives once the card is well on its way up, so it reads as
-                // part of the reveal rather than a separate pop.
-                transition={reduced ? { duration: 0.15 } : { duration: 0.26, ease: SHEET, delay: expandDuration * 0.4 }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </form>
       </div>
     </div>
   );

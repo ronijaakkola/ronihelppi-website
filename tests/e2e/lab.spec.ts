@@ -166,12 +166,12 @@ test.describe('Lab: expanding search', () => {
     await expect(rows).toHaveCount(4);
     await expect(rows.first()).toContainText('Sliding tabs');
     await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toBeVisible();
-    // The input is the anchor: it has not moved while the card grew above it.
+    // The input is the anchor: it has not moved while the card grew below it.
     const box = await input.boundingBox();
     expect(box!.y).toBeGreaterThan(0);
   });
 
-  test('the input stays put while the card grows above it', async ({ page }) => {
+  test('the input stays put while the card grows below it', async ({ page }) => {
     await page.goto('/lab/expanding-search');
     const input = stage(page).getByRole('searchbox');
     const before = (await input.boundingBox())!;
@@ -181,7 +181,8 @@ test.describe('Lab: expanding search', () => {
     const after = (await input.boundingBox())!;
     expect(Math.abs(after.y - before.y)).toBeLessThan(2);
     const cardBox = (await card(page).boundingBox())!;
-    expect(cardBox.y).toBeLessThan(before.y - 50);
+    expect(cardBox.y + cardBox.height).toBeGreaterThan(before.y + before.height + 50);
+    expect(Math.abs(cardBox.y - before.y)).toBeLessThan(20);
   });
 
   test('hovering a result moves the shared highlight behind that row', async ({ page }) => {
