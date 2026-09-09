@@ -88,8 +88,10 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
     }
   };
 
-  const grow: Transition = reduced ? { duration: 0 } : { duration: expandDuration, ease: SHEET };
-  const fade: Transition = { duration: reduced ? 0.15 : 0.15, ease: 'linear' };
+  // Exits are shorter than entries: the user has already decided, so the
+  // collapse gets out of the way at three quarters of the growth time.
+  const grow: Transition = reduced ? { duration: 0 } : { duration: open ? expandDuration : expandDuration * 0.75, ease: SHEET };
+  const fade: Transition = { duration: 0.15, ease: 'linear' };
 
   return (
     <div className={styles.search}>
@@ -242,7 +244,8 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
     row?.focus();
   };
   const onListKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
-    const i = active ?? tabStop;
+    // Start from the focused row (tabStop), never from where the pointer rests.
+    const i = tabStop;
     const last = results.length - 1;
     switch (e.key) {
       case 'ArrowDown':
@@ -290,7 +293,10 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
         ref={listRef}
         data-search-results
         onKeyDown={onListKeyDown}
-        onPointerLeave={() => setActive(null)}
+        onPointerLeave={(e) => {
+          // Leaving with the pointer only clears the highlight if no row holds focus.
+          if (!e.currentTarget.contains(document.activeElement)) setActive(null);
+        }}
         onBlur={(e) => {
           if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null);
         }}

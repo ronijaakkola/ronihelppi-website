@@ -254,6 +254,22 @@ test.describe('Lab: expanding search', () => {
     await expect(rows.nth(0)).toBeFocused();
     await page.keyboard.press('ArrowUp');
     await expect(input).toBeFocused();
+    // Keyboard navigation starts from the focused row, not from whatever the pointer happens to rest on,
+    // and moving the pointer off the list does not hide the highlight from a focused row.
+    await input.press('ArrowDown');
+    await expect(rows.nth(0)).toBeFocused();
+    await rows.nth(3).hover();
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.nth(1)).toBeFocused();
+    await page.mouse.move(5, 5);
+    await expect.poll(async () => {
+      const r = (await rows.nth(1).boundingBox())!;
+      const h = (await highlight.boundingBox())!;
+      return Math.abs(r.y - h.y) < 2 && (await highlight.evaluate((el) => getComputedStyle(el).opacity)) === '1';
+    }).toBe(true);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toBeFocused();
     // Only one row is in the tab order, so Tab leaves the list instead of walking it.
     expect(await rows.evaluateAll((els) => els.filter((el) => el.tabIndex === 0).length)).toBe(1);
     // Escape from a focused row collapses the card and returns focus to the input.

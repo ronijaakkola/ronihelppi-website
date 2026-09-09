@@ -21,7 +21,7 @@ details this brief leaves open.
 **Easing:** `cubic-bezier(0.32, 0.72, 0, 1)` · **Duration:** 320ms. Reference: Raycast / Linear, crisp, no bounce.
 **expanding → loading:** fires when the height animation completes. Skeleton fades in over 150ms, no stagger.
 **loading → results:** skeleton fades out 120ms; rows fade and rise 6px → 0 over 260ms with a 35ms stagger, `cubic-bezier(0.19, 1, 0.22, 1)`.
-**Exit:** mirrors enter, body content fades first, then the height collapses at the same 320ms.
+**Exit:** mirrors enter; body content fades (100ms) while the height collapses at 75% of the growth time (240ms), since exits should be shorter than entries.
 **Origin:** top edge of the card; the input is the fixed point.
 **Hover:** one shared highlight element that **jumps** to the hovered row with no travel. Only its opacity animates, ~100ms in and out. Keyboard focus moves it the same way.
 **Interrupt:** retarget, never restart. A re-search mid-flight keeps the current height and restarts loading in place; Escape collapses from wherever the card is. Responses carry a request id and stale ones are dropped.
