@@ -32,4 +32,4 @@ details this brief leaves open.
 
 **Open risk:** at 320ms the growth may be too quick to register as "growing out of" on a large stage. DialKit exposes the duration; compare against 380ms live before locking it.
 
-**Data (decided 2026-09-09):** fruit with kcal per 100 g, placeholder "Search fruit…". Any query returns four rows so the card height never changes; the matched letters in a name are set at weight 500 against a 400 title, and a row without a hit shows a plain name. Places-and-weather was considered and dropped because viewers could not guess what to type.
+**Data (decided 2026-09-09):** fruit with kcal per 100 g, placeholder "Search fruit…". Any query returns four rows so the card height never changes; the matched letters in a name are underlined (a heavier weight and a highlighter mark were tried; dimming the rest of the name made unmatched names look like the hits), and a row without a hit shows a plain name. Places-and-weather was considered and dropped because viewers could not guess what to type.

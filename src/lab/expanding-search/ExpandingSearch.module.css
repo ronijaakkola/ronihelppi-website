@@ -129,18 +129,16 @@
   outline: 2px solid #f4f4f4;
   outline-offset: -2px;
 }
-/* Every name is plain white; the matched letters carry a highlighter mark
-   behind them, so a hit is emphasis added, never emphasis taken from the rest. */
+/* Every name is plain white; the matched letters are underlined, so a hit is
+   emphasis added, never emphasis taken from the rest. */
 .title {
   font-weight: 500;
 }
 .hit {
-  padding: 0.05em 0.12em;
-  margin: -0.05em -0.12em;
-  border-radius: 0.25em;
-  background: rgba(244, 244, 244, 0.18);
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  text-decoration: underline;
+  text-decoration-thickness: 0.09em;
+  text-decoration-color: #8e8e93;
+  text-underline-offset: 0.18em;
 }
 .meta {
   color: #8e8e93;
