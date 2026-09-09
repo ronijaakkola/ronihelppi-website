@@ -34,8 +34,8 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
 /**
  * A search input that turns into a results card. The card is pinned by its
  * top edge, so growing its body reveals the results *below* the input while
- * the input itself never moves. See MOTION-BRIEF.md for the decisions (320ms
- * sheet curve, skeleton, instant highlight, 35ms stagger).
+ * the input itself never moves. Motion decisions: 320ms sheet curve for the
+ * growth, skeleton while loading, an instant highlight, 35ms row stagger.
  */
 export default function ExpandingSearch(props: ExpandingSearchProps) {
   const { expandDuration, loadDelay, resultDuration, stagger, highlightMotion, highlightDuration, loading, hover, entrance } = props;

@@ -2,10 +2,10 @@ import { useDialKit } from 'dialkit';
 import ExpandingSearch, { type EntranceStyle, type HighlightMotion, type HoverStyle, type LoadingStyle } from './ExpandingSearch';
 import styles from './styles.module.css';
 
-// Defaults are the confirmed MOTION-BRIEF.md (variation A of round two in
-// prototypes/variations.html): 320ms height reveal, skeleton, a highlight that
-// jumps between rows, staggered rows. The selects swap in the other prototyped
-// options live in dev; change the defaults here to ship a different one.
+// Defaults are what ships: 320ms height reveal, skeleton, a highlight that
+// jumps between rows, staggered rows. The selects swap in the alternatives
+// that were prototyped (spinner, per-row hover, at-once entrance, sliding
+// highlight) live in dev; change the defaults here to ship a different one.
 export default function ExpandingSearchDemo() {
   const dial = useDialKit(
     'Expanding search',
