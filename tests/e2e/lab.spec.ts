@@ -65,6 +65,16 @@ test.describe('Lab', () => {
     }
   });
 
+  test('demo page renders a markdown write-up with headings and code', async ({ page }) => {
+    await page.goto('/lab/sliding-tabs');
+    const writeup = page.locator('.lab-writeup');
+    await expect(writeup).toBeVisible();
+    await expect(writeup.locator('h2').first()).toBeVisible();
+    await expect(writeup.locator('pre code').first()).toBeVisible();
+    // Runs through the same pipeline as posts: headings get anchor links.
+    await expect(writeup.locator('h2 .heading-anchor').first()).toHaveAttribute('href', /^#/);
+  });
+
   test('ships no DialKit in production', async ({ page }) => {
     await page.goto('/lab');
     const href = await page.locator('.lab-card').first().getAttribute('href');

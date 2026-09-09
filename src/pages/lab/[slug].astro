@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import LabStage from '../../lab/LabStage';
 import { labEntries, labPreviewPaths, labSourceUrl, formatLabDate, type LabEntry } from '../../lab';
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 
 export function getStaticPaths() {
   return labEntries.map((entry, index) => ({
@@ -22,8 +23,15 @@ interface Props {
   older: LabEntry | null;
 }
 
+// Optional long-form write-up colocated with the demo. `.md` imports go through
+// the same `markdown.processor` as the writing collection, so embeds, code
+// blocks and external links behave identically to posts.
+const descriptions = import.meta.glob<{ Content: AstroComponentFactory }>('../../lab/*/description.md');
+
 const { entry, newer, older } = Astro.props;
 const { meta, slug } = entry;
+const loadDescription = descriptions[`../../lab/${slug}/description.md`] as (typeof descriptions)[string] | undefined;
+const Writeup = loadDescription ? (await loadDescription()).Content : null;
 const preview = labPreviewPaths(slug);
 const pageURL = new URL(`/lab/${slug}/`, Astro.site).href;
 
@@ -83,11 +91,16 @@ const schemas = [
           <LabStage client:only="react" slug={slug} poster={preview.poster} />
         </div>
 
-        {(meta.description || meta.post) && (
+        {(meta.description || meta.post || Writeup) && (
           <div class="lab-body">
             {meta.description && <p class="lab-description">{meta.description}</p>}
             {meta.post && (
               <a href={`/writing/${meta.post}`} class="meta-link">Read the post</a>
+            )}
+            {Writeup && (
+              <div class="lab-writeup prose-content">
+                <Writeup />
+              </div>
             )}
           </div>
         )}
@@ -175,6 +188,15 @@ const schemas = [
     display: flex;
     flex-direction: column;
     gap: var(--gap-sm);
+  }
+
+  /* Post-style prose from description.md; `.prose-content` (global.css) does the rest. */
+  .lab-writeup {
+    font-family: var(--font-sans);
+    margin-top: var(--gap-xs);
+  }
+  .lab-writeup > :first-child {
+    margin-top: 0;
   }
 
   .lab-description {

@@ -12,6 +12,9 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
      `LabStage`, a `position: absolute; inset: 0` box (clipped by its shell) with a reset font
      and colour; position your content absolutely or fill it with a grid.
    - `styles.module.css` — CSS Modules keep each demo's styles to itself.
+   - `description.md` (optional) — a long-form write-up rendered under the
+     stage, after the short `description` and the "Read the post" link. See
+     "Writing a description" below.
 2. Render the preview. Build and start the preview server
    (`npm run build && npm run preview`), then:
    `npm run lab:record -- <slug> "Balances@0.5,Billing@1.3" --duration 4`
@@ -25,6 +28,27 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
 
 Animations: CSS where possible, `motion/react` otherwise. Each demo is its own
 lazy chunk, so Motion is only downloaded by demos that import it.
+
+## Writing a description
+
+`meta.description` stays a one-liner: it is the list-page blurb and the SEO
+meta description. For anything longer, add `src/lab/<slug>/description.md`.
+When the file exists the page renders it beneath the stage inside the same
+`.prose-content` styles the writing posts use; when it is absent nothing changes.
+
+The file goes through the same markdown pipeline as `content/posts`, so
+headings (with anchor links), paragraphs, fenced code blocks with a language
+tag, external links (opening in a new tab) and `![[file|Caption|WxH]]` embeds all
+behave as in a post. Write body copy only, no frontmatter and no top-level `# title`
+(the page already has one); start sections at `##`.
+
+Caveats:
+- Image embeds resolve relative to the markdown file, so a `![[still.jpg]]`
+  must live in `src/lab/images/` (not `content/images/`). Videos are served
+  from `/images/`, so `.mp4` embeds still go in `content/images/` with a poster.
+- `[toc]` works but is usually overkill here; the heading rail from posts is not
+  rendered on demo pages.
+- The "Copy post" button, read time and `.md` mirror are post-only features.
 
 ## Tuning with DialKit
 
