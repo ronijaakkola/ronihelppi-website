@@ -200,6 +200,68 @@ test.describe('Lab: expanding search', () => {
     }).toBe(true);
   });
 
+  test('the card body is exactly the same height while loading and once results are in', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'loading', { timeout: 5000 });
+    // Wait for the growth to finish: the height stops changing.
+    const body = stage(page).locator('[data-search-body]');
+    await expect.poll(async () => {
+      const a = (await body.boundingBox())!.height;
+      await page.waitForTimeout(120);
+      const b = (await body.boundingBox())!.height;
+      return Math.abs(a - b) < 0.5;
+    }).toBe(true);
+    const loadingHeight = (await body.boundingBox())!.height;
+    const skeletonRows = stage(page).locator('[data-search-skeleton] li');
+    await expect(skeletonRows).toHaveCount(4);
+    const skeletonRowHeight = (await skeletonRows.first().boundingBox())!.height;
+
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await page.waitForTimeout(600);
+    const resultsHeight = (await body.boundingBox())!.height;
+    const rowHeight = (await stage(page).locator('[data-search-results] li').first().boundingBox())!.height;
+    expect(Math.abs(resultsHeight - loadingHeight)).toBeLessThan(0.5);
+    expect(Math.abs(rowHeight - skeletonRowHeight)).toBeLessThan(0.5);
+  });
+
+  test('arrow keys move between the input and the results, and the highlight follows focus', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    const rows = stage(page).locator('[data-search-results] li button');
+    const highlight = stage(page).locator('[data-search-highlight]');
+
+    await input.press('ArrowDown');
+    await expect(rows.nth(0)).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.nth(2)).toBeFocused();
+    await expect.poll(async () => {
+      const r = (await rows.nth(2).boundingBox())!;
+      const h = (await highlight.boundingBox())!;
+      return Math.abs(r.y - h.y) < 2 && (await highlight.evaluate((el) => getComputedStyle(el).opacity)) === '1';
+    }).toBe(true);
+    // End and Home jump; Up from the first row returns to the input.
+    await page.keyboard.press('End');
+    await expect(rows.nth(3)).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(rows.nth(0)).toBeFocused();
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toBeFocused();
+    // Only one row is in the tab order, so Tab leaves the list instead of walking it.
+    expect(await rows.evaluateAll((els) => els.filter((el) => el.tabIndex === 0).length)).toBe(1);
+    // Escape from a focused row collapses the card and returns focus to the input.
+    await input.press('ArrowDown');
+    await page.keyboard.press('Escape');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toBeFocused();
+  });
+
   test('Escape collapses back to the lone input and a late response cannot reopen it', async ({ page }) => {
     await page.goto('/lab/expanding-search');
     const input = stage(page).getByRole('searchbox');

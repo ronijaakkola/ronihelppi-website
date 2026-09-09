@@ -5,6 +5,7 @@
 .search {
   position: absolute;
   inset: 0;
+  line-height: 1.4;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: clamp(9px, 2.4cqw, 14px);
   font-weight: 400;
@@ -162,30 +163,41 @@
 }
 
 .skeleton {
-  display: grid;
-  gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* The skeleton row is the result row's box exactly: same padding and gap, and
+   each bone is as tall as the text line it stands in for, with the visible bar
+   drawn inside it. The body is measured from whichever layer is showing, so any
+   drift here would make the card resize when results land. */
 .skeletonRow {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
-  padding: 0.75em 0.85em;
+  align-items: flex-start;
+  gap: 0.15em;
+  padding: 0.55em 0.85em;
 }
 .bone {
+  display: flex;
+  align-items: center;
+  height: 1.4em; /* title line: 1em × 1.4 line-height */
+  width: 72%;
+}
+.bone:last-child {
+  height: calc(0.9em * 1.4); /* meta line */
+  width: 45%;
+}
+.bone::before {
+  content: '';
+  width: 100%;
   height: 0.7em;
   border-radius: 0.35em;
   background: linear-gradient(90deg, #2c2c2e 0%, #3a3a3c 50%, #2c2c2e 100%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
 }
-.bone:first-child {
-  width: 72%;
-}
-.bone:last-child {
-  width: 45%;
+.bone:last-child::before {
   height: 0.6em;
 }
 @keyframes shimmer {
@@ -197,8 +209,8 @@
 .spinnerWrap {
   display: grid;
   place-items: center;
-  /* Same height as four result rows so the card does not resize on swap. */
-  min-height: 12em;
+  /* Four result rows: 4 × (0.55em × 2 padding + 1.4em title + 0.15em gap + 1.26em meta). */
+  min-height: calc(4 * (1.1em + 1.4em + 0.15em + 1.26em));
 }
 .spinner {
   width: 1.4em;
@@ -215,7 +227,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bone {
+  .bone::before {
     animation: none;
     background: #2c2c2e;
   }

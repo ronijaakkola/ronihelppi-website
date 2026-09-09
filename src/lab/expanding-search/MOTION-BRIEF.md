@@ -27,6 +27,7 @@ details this brief leaves open.
 **Interrupt:** retarget, never restart. A re-search mid-flight keeps the current height and restarts loading in place; Escape collapses from wherever the card is. Responses carry a request id and stale ones are dropped.
 **Reduced motion:** the card still opens but instantly; skeleton and results crossfade ~150ms with no rise and no stagger; highlight behaviour is unchanged (it is already instant).
 **Stack:** `motion/react` for the height, layer crossfades and row entrances (the Lab recorder only advances rAF time, so CSS transitions would record wrong). Highlight is positioned directly, no spring.
-**Loading style:** skeleton, not spinner. It pre-draws the result shape so results feel filled in.
+**Loading style:** skeleton, not spinner. It pre-draws the result shape so results feel filled in. The skeleton row is the result row's exact box (same padding, gap and line heights), so the card is pixel-identical in height while loading and once results land. Result count is fixed at four; more would need the body to scroll.
+**Keyboard:** ArrowDown from the input enters the list; ArrowUp/ArrowDown, Home and End move within it with a roving tabindex so Tab leaves the list; ArrowUp on the first row returns to the input; Escape anywhere collapses and refocuses the input. The highlight follows focus.
 
 **Open risk:** at 320ms the growth may be too quick to register as "growing out of" on a large stage. DialKit exposes the duration; compare against 380ms live before locking it.

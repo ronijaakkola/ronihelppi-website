@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from 'react';
 import { AnimatePresence, motion, useReducedMotion, type Transition } from 'motion/react';
 import { initialState, reduce, type SearchResult } from './machine';
 import { rankResults } from './mockSearch';
@@ -73,10 +73,18 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
     e?.preventDefault();
     dispatch({ type: 'submit', query: value });
   };
+  const reset = () => {
+    dispatch({ type: 'reset' });
+    setValue('');
+    inputRef.current?.focus();
+  };
+  const listRef = useRef<HTMLUListElement>(null);
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      dispatch({ type: 'reset' });
-      setValue('');
+    if (e.key === 'Escape') reset();
+    // Down from the input walks into the results, like a combobox.
+    if (e.key === 'ArrowDown' && state.status === 'results') {
+      e.preventDefault();
+      listRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
     }
   };
 
@@ -88,6 +96,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
       <div className={styles.card} data-search-card data-state={state.status}>
         <motion.div
           className={styles.body}
+          data-search-body
           initial={false}
           animate={{ height: open ? bodyHeight : 0 }}
           transition={grow}
@@ -118,6 +127,9 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
               {state.status === 'results' && (
                 <Results
                   key={`results-${state.request}`}
+                  listRef={listRef}
+                  onEscape={reset}
+                  onLeaveUp={() => inputRef.current?.focus()}
                   results={state.results}
                   query={state.query}
                   hover={hover}
@@ -180,7 +192,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
 
 function Skeleton() {
   return (
-    <ul className={styles.skeleton} aria-hidden="true">
+    <ul className={styles.skeleton} aria-hidden="true" data-search-skeleton>
       {[0, 1, 2, 3].map((i) => (
         <li key={i} className={styles.skeletonRow}>
           <span className={styles.bone} />
@@ -200,6 +212,11 @@ function Spinner() {
 }
 
 interface ResultsProps {
+  listRef: RefObject<HTMLUListElement | null>;
+  /** Escape on a row: collapse and hand focus back to the input. */
+  onEscape: () => void;
+  /** ArrowUp on the first row: focus goes back to the input. */
+  onLeaveUp: () => void;
   results: SearchResult[];
   query: string;
   hover: HoverStyle;
@@ -211,9 +228,42 @@ interface ResultsProps {
   highlightDuration: number;
 }
 
-function Results({ results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
+function Results({ listRef, onEscape, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
-  const listRef = useRef<HTMLUListElement>(null);
+  // Roving tabindex: only the last focused row is in the tab order, so Tab
+  // leaves the list and the arrow keys move within it.
+  const [tabStop, setTabStop] = useState(0);
+  const focusRow = (i: number) => {
+    const row = listRef.current?.children[i]?.querySelector<HTMLButtonElement>('button');
+    row?.focus();
+  };
+  const onListKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
+    const i = active ?? tabStop;
+    const last = results.length - 1;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        focusRow(Math.min(i + 1, last));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (i === 0) onLeaveUp();
+        else focusRow(i - 1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        focusRow(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        focusRow(last);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        onEscape();
+        break;
+    }
+  };
   const [rect, setRect] = useState<{ top: number; height: number } | null>(null);
 
   // Position the shared highlight from the hovered/focused row's box.
@@ -231,9 +281,16 @@ function Results({ results, query, hover, entrance, reduced, duration, stagger, 
       <span className={styles.visuallyHidden} role="status">
         {results.length} results for {query}
       </span>
-      <ul className={styles.list} ref={listRef} data-search-results onPointerLeave={() => setActive(null)} onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null);
-      }}>
+      <ul
+        className={styles.list}
+        ref={listRef}
+        data-search-results
+        onKeyDown={onListKeyDown}
+        onPointerLeave={() => setActive(null)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null);
+        }}
+      >
         {results.map((r, i) => (
           <motion.li
             key={r.id}
@@ -254,8 +311,12 @@ function Results({ results, query, hover, entrance, reduced, duration, stagger, 
             <button
               type="button"
               className={styles.rowButton}
+              tabIndex={i === tabStop ? 0 : -1}
               onPointerEnter={() => setActive(i)}
-              onFocus={() => setActive(i)}
+              onFocus={() => {
+                setActive(i);
+                setTabStop(i);
+              }}
             >
               <span className={styles.title}>
                 {r.title} <span className={styles.query}>· {query}</span>
