@@ -65,14 +65,14 @@ test.describe('Lab', () => {
     }
   });
 
-  test('demo page renders a markdown write-up with headings and code', async ({ page }) => {
+  test('demo page renders the markdown write-up as prose', async ({ page }) => {
     await page.goto('/lab/sliding-tabs');
-    const writeup = page.locator('.lab-writeup');
+    const writeup = page.locator('.lab-writeup.prose-content');
     await expect(writeup).toBeVisible();
-    await expect(writeup.locator('h2').first()).toBeVisible();
-    await expect(writeup.locator('pre code').first()).toBeVisible();
-    // Runs through the same pipeline as posts: headings get anchor links.
-    await expect(writeup.locator('h2 .heading-anchor').first()).toHaveAttribute('href', /^#/);
+    await expect(writeup.locator('p').first()).toBeVisible();
+    // Markdown was processed, not dumped raw: inline code is an element.
+    await expect(writeup.locator('code').first()).toBeVisible();
+    await expect(writeup).not.toContainText('`');
   });
 
   test('ships no DialKit in production', async ({ page }) => {

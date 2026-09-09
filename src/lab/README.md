@@ -40,7 +40,8 @@ The file goes through the same markdown pipeline as `content/posts`, so
 headings (with anchor links), paragraphs, fenced code blocks with a language
 tag, external links (opening in a new tab) and `![[file|Caption|WxH]]` embeds all
 behave as in a post. Write body copy only, no frontmatter and no top-level `# title`
-(the page already has one); start sections at `##`.
+(the page already has one). A couple of plain paragraphs is fine; if you do add
+sections, start them at `##`.
 
 Caveats:
 - Image embeds resolve relative to the markdown file, so a `![[still.jpg]]`

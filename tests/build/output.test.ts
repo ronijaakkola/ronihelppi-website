@@ -49,13 +49,16 @@ describe('Build Output Validation', () => {
     });
 
     it('renders a colocated description.md as prose beneath the stage', async () => {
-      // sliding-tabs ships a description.md with a heading and a fenced code block.
+      // sliding-tabs ships a description.md: plain paragraphs with inline code.
+      // Headings and fenced blocks are optional, so only assert that markdown
+      // was actually processed (paragraphs and `code` spans become elements).
       const content = await readFile(join(distPath, 'lab', 'sliding-tabs', 'index.html'), 'utf-8');
       const start = content.indexOf('class="lab-writeup prose-content"');
       expect(start, 'lab-writeup wrapper').toBeGreaterThan(-1);
-      const writeup = content.slice(start);
-      expect(writeup).toMatch(/<h2[^>]*>/);
-      expect(writeup).toMatch(/<pre[^>]*>[\s\S]*<code/);
+      const writeup = content.slice(start, content.indexOf('</div>', start));
+      expect(writeup).toMatch(/<p[^>]*>/);
+      expect(writeup).toMatch(/<code[^>]*>/);
+      expect(writeup).not.toContain('`');
     });
 
     it('does not bundle DialKit into production JS', async () => {
