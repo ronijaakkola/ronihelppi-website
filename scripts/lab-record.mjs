@@ -6,10 +6,14 @@
 // Each step is "<button text>@<seconds>": the first button in the stage whose
 // text matches is clicked at that time. Append "~<seconds>" to hold the press
 // that long instead of clicking (e.g. "Press me@0.6~0.25"), so whileTap-style
-// press animations have time to play. The page's requestAnimationFrame and
-// performance.now are replaced with a manual clock, so Motion advances exactly
-// one frame per screenshot no matter how slow the capture is. Frames are
-// stitched with ffmpeg and then handed to lab-preview.mjs for the final assets.
+// press animations have time to play. Two prefixes cover other input:
+// "type:<text>@<s>" fills the stage's search box with <text> and presses Enter,
+// "hover:<text>@<s>" moves the pointer onto the first button containing <text>.
+// The page's requestAnimationFrame and performance.now are replaced with a
+// manual clock, so Motion advances exactly one frame per screenshot no matter
+// how slow the capture is. Pass --timers to also drive setTimeout from that
+// clock, for demos that simulate latency with a timer. Frames are stitched with
+// ffmpeg and then handed to lab-preview.mjs for the final assets.
 //
 // Run against a production build (`npm run build && npm run preview`) so the
 // DialKit panel isn't in frame.
@@ -41,6 +45,7 @@ const fps = Number(flag('fps', 60));
 const duration = Number(flag('duration', 6));
 if ([dpr, fps, duration].some((n) => !Number.isFinite(n) || n <= 0)) fail('--dpr, --fps and --duration must be positive numbers');
 const base = flag('base', 'http://localhost:4321');
+const virtualTimers = args.includes('--timers');
 const steps = (stepsArg ?? '')
   .split(',')
   .filter(Boolean)
@@ -84,9 +89,34 @@ await stage.waitFor();
 // Let the lazy demo chunk and fonts arrive (real time, unaffected by the clock).
 // Poll on a timer: Playwright's default rAF polling would never fire here.
 await page.waitForFunction(() => document.fonts.status === 'loaded', null, { polling: 100 });
-await page.waitForFunction(() => !document.querySelector('[data-lab-stage] img'), null, { polling: 100 });
+await page.waitForFunction(() => document.querySelector('[data-lab-stage] [data-lab-poster]')?.getAttribute('data-ready') === 'true', null, { polling: 100 });
 await page.waitForTimeout(300);
 await stage.scrollIntoViewIfNeeded();
+
+// Installed only now, after hydration, so nothing the page needed while
+// loading waited on a clock that was not ticking yet.
+if (virtualTimers) {
+  await page.evaluate(() => {
+    const timers = new Map();
+    let id = 0;
+    window.setTimeout = (cb, ms = 0, ...a) => {
+      timers.set(++id, { at: performance.now() + ms, cb, a });
+      return id;
+    };
+    window.clearTimeout = (t) => timers.delete(t);
+    const step = window.__step;
+    window.__step = (ms) => {
+      step(ms);
+      const now = performance.now();
+      for (const [t, timer] of [...timers]) {
+        if (timer.at <= now) {
+          timers.delete(t);
+          timer.cb(...timer.a);
+        }
+      }
+    };
+  });
+}
 
 const frameMs = 1000 / fps;
 const total = Math.round(duration * fps);
@@ -100,6 +130,16 @@ for (let i = 0; i < total; i++) {
   }
   while (next < steps.length && steps[next].at <= t) {
     const step = steps[next++];
+    if (step.text.startsWith('type:')) {
+      const input = stage.getByRole('searchbox').first();
+      await input.fill(step.text.slice(5));
+      await input.press('Enter');
+      continue;
+    }
+    if (step.text.startsWith('hover:')) {
+      await stage.locator('button', { hasText: step.text.slice(6) }).first().hover();
+      continue;
+    }
     const button = stage.locator('button', { hasText: step.text }).first();
     if (step.hold > 0) {
       const b = await button.boundingBox();
