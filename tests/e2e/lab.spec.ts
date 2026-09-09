@@ -145,7 +145,8 @@ test.describe('Lab: expanding search', () => {
     await expect(input).toBeVisible();
     await expect(card(page)).toHaveAttribute('data-state', 'idle');
     await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
-    await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toHaveCount(0);
+    // The search button is always there, even before anything is typed.
+    await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toBeVisible();
 
     const seen: string[] = [];
     await page.exposeFunction('__recordState', (s: string) => seen.push(s));

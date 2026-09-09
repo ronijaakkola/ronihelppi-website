@@ -17,7 +17,7 @@ details this brief leaves open.
 - `results`: four mock rows; an instant highlight marks the hovered/focused row.
 - `results → loading` on re-search, without collapsing. Escape returns to `idle`.
 
-**Enter (idle → expanding):** body height 0 → measured, anchored on the top edge so the input never moves and results reveal below it. (Revised 2026-09-09 from bottom-anchored/upward: with keyboard navigation the best result must be the row nearest the input, reached with ArrowDown.) Card radius stays constant. Search button fades in and slides 8px → 0, starting at 40% of the growth.
+**Enter (idle → expanding):** body height 0 → measured, anchored on the top edge so the input never moves and results reveal below it. (Revised 2026-09-09 from bottom-anchored/upward: with keyboard navigation the best result must be the row nearest the input, reached with ArrowDown.) Card radius stays constant. The search button is always visible (an outline glyph in the text colour, no fill), so nothing else arrives during the growth. (Revised 2026-09-09: it used to fade/slide in at 40% of the growth.)
 **Easing:** `cubic-bezier(0.32, 0.72, 0, 1)` · **Duration:** 320ms. Reference: Raycast / Linear, crisp, no bounce.
 **expanding → loading:** fires when the height animation completes. Skeleton fades in over 150ms, no stagger.
 **loading → results:** skeleton fades out 120ms; rows fade and rise 6px → 0 over 260ms with a 35ms stagger, `cubic-bezier(0.19, 1, 0.22, 1)`.

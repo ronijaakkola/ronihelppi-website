@@ -109,26 +109,12 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKeyDown}
           />
-          <AnimatePresence initial={false}>
-            {open && (
-              <motion.button
-                type="submit"
-                className={styles.go}
-                aria-label="Search"
-                initial={{ opacity: 0, x: reduced ? 0 : 8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: reduced ? 0 : 8, transition: { duration: 0.15 } }}
-                // Arrives once the card is well on its way up, so it reads as
-                // part of the reveal rather than a separate pop.
-                transition={reduced ? { duration: 0.15 } : { duration: 0.26, ease: SHEET, delay: expandDuration * 0.4 }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-3.5-3.5" />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
+          <button type="submit" className={styles.go} aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M17 17L21 21" />
+              <path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" />
+            </svg>
+          </button>
         </form>
 
         <motion.div
