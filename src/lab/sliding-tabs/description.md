@@ -1,18 +1,3 @@
-<!-- PLACEHOLDER COPY — rewrite before publishing. Everything below is a stand-in
-     so the build and E2E tests have a heading and a code block to check. -->
+A very simple active tab animation that I often use in projects. The feel of the animation can be easily altered to fit the project. The solution utilizes two duplicate tab rows aligned on top of each other and a `clip-path` to render the active tab pill.
 
-## How it works
-
-The active tab is a single indicator element that slides between positions rather than
-each tab drawing its own background. Measuring the target tab's offset and width once per
-change, then animating `transform` and `width`, keeps the motion on the compositor and
-avoids re-laying out the row.
-
-```tsx
-const target = tabRefs.current[activeIndex];
-setIndicator({ x: target.offsetLeft, width: target.offsetWidth });
-```
-
-Placeholder copy: this paragraph will be replaced with the actual write-up covering the
-easing choice, how the demo handles keyboard navigation, and what changes under
-`prefers-reduced-motion`.
+Note that this particular animation could be almost achieved with plain CSS as well. I just like to use Motion to make it easier to tweak the animation to fit the project at hand. But if I was tight on bundle size, I would do this with CSS instead.
