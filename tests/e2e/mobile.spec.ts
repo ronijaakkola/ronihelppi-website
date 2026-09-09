@@ -102,6 +102,30 @@ test.describe('Mobile Menu Accessibility', () => {
     await expect(button).toHaveAttribute('aria-expanded', 'false');
   });
 
+  test('every menu link, including the last, joins the entrance cascade', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).toHaveClass(/open/);
+
+    const links = page.locator('.mobile-menu-link');
+    const count = await links.count();
+    expect(count).toBeGreaterThan(1);
+    await expect(links.last()).toHaveText('Contact');
+
+    const delays: number[] = [];
+    for (let i = 0; i < count; i++) {
+      delays.push(await links.nth(i).evaluate(
+        (el) => parseFloat(getComputedStyle(el).transitionDelay)
+      ));
+    }
+
+    // Every link uses the same transition, and the delays strictly increase
+    // so each item lands after the one above it — Contact last of all.
+    for (let i = 1; i < count; i++) {
+      expect(delays[i], `link ${i} (${await links.nth(i).textContent()}) delay`).toBeGreaterThan(delays[i - 1]);
+    }
+  });
+
   test('menu has correct aria-hidden state', async ({ page }) => {
     await page.goto('/');
     const menu = page.locator('#mobile-menu');
