@@ -282,7 +282,9 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
     entrance === 'stagger' ? { duration, ease: RISE, delay: i * stagger } : { duration: reduced ? 0.15 : 0.18, ease: 'linear' };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.1 } }} transition={{ duration: 0.12 }}>
+    // One entrance per container: the rows animate in themselves, so the
+    // wrapper only owns the exit (used when the card collapses or re-searches).
+    <motion.div exit={{ opacity: 0, transition: { duration: 0.1 } }}>
       <span className={styles.visuallyHidden} role="status">
         {results.length} results for {query}
       </span>
