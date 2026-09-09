@@ -164,6 +164,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                   key={`results-${state.request}`}
                   listRef={listRef}
                   onEscape={reset}
+                  onSelect={reset}
                   onLeaveUp={() => inputRef.current?.focus()}
                   results={state.results}
                   query={state.query}
@@ -216,6 +217,8 @@ interface ResultsProps {
   listRef: RefObject<HTMLUListElement | null>;
   /** Escape on a row: collapse and hand focus back to the input. */
   onEscape: () => void;
+  /** A result was chosen (click, or Enter on a focused row): the search is done. */
+  onSelect: (result: SearchResult) => void;
   /** ArrowUp on the first row: focus goes back to the input. */
   onLeaveUp: () => void;
   results: SearchResult[];
@@ -229,7 +232,7 @@ interface ResultsProps {
   highlightDuration: number;
 }
 
-function Results({ listRef, onEscape, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
+function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
   // Roving tabindex: only the last focused row is in the tab order, so Tab
   // leaves the list and the arrow keys move within it.
@@ -313,6 +316,7 @@ function Results({ listRef, onEscape, onLeaveUp, results, query, hover, entrance
               type="button"
               className={styles.rowButton}
               tabIndex={i === tabStop ? 0 : -1}
+              onClick={() => onSelect(r)}
               onPointerEnter={() => setActive(i)}
               onFocus={() => {
                 setActive(i);

@@ -276,6 +276,30 @@ test.describe('Lab: expanding search', () => {
     await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
   });
 
+  test('selecting a result by click or Enter collapses the card and clears the input', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    const rows = stage(page).locator('[data-search-results] li button');
+
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await rows.nth(1).click();
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeFocused();
+    await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
+
+    await input.fill('herdr');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await input.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeFocused();
+  });
+
   test('reaches results under reduced motion and passes axe in every state', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/lab/expanding-search');
