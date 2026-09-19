@@ -166,3 +166,9 @@ The Lab demos use DialKit for tuning. Rather than trusting its "hidden in produc
 ## Generic Lab E2E checks must not assume a demo renders a `<button>`
 
 `accessibility.spec.ts` and the preview→demo handoff test used "a `button` is visible inside the stage" as the proxy for "the demo has mounted". The expanding-search demo is input-only in its idle state, so those tests timed out on the newest demo. The selectors now also accept `input`; when adding a demo whose first paint is something else (canvas-only, an `<a>`, plain text), extend that selector list rather than adding a decoy button.
+
+---
+
+## A stray `astro preview` daemon on another port makes every E2E run fail
+
+If a preview daemon is already running (even on a different port, e.g. 4322 because 4321 was busy at the time), `npm run preview` prints "already running" and exits, so nothing ever listens on 4321. Playwright then reports `Process from config.webServer exited early` and every test fails or times out, and `lsof -ti :4321 | xargs kill` finds nothing to kill. Check with `npx astro preview status`, stop with `npx astro preview stop`, then start again. Symptom to watch for: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4321/` returning `000` right after starting the preview.
