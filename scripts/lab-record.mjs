@@ -87,6 +87,11 @@ await page.addInitScript(() => {
 await page.goto(`${base}/lab/${slug}`);
 const stage = page.locator('[data-lab-stage]');
 await stage.waitFor();
+// The shell around the stage draws the card hairline on `::after`, above the
+// stage, and rounds its corners. A screenshot of the stage's box captures
+// both, and the Lab list then draws its own frame around the clip: a second
+// border a pixel inside the first. Record the bare rectangle instead.
+await page.addStyleTag({ content: '[data-lab-shell] { border-radius: 0 !important; } [data-lab-shell]::after { display: none !important; }' });
 // Let the lazy demo chunk and fonts arrive (real time, unaffected by the clock).
 // Poll on a timer: Playwright's default rAF polling would never fire here.
 await page.waitForFunction(() => document.fonts.status === 'loaded', null, { polling: 100 });

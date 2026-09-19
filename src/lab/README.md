@@ -28,10 +28,20 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
    load, then writes `public/lab/<slug>/preview.mp4` and `poster.webp`.
    For demos that need real input (drag, scroll), screen-record instead and run
    `npm run lab:preview -- <slug> recording.mov`.
+   Keep the exact command in the list below so the clip can be re-rendered
+   after a visual change without guessing the timings.
 3. Set `published: true`. Unpublished demos are excluded from every page.
 
 Animations: CSS where possible, `motion/react` otherwise. Each demo is its own
 lazy chunk, so Motion is only downloaded by demos that import it.
+
+## Recording commands
+
+The clips in `public/lab/` were rendered with these commands (production build,
+preview server running):
+
+- `npm run lab:record -- sliding-tabs "Albums@0.4,Places@1.2,Photos@2.0,People@2.8,Albums@3.6,Places@4.4,Photos@5.2" --duration 6.6`
+- `npm run lab:record -- expanding-search "type:berry@0.5,key:ArrowDown@2.0,key:ArrowDown@2.4,key:ArrowDown@2.8,key:ArrowDown@3.1,key:ArrowUp@3.7,key:ArrowUp@4.1,key:Enter@4.6" --duration 5.4 --timers`
 
 ## Writing a description
 
