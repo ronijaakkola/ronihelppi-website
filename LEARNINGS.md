@@ -189,3 +189,14 @@ The projects grid cards, Lab previews and the Lab demo stage had `border: 0.5px`
 ## A stray `astro preview` daemon on another port makes every E2E run fail
 
 If a preview daemon is already running (even on a different port, e.g. 4322 because 4321 was busy at the time), `npm run preview` prints "already running" and exits, so nothing ever listens on 4321. Playwright then reports `Process from config.webServer exited early` and every test fails or times out, and `lsof -ti :4321 | xargs kill` finds nothing to kill. Check with `npx astro preview status`, stop with `npx astro preview stop`, then start again. Symptom to watch for: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4321/` returning `000` right after starting the preview.
+
+---
+
+## The Lab recorder captures whatever paints over the stage — the shell's `::after` hairline ended up inside the clips
+
+After #123 moved the card border to a `.card-frame::after` overlay, `scripts/lab-record.mjs` (which screenshots the `[data-lab-stage]` box) started capturing the demo page's shell hairline and rounded corners inside every frame. The Lab list then drew its own `::after` border around that video, so each card showed a second line a pixel inside the first. The CSS was fine (hiding the `<video>` left exactly one border); the duplicate was baked into `preview.mp4` and `poster.webp`.
+
+**Steps to avoid this:**
+1. The recorder now injects `[data-lab-shell] { border-radius: 0 } [data-lab-shell]::after { display: none }` before the first screenshot, so clips are bare rectangles. Keep any new decoration on the shell out of the capture the same way.
+2. When a card looks doubled, sample the asset's edge pixels first (`sharp(...).raw()` on the poster, or `ffmpeg -frames:v 1` on the clip): a light ring in the outer 1–2 device pixels means the frame is in the media, not the CSS.
+3. Re-recording requires the original step timings; they now live in `src/lab/README.md` under "Recording commands". Add the command there whenever a clip is (re)rendered.
