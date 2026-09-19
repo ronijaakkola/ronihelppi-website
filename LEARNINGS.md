@@ -169,3 +169,23 @@ The projects grid cards, Lab previews and the Lab demo stage had `border: 0.5px`
 1. New media card? Add `card-frame` to the clipping element and set the radius on it; do not write `border:` on it.
 2. Do not reach for `translateZ(0)`/`will-change`/thicker borders first — check `getComputedStyle().borderTopWidth` and `getBoundingClientRect()` at DPR 3 in WebKit; a `0.333333px` border on a clipping element with a fractional edge is the smoking gun.
 3. Remaining `0.5px` borders on non-clipping elements (`.toc-card`, `.prose-content img`, `.filter-chip`) are unaffected: they have no clipped child bleeding over the stroke.
+
+---
+
+## The Lab recorder only sees rAF time — CSS transitions and `setTimeout` run on the wall clock
+
+`scripts/lab-record.mjs` drives Motion by mocking `requestAnimationFrame` and `performance.now`, then screenshots one frame per virtual tick. Anything not on that clock is captured wrong: a CSS `transition` finishes in a couple of frames because each screenshot takes ~50ms of real time, and a `setTimeout`-based fake fetch fires at the wrong virtual moment. The expanding-search demo therefore animates with `motion/react` rather than CSS transitions, and the recorder gained `--timers` (virtual `setTimeout`, installed after hydration so it cannot stall loading) plus `type:`/`hover:` steps for demos that need more than button clicks.
+
+**Also:** the recorder's "demo has mounted" check used to wait for the poster `<img>` to be removed; since the stage shell change (#121) the poster stays in the DOM with `data-ready`, so the old check timed out after 30s. It now waits for `[data-lab-poster][data-ready="true"]`. If `lab:record` hangs on `waitForFunction`, suspect a stale readiness check before suspecting the demo.
+
+---
+
+## Generic Lab E2E checks must not assume a demo renders a `<button>`
+
+`accessibility.spec.ts` and the preview→demo handoff test used "a `button` is visible inside the stage" as the proxy for "the demo has mounted". The expanding-search demo is input-only in its idle state, so those tests timed out on the newest demo. The selectors now also accept `input`; when adding a demo whose first paint is something else (canvas-only, an `<a>`, plain text), extend that selector list rather than adding a decoy button.
+
+---
+
+## A stray `astro preview` daemon on another port makes every E2E run fail
+
+If a preview daemon is already running (even on a different port, e.g. 4322 because 4321 was busy at the time), `npm run preview` prints "already running" and exits, so nothing ever listens on 4321. Playwright then reports `Process from config.webServer exited early` and every test fails or times out, and `lsof -ti :4321 | xargs kill` finds nothing to kill. Check with `npx astro preview status`, stop with `npx astro preview stop`, then start again. Symptom to watch for: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4321/` returning `000` right after starting the preview.

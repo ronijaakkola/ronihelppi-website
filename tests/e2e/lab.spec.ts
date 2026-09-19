@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 test.describe('Lab', () => {
   test('nav links to the lab and marks it current', async ({ page }) => {
@@ -122,7 +123,7 @@ test.describe('Lab preview to demo handoff', () => {
       await expect(page.locator('video')).toHaveCount(0);
       const poster = page.locator('[data-lab-stage] img[data-lab-poster]');
       await expect(poster).toHaveAttribute('data-ready', 'true');
-      await expect(page.locator('[data-lab-stage] button').first()).toBeVisible();
+      await expect(page.locator('[data-lab-stage] button, [data-lab-stage] input').first()).toBeVisible();
 
       // The React stage fills exactly the box the server reserved (inside the shell's border),
       // so nothing jumps when it hydrates.
@@ -132,4 +133,254 @@ test.describe('Lab preview to demo handoff', () => {
       expect(Math.abs(shellInner.height - stageBox.height)).toBeLessThan(1);
     });
   }
+});
+
+test.describe('Lab: expanding search', () => {
+  const stage = (page: import('@playwright/test').Page) => page.locator('[data-lab-stage]');
+  const card = (page: import('@playwright/test').Page) => page.locator('[data-search-card]');
+
+  test('starts as a lone input and walks idle → expanding → loading → results on Enter', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await expect(input).toBeVisible();
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
+    // The search button is always there, even before anything is typed.
+    await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toBeVisible();
+
+    const seen: string[] = [];
+    await page.exposeFunction('__recordState', (s: string) => seen.push(s));
+    await card(page).evaluate((el) => {
+      new MutationObserver(() => (window as unknown as { __recordState: (s: string) => void }).__recordState(el.dataset.state!)).observe(el, {
+        attributes: true,
+        attributeFilter: ['data-state'],
+      });
+    });
+
+    await input.fill('berry');
+    await input.press('Enter');
+
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    expect(seen).toEqual(['expanding', 'loading', 'results']);
+
+    const rows = stage(page).locator('[data-search-results] li');
+    await expect(rows).toHaveCount(4);
+    await expect(rows.first()).toContainText('Strawberry');
+    // The matched letters are emphasised inside the name.
+    await expect(rows.first().locator('span[class*="hit"]')).toHaveText('berry');
+    await expect(rows.last().locator('span[class*="hit"]')).toHaveCount(0);
+    await expect(stage(page).getByRole('button', { name: 'Search', exact: true })).toBeVisible();
+    // The input is the anchor: it has not moved while the card grew below it.
+    const box = await input.boundingBox();
+    expect(box!.y).toBeGreaterThan(0);
+  });
+
+  test('the input stays put while the card grows below it', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    const before = (await input.boundingBox())!;
+    await input.fill('herdr');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    const after = (await input.boundingBox())!;
+    expect(Math.abs(after.y - before.y)).toBeLessThan(2);
+    const cardBox = (await card(page).boundingBox())!;
+    expect(cardBox.y + cardBox.height).toBeGreaterThan(before.y + before.height + 50);
+    expect(Math.abs(cardBox.y - before.y)).toBeLessThan(20);
+  });
+
+  test('hovering a result moves the shared highlight behind that row', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('pe');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    const rows = stage(page).locator('[data-search-results] li');
+    const highlight = stage(page).locator('[data-search-highlight]');
+    await rows.nth(2).hover();
+    await expect.poll(async () => {
+      const r = (await rows.nth(2).boundingBox())!;
+      const h = (await highlight.boundingBox())!;
+      return Math.abs(r.y - h.y) < 2 && Math.abs(r.height - h.height) < 2 && (await highlight.evaluate((el) => getComputedStyle(el).opacity)) === '1';
+    }).toBe(true);
+  });
+
+  test('the card body is exactly the same height while loading and once results are in', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'loading', { timeout: 5000 });
+    // Wait for the growth to finish: the height stops changing.
+    const body = stage(page).locator('[data-search-body]');
+    await expect.poll(async () => {
+      const a = (await body.boundingBox())!.height;
+      await page.waitForTimeout(120);
+      const b = (await body.boundingBox())!.height;
+      return Math.abs(a - b) < 0.5;
+    }).toBe(true);
+    const loadingHeight = (await body.boundingBox())!.height;
+    const skeletonRows = stage(page).locator('[data-search-skeleton] li');
+    await expect(skeletonRows).toHaveCount(4);
+    const skeletonRowHeight = (await skeletonRows.first().boundingBox())!.height;
+
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await page.waitForTimeout(600);
+    const resultsHeight = (await body.boundingBox())!.height;
+    const rowHeight = (await stage(page).locator('[data-search-results] li').first().boundingBox())!.height;
+    expect(Math.abs(resultsHeight - loadingHeight)).toBeLessThan(0.5);
+    expect(Math.abs(rowHeight - skeletonRowHeight)).toBeLessThan(0.5);
+  });
+
+  test('arrow keys move between the input and the results, and the highlight follows focus', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    const rows = stage(page).locator('[data-search-results] li button');
+    const highlight = stage(page).locator('[data-search-highlight]');
+
+    await input.press('ArrowDown');
+    await expect(rows.nth(0)).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.nth(2)).toBeFocused();
+    await expect.poll(async () => {
+      const r = (await rows.nth(2).boundingBox())!;
+      const h = (await highlight.boundingBox())!;
+      return Math.abs(r.y - h.y) < 2 && (await highlight.evaluate((el) => getComputedStyle(el).opacity)) === '1';
+    }).toBe(true);
+    // End and Home jump; Up from the first row returns to the input.
+    await page.keyboard.press('End');
+    await expect(rows.nth(3)).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(rows.nth(0)).toBeFocused();
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toBeFocused();
+    // Keyboard navigation starts from the focused row, not from whatever the pointer happens to rest on,
+    // and moving the pointer off the list does not hide the highlight from a focused row.
+    await input.press('ArrowDown');
+    await expect(rows.nth(0)).toBeFocused();
+    await rows.nth(3).hover();
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.nth(1)).toBeFocused();
+    await page.mouse.move(5, 5);
+    await expect.poll(async () => {
+      const r = (await rows.nth(1).boundingBox())!;
+      const h = (await highlight.boundingBox())!;
+      return Math.abs(r.y - h.y) < 2 && (await highlight.evaluate((el) => getComputedStyle(el).opacity)) === '1';
+    }).toBe(true);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp');
+    await expect(input).toBeFocused();
+    // Only one row is in the tab order, so Tab leaves the list instead of walking it.
+    expect(await rows.evaluateAll((els) => els.filter((el) => el.tabIndex === 0).length)).toBe(1);
+    // Escape from a focused row collapses the card and returns focus to the input.
+    await input.press('ArrowDown');
+    await page.keyboard.press('Escape');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toBeFocused();
+  });
+
+  test('Escape collapses back to the lone input and a late response cannot reopen it', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'loading', { timeout: 5000 });
+    await input.press('Escape');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await page.waitForTimeout(1500);
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
+    // The term survives Escape and is selected, ready to be typed over.
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('tabs');
+    expect(await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 4]);
+  });
+
+  test('Escape from a focused result keeps and selects the term', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('berry');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await input.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Escape');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('berry');
+    expect(await input.evaluate((el: HTMLInputElement) => [el.selectionStart, el.selectionEnd])).toEqual([0, 5]);
+    // Typing replaces the whole term.
+    await page.keyboard.type('pe');
+    await expect(input).toHaveValue('pe');
+  });
+
+  test('selecting a result by click or Enter collapses the card and clears the input', async ({ page }) => {
+    await page.goto('/lab/expanding-search');
+    const input = stage(page).getByRole('searchbox');
+    const rows = stage(page).locator('[data-search-results] li button');
+
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    // Acknowledge, then leave: the chosen row's highlight brightens and holds briefly before the collapse.
+    const highlight = stage(page).locator('[data-search-highlight]');
+    await rows.nth(1).hover();
+    await expect(highlight).toHaveAttribute('data-selected', 'false');
+    const hoverColor = await highlight.evaluate((el) => getComputedStyle(el).backgroundColor);
+    // Click in-page and sample every frame, so Playwright round-trips cannot eat the ~120ms hold.
+    const samples = await rows.nth(1).evaluate(
+      (btn) =>
+        new Promise<[string | undefined, string | null, string | undefined][]>((resolve) => {
+          const out: [string | undefined, string | null, string | undefined][] = [];
+          const t0 = performance.now();
+          (btn as HTMLButtonElement).click();
+          const tick = () => {
+            const h = document.querySelector<HTMLElement>('[data-search-highlight]');
+            const c = document.querySelector<HTMLElement>('[data-search-card]');
+            out.push([h?.dataset.selected, h ? getComputedStyle(h).backgroundColor : null, c?.dataset.state]);
+            if (performance.now() - t0 < 300) requestAnimationFrame(tick);
+            else resolve(out);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
+    const lit = samples.filter(([sel, color, state]) => sel === 'true' && color !== hoverColor && state === 'results');
+    // Held lit for several frames before the card left.
+    expect(lit.length).toBeGreaterThan(3);
+    expect(samples[0][2]).toBe('results');
+    expect(samples.at(-1)![2]).toBe('idle');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeFocused();
+    await expect(stage(page).locator('[data-search-results] li')).toHaveCount(0);
+
+    await input.fill('herdr');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    await input.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeFocused();
+  });
+
+  test('reaches results under reduced motion and passes axe in every state', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/lab/expanding-search');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+    await page.waitForTimeout(700);
+    const idle = await new AxeBuilder({ page }).include('[data-lab-stage]').analyze();
+    expect(idle.violations).toEqual([]);
+
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    const results = await new AxeBuilder({ page }).include('[data-lab-stage]').analyze();
+    expect(results.violations).toEqual([]);
+  });
 });
