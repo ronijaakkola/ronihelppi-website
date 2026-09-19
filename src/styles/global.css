@@ -326,6 +326,40 @@ ol {
 }
 
 /* ==========================================================================
+   Card frame (projects grid, Lab previews, Lab demo stage)
+   ========================================================================== */
+
+/* A card clips its media (overflow: hidden + radius) but does NOT draw its own
+   border: the hairline lives on an `::after` overlay painted ABOVE the media.
+   When border and clip sat on the same element, WebKit on 3× phones floored the
+   0.5px border to one device pixel and then blended the media's anti-aliased
+   clip edge over that stroke — the corner arcs all but vanished while the
+   straight edges stayed, and a card whose height landed off the device grid
+   (aspect-ratio boxes) showed the clip edge as a second, offset line. The
+   overlay keeps the stroke on top of whatever it frames, and it can never be
+   thinned by the clip. Hosts set their own hover colour via `::after`. */
+.card-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 0.5px solid var(--color-border);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: border-color 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-frame::after {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
    Table of Contents Card
    ========================================================================== */
 
@@ -885,7 +919,8 @@ ol {
   }
 
   .prose-content img,
-  .prose-content video {
+  .prose-content video,
+  .card-frame::after {
     border-width: 1px;
   }
 }
