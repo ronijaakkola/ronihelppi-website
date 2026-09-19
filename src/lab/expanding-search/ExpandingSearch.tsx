@@ -122,7 +122,10 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             onKeyDown={onKeyDown}
           />
           <button type="submit" className={styles.go} aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {/* The glyph's lens sits at 11,11 and its handle ends at 21,21, so a 0,0 24×24
+                viewBox centres the bounding box but leaves the visual mass up-left. Shifting
+                the viewBox by half a unit puts the optical centre on the button's centre. */}
+            <svg viewBox="0.5 0.5 22 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M17 17L21 21" />
               <path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" />
             </svg>
