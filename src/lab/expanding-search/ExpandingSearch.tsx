@@ -21,6 +21,8 @@ export interface ExpandingSearchProps {
   highlightMotion: HighlightMotion;
   /** Seconds for the 'slide' variant's travel. */
   highlightDuration: number;
+  /** ms the chosen row stays lit before the card collapses: acknowledge, then leave. */
+  selectHold: number;
   loading: LoadingStyle;
   hover: HoverStyle;
   entrance: EntranceStyle;
@@ -28,6 +30,10 @@ export interface ExpandingSearchProps {
 
 // The "sheet" curve for the expansion (fast start, long settle) and a
 // steeper ease-out for the rows rising into place.
+// Highlight colours: hover, and the brighter step that acknowledges a choice.
+const HOVER_COLOR = '#2c2c2e';
+const SELECTED_COLOR = '#48484c';
+
 const SHEET: Transition['ease'] = [0.32, 0.72, 0, 1];
 const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
 
@@ -38,7 +44,7 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
  * growth, skeleton while loading, an instant highlight, 35ms row stagger.
  */
 export default function ExpandingSearch(props: ExpandingSearchProps) {
-  const { expandDuration, loadDelay, resultDuration, stagger, highlightMotion, highlightDuration, loading, hover, entrance } = props;
+  const { expandDuration, loadDelay, resultDuration, stagger, highlightMotion, highlightDuration, selectHold, loading, hover, entrance } = props;
   const reduced = useReducedMotion() ?? false;
   const [state, dispatch] = useReducer(reduce, initialState);
   const [value, setValue] = useState('');
@@ -178,6 +184,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                   stagger={stagger}
                   highlightMotion={highlightMotion}
                   highlightDuration={highlightDuration}
+                  selectHold={selectHold}
                 />
               )}
               {state.status === 'idle' && (
@@ -233,10 +240,24 @@ interface ResultsProps {
   stagger: number;
   highlightMotion: HighlightMotion;
   highlightDuration: number;
+  selectHold: number;
 }
 
-function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration }: ResultsProps) {
+function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration, selectHold }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
+  // Acknowledge, then leave (the macOS menu pattern): the chosen row's
+  // highlight brightens and holds for `selectHold` before the card collapses,
+  // so the click is seen to land. Further clicks during the hold are ignored.
+  const [selected, setSelected] = useState<number | null>(null);
+  const holdTimer = useRef<number | undefined>(undefined);
+  const choose = (i: number) => {
+    if (selected !== null) return;
+    setSelected(i);
+    setActive(i);
+    holdTimer.current = window.setTimeout(() => onSelect(results[i]), selectHold);
+  };
+  useEffect(() => () => window.clearTimeout(holdTimer.current), []);
+  const lit = selected ?? active;
   // Roving tabindex: only the last focused row is in the tab order, so Tab
   // leaves the list and the arrow keys move within it.
   const [tabStop, setTabStop] = useState(0);
@@ -276,10 +297,10 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
 
   // Position the shared highlight from the hovered/focused row's box.
   useLayoutEffect(() => {
-    if (hover !== 'shared' || active === null) return;
-    const row = listRef.current?.children[active] as HTMLElement | undefined;
+    if (hover !== 'shared' || lit === null) return;
+    const row = listRef.current?.children[lit] as HTMLElement | undefined;
     if (row) setRect({ top: row.offsetTop, height: row.offsetHeight });
-  }, [active, hover]);
+  }, [lit, hover]);
 
   const rowTransition = (i: number): Transition =>
     entrance === 'stagger' ? { duration, ease: RISE, delay: i * stagger } : { duration: reduced ? 0.15 : 0.18, ease: 'linear' };
@@ -298,10 +319,10 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
         onKeyDown={onListKeyDown}
         onPointerLeave={(e) => {
           // Leaving with the pointer only clears the highlight if no row holds focus.
-          if (!e.currentTarget.contains(document.activeElement)) setActive(null);
+          if (selected === null && !e.currentTarget.contains(document.activeElement)) setActive(null);
         }}
         onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null);
+          if (selected === null && !e.currentTarget.contains(e.relatedTarget as Node | null)) setActive(null);
         }}
       >
         {results.map((r, i) => (
@@ -317,15 +338,19 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
                 className={styles.rowBackground}
                 aria-hidden="true"
                 initial={false}
-                animate={{ opacity: active === i ? 1 : 0, scale: active === i || reduced ? 1 : 0.96 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
+                animate={{
+                  opacity: lit === i ? 1 : 0,
+                  scale: lit === i || reduced ? 1 : 0.96,
+                  backgroundColor: selected === i ? SELECTED_COLOR : HOVER_COLOR,
+                }}
+                transition={{ duration: 0.15, ease: 'easeOut', backgroundColor: { duration: 0 } }}
               />
             )}
             <button
               type="button"
               className={styles.rowButton}
               tabIndex={i === tabStop ? 0 : -1}
-              onClick={() => onSelect(r)}
+              onClick={() => choose(i)}
               onPointerEnter={() => setActive(i)}
               onFocus={() => {
                 setActive(i);
@@ -343,14 +368,20 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
           <motion.span
             className={styles.highlight}
             data-search-highlight
+            data-selected={selected !== null}
             aria-hidden="true"
-            initial={{ opacity: 0, top: rect.top, height: rect.height }}
-            animate={{ opacity: active === null ? 0 : 1, top: rect.top, height: rect.height }}
+            initial={{ opacity: 0, top: rect.top, height: rect.height, backgroundColor: HOVER_COLOR }}
+            animate={{
+              opacity: lit === null ? 0 : 1,
+              top: rect.top,
+              height: rect.height,
+              backgroundColor: selected === null ? HOVER_COLOR : SELECTED_COLOR,
+            }}
             // Per the brief the highlight jumps: position changes instantly and
             // only opacity eases, so skimming the list never shows it in transit.
             transition={
               highlightMotion === 'slide' && !reduced
-                ? { duration: highlightDuration, ease: [0.25, 1, 0.5, 1], opacity: { duration: 0.1 } }
+                ? { duration: highlightDuration, ease: [0.25, 1, 0.5, 1], opacity: { duration: 0.1 }, backgroundColor: { duration: 0 } }
                 : { duration: 0, opacity: { duration: 0.1 } }
             }
             style={{ zIndex: -1 }}

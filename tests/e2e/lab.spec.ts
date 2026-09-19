@@ -326,7 +326,33 @@ test.describe('Lab: expanding search', () => {
     await input.fill('tabs');
     await input.press('Enter');
     await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
-    await rows.nth(1).click();
+    // Acknowledge, then leave: the chosen row's highlight brightens and holds briefly before the collapse.
+    const highlight = stage(page).locator('[data-search-highlight]');
+    await rows.nth(1).hover();
+    await expect(highlight).toHaveAttribute('data-selected', 'false');
+    const hoverColor = await highlight.evaluate((el) => getComputedStyle(el).backgroundColor);
+    // Click in-page and sample every frame, so Playwright round-trips cannot eat the ~120ms hold.
+    const samples = await rows.nth(1).evaluate(
+      (btn) =>
+        new Promise<[string | undefined, string | null, string | undefined][]>((resolve) => {
+          const out: [string | undefined, string | null, string | undefined][] = [];
+          const t0 = performance.now();
+          (btn as HTMLButtonElement).click();
+          const tick = () => {
+            const h = document.querySelector<HTMLElement>('[data-search-highlight]');
+            const c = document.querySelector<HTMLElement>('[data-search-card]');
+            out.push([h?.dataset.selected, h ? getComputedStyle(h).backgroundColor : null, c?.dataset.state]);
+            if (performance.now() - t0 < 300) requestAnimationFrame(tick);
+            else resolve(out);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
+    const lit = samples.filter(([sel, color, state]) => sel === 'true' && color !== hoverColor && state === 'results');
+    // Held lit for several frames before the card left.
+    expect(lit.length).toBeGreaterThan(3);
+    expect(samples[0][2]).toBe('results');
+    expect(samples.at(-1)![2]).toBe('idle');
     await expect(card(page)).toHaveAttribute('data-state', 'idle');
     await expect(input).toHaveValue('');
     await expect(input).toBeFocused();

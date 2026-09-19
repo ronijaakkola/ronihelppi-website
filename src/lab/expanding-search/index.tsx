@@ -16,6 +16,7 @@ export default function ExpandingSearchDemo() {
       stagger: [0.035, 0, 0.15, 0.005],
       highlightMotion: { type: 'select', options: ['instant', 'slide'] },
       highlightDuration: [0.12, 0.05, 0.4, 0.01],
+      selectHold: [120, 0, 400, 10],
       loading: { type: 'select', options: ['skeleton', 'spinner'] },
       hover: { type: 'select', options: ['shared', 'row'] },
       entrance: { type: 'select', options: ['stagger', 'once'] },
@@ -32,6 +33,7 @@ export default function ExpandingSearchDemo() {
         stagger={dial.stagger}
         highlightMotion={dial.highlightMotion as HighlightMotion}
         highlightDuration={dial.highlightDuration}
+        selectHold={dial.selectHold}
         loading={dial.loading as LoadingStyle}
         hover={dial.hover as HoverStyle}
         entrance={dial.entrance as EntranceStyle}
