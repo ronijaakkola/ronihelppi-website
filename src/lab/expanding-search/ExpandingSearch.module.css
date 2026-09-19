@@ -129,8 +129,6 @@
   outline: 2px solid #f4f4f4;
   outline-offset: -2px;
 }
-/* Every name is plain white; the matched letters are underlined, so a hit is
-   emphasis added, never emphasis taken from the rest. */
 .title {
   font-weight: 500;
 }
@@ -145,21 +143,12 @@
   font-size: 0.9em;
 }
 
-/* Shared highlight: one element that springs between rows. */
+/* One highlight behind the list; Motion positions and colours it. */
 .highlight {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  border-radius: 0.85em;
-  /* background is driven by Motion: hover grey, brighter while a choice is acknowledged. */
-  pointer-events: none;
-}
-
-/* Per-row variant: each row paints its own background instead. */
-.rowBackground {
-  position: absolute;
-  inset: 0;
   border-radius: 0.85em;
   pointer-events: none;
 }
@@ -169,10 +158,7 @@
   padding: 0;
   list-style: none;
 }
-/* The skeleton row is the result row's box exactly: same padding and gap, and
-   each bone is as tall as the text line it stands in for, with the visible bar
-   drawn inside it. The body is measured from whichever layer is showing, so any
-   drift here would make the card resize when results land. */
+/* Same box as a result row, so the card does not resize when results land. */
 .skeletonRow {
   display: flex;
   flex-direction: column;
@@ -208,33 +194,10 @@
   }
 }
 
-.spinnerWrap {
-  display: grid;
-  place-items: center;
-  /* Four result rows: 4 × (0.55em × 2 padding + 1.4em title + 0.15em gap + 1.26em meta). */
-  min-height: calc(4 * (1.1em + 1.4em + 0.15em + 1.26em));
-}
-.spinner {
-  width: 1.4em;
-  height: 1.4em;
-  border-radius: 50%;
-  border: 2px solid #3a3a3c;
-  border-top-color: #f4f4f4;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(1turn);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .bone::before {
     animation: none;
     background: #2c2c2e;
-  }
-  .spinner {
-    animation-duration: 2.4s;
   }
 }
 

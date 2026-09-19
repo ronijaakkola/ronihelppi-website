@@ -4,33 +4,18 @@ import { initialState, reduce, type SearchResult } from './machine';
 import { matchRange, rankResults } from './mockSearch';
 import styles from './ExpandingSearch.module.css';
 
-export type LoadingStyle = 'skeleton' | 'spinner';
-export type HoverStyle = 'shared' | 'row';
-export type EntranceStyle = 'stagger' | 'once';
-export type HighlightMotion = 'instant' | 'slide';
-
 export interface ExpandingSearchProps {
-  /** Seconds the card takes to grow. */
+  /** Seconds the card takes to grow. The collapse runs at three quarters of it. */
   expandDuration: number;
   /** Fake network delay in ms before results land. */
   loadDelay: number;
   /** Seconds each result's entrance lasts, and the gap between rows. */
   resultDuration: number;
   stagger: number;
-  /** How the shared highlight reaches the hovered row: a jump (brief) or a short tween. */
-  highlightMotion: HighlightMotion;
-  /** Seconds for the 'slide' variant's travel. */
-  highlightDuration: number;
-  /** ms the chosen row stays lit before the card collapses: acknowledge, then leave. */
+  /** ms the chosen row stays lit before the card collapses. */
   selectHold: number;
-  loading: LoadingStyle;
-  hover: HoverStyle;
-  entrance: EntranceStyle;
 }
 
-// The "sheet" curve for the expansion (fast start, long settle) and a
-// steeper ease-out for the rows rising into place.
-// Highlight colours: hover, and the brighter step that acknowledges a choice.
 const HOVER_COLOR = '#2c2c2e';
 const SELECTED_COLOR = '#48484c';
 
@@ -39,21 +24,17 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
 
 /**
  * A search input that turns into a results card. The card is pinned by its
- * top edge, so growing its body reveals the results *below* the input while
- * the input itself never moves. Motion decisions: 320ms sheet curve for the
- * growth, skeleton while loading, an instant highlight, 35ms row stagger.
+ * top edge, so growing its body reveals the results below the input while the
+ * input itself never moves.
  */
-export default function ExpandingSearch(props: ExpandingSearchProps) {
-  const { expandDuration, loadDelay, resultDuration, stagger, highlightMotion, highlightDuration, selectHold, loading, hover, entrance } = props;
+export default function ExpandingSearch({ expandDuration, loadDelay, resultDuration, stagger, selectHold }: ExpandingSearchProps) {
   const reduced = useReducedMotion() ?? false;
   const [state, dispatch] = useReducer(reduce, initialState);
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const open = state.status !== 'idle';
 
-  // Fake fetch. Keyed on the request id so a re-search or reset mid-flight
-  // clears the pending timer, and a slow response for an old id is refused by
-  // the reducer anyway.
   useEffect(() => {
     if (state.status !== 'loading') return;
     const { request, query } = state;
@@ -61,8 +42,8 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
     return () => window.clearTimeout(timer);
   }, [state.status, state.request, state.query, loadDelay]);
 
-  // Body height is measured, not guessed: the skeleton and the result list
-  // are the same height, so the card grows once and then stays put.
+  // The skeleton and the result list share one box, so the body is measured
+  // once and the card never resizes when results replace the skeleton.
   const innerRef = useRef<HTMLDivElement>(null);
   const [bodyHeight, setBodyHeight] = useState(0);
   useLayoutEffect(() => {
@@ -79,37 +60,29 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
     e?.preventDefault();
     dispatch({ type: 'submit', query: value });
   };
-  // Choosing a result ends the search: back to an empty, focused input.
   const reset = () => {
     dispatch({ type: 'reset' });
     setValue('');
     inputRef.current?.focus();
   };
-  // Escape backs out but keeps the term, selected, so it can be typed over.
   const escape = () => {
     dispatch({ type: 'reset' });
-    const input = inputRef.current;
-    input?.focus();
-    input?.select();
+    inputRef.current?.focus();
+    inputRef.current?.select();
   };
-  const listRef = useRef<HTMLUListElement>(null);
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       // Browsers clear a type="search" input on Escape; keep the term instead.
       e.preventDefault();
       escape();
     }
-    // Down from the input walks into the results, like a combobox.
     if (e.key === 'ArrowDown' && state.status === 'results') {
       e.preventDefault();
       listRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
     }
   };
 
-  // Exits are shorter than entries: the user has already decided, so the
-  // collapse gets out of the way at three quarters of the growth time.
   const grow: Transition = reduced ? { duration: 0 } : { duration: open ? expandDuration : expandDuration * 0.75, ease: SHEET };
-  const fade: Transition = { duration: 0.15, ease: 'linear' };
 
   return (
     <div className={styles.search}>
@@ -128,9 +101,7 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             onKeyDown={onKeyDown}
           />
           <button type="submit" className={styles.go} aria-label="Search">
-            {/* The glyph's lens sits at 11,11 and its handle ends at 21,21, so a 0,0 24×24
-                viewBox centres the bounding box but leaves the visual mass up-left. Shifting
-                the viewBox by half a unit puts the optical centre on the button's centre. */}
+            {/* viewBox shifted half a unit so the lens, not the bounding box, is centred. */}
             <svg viewBox="0.5 0.5 22 22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M17 17L21 21" />
               <path d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z" />
@@ -148,7 +119,6 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             if (state.status === 'expanding') dispatch({ type: 'expanded' });
           }}
         >
-          {/* Rendered in every state so its height is known before the card grows. */}
           <div className={styles.bodyInner} ref={innerRef}>
             <AnimatePresence initial={false}>
               {(state.status === 'expanding' || state.status === 'loading') && (
@@ -157,10 +127,10 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: state.status === 'loading' ? 1 : 0 }}
                   exit={{ opacity: 0, transition: { duration: 0.12 } }}
-                  transition={fade}
+                  transition={{ duration: 0.15, ease: 'linear' }}
                   aria-hidden={state.status !== 'loading'}
                 >
-                  {loading === 'skeleton' ? <Skeleton /> : <Spinner />}
+                  <Skeleton />
                   {state.status === 'loading' && (
                     <span className={styles.visuallyHidden} role="status">
                       Searching for {state.query}
@@ -177,18 +147,13 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
                   onLeaveUp={() => inputRef.current?.focus()}
                   results={state.results}
                   query={state.query}
-                  hover={hover}
-                  entrance={reduced ? 'once' : entrance}
                   reduced={reduced}
                   duration={resultDuration}
                   stagger={stagger}
-                  highlightMotion={highlightMotion}
-                  highlightDuration={highlightDuration}
                   selectHold={selectHold}
                 />
               )}
               {state.status === 'idle' && (
-                // Placeholder that gives the body its future height while collapsed.
                 <div key="ghost" aria-hidden="true" style={{ visibility: 'hidden' }}>
                   <Skeleton />
                 </div>
@@ -196,7 +161,6 @@ export default function ExpandingSearch(props: ExpandingSearchProps) {
             </AnimatePresence>
           </div>
         </motion.div>
-
       </div>
     </div>
   );
@@ -215,41 +179,29 @@ function Skeleton() {
   );
 }
 
-function Spinner() {
-  return (
-    <div className={styles.spinnerWrap} aria-hidden="true">
-      <span className={styles.spinner} />
-    </div>
-  );
-}
-
 interface ResultsProps {
   listRef: RefObject<HTMLUListElement | null>;
-  /** Escape on a row: collapse and hand focus back to the input. */
   onEscape: () => void;
-  /** A result was chosen (click, or Enter on a focused row): the search is done. */
   onSelect: (result: SearchResult) => void;
-  /** ArrowUp on the first row: focus goes back to the input. */
+  /** ArrowUp on the first row hands focus back to the input. */
   onLeaveUp: () => void;
   results: SearchResult[];
   query: string;
-  hover: HoverStyle;
-  entrance: EntranceStyle;
   reduced: boolean;
   duration: number;
   stagger: number;
-  highlightMotion: HighlightMotion;
-  highlightDuration: number;
   selectHold: number;
 }
 
-function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover, entrance, reduced, duration, stagger, highlightMotion, highlightDuration, selectHold }: ResultsProps) {
+function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduced, duration, stagger, selectHold }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
-  // Acknowledge, then leave (the macOS menu pattern): the chosen row's
-  // highlight brightens and holds for `selectHold` before the card collapses,
-  // so the click is seen to land. Further clicks during the hold are ignored.
+  // Only the last focused row is in the tab order, so Tab leaves the list.
+  const [tabStop, setTabStop] = useState(0);
+  // The chosen row stays lit for `selectHold` before the card collapses.
   const [selected, setSelected] = useState<number | null>(null);
   const holdTimer = useRef<number | undefined>(undefined);
+  const lit = selected ?? active;
+
   const choose = (i: number) => {
     if (selected !== null) return;
     setSelected(i);
@@ -257,27 +209,19 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
     holdTimer.current = window.setTimeout(() => onSelect(results[i]), selectHold);
   };
   useEffect(() => () => window.clearTimeout(holdTimer.current), []);
-  const lit = selected ?? active;
-  // Roving tabindex: only the last focused row is in the tab order, so Tab
-  // leaves the list and the arrow keys move within it.
-  const [tabStop, setTabStop] = useState(0);
-  const focusRow = (i: number) => {
-    const row = listRef.current?.children[i]?.querySelector<HTMLButtonElement>('button');
-    row?.focus();
-  };
+
+  const focusRow = (i: number) => listRef.current?.children[i]?.querySelector<HTMLButtonElement>('button')?.focus();
   const onListKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
-    // Start from the focused row (tabStop), never from where the pointer rests.
-    const i = tabStop;
     const last = results.length - 1;
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        focusRow(Math.min(i + 1, last));
+        focusRow(Math.min(tabStop + 1, last));
         break;
       case 'ArrowUp':
         e.preventDefault();
-        if (i === 0) onLeaveUp();
-        else focusRow(i - 1);
+        if (tabStop === 0) onLeaveUp();
+        else focusRow(tabStop - 1);
         break;
       case 'Home':
         e.preventDefault();
@@ -293,21 +237,18 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
         break;
     }
   };
-  const [rect, setRect] = useState<{ top: number; height: number } | null>(null);
 
-  // Position the shared highlight from the hovered/focused row's box.
+  const [rect, setRect] = useState<{ top: number; height: number } | null>(null);
   useLayoutEffect(() => {
-    if (hover !== 'shared' || lit === null) return;
+    if (lit === null) return;
     const row = listRef.current?.children[lit] as HTMLElement | undefined;
     if (row) setRect({ top: row.offsetTop, height: row.offsetHeight });
-  }, [lit, hover]);
+  }, [lit]);
 
   const rowTransition = (i: number): Transition =>
-    entrance === 'stagger' ? { duration, ease: RISE, delay: i * stagger } : { duration: reduced ? 0.15 : 0.18, ease: 'linear' };
+    reduced ? { duration: 0.15, ease: 'linear' } : { duration, ease: RISE, delay: i * stagger };
 
   return (
-    // One entrance per container: the rows animate in themselves, so the
-    // wrapper only owns the exit (used when the card collapses or re-searches).
     <motion.div exit={{ opacity: 0, transition: { duration: 0.1 } }}>
       <span className={styles.visuallyHidden} role="status">
         {results.length} results for {query}
@@ -318,7 +259,6 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
         data-search-results
         onKeyDown={onListKeyDown}
         onPointerLeave={(e) => {
-          // Leaving with the pointer only clears the highlight if no row holds focus.
           if (selected === null && !e.currentTarget.contains(document.activeElement)) setActive(null);
         }}
         onBlur={(e) => {
@@ -329,23 +269,10 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
           <motion.li
             key={r.id}
             className={styles.row}
-            initial={{ opacity: 0, y: entrance === 'stagger' ? 6 : 0 }}
+            initial={{ opacity: 0, y: reduced ? 0 : 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={rowTransition(i)}
           >
-            {hover === 'row' && (
-              <motion.span
-                className={styles.rowBackground}
-                aria-hidden="true"
-                initial={false}
-                animate={{
-                  opacity: lit === i ? 1 : 0,
-                  scale: lit === i || reduced ? 1 : 0.96,
-                  backgroundColor: selected === i ? SELECTED_COLOR : HOVER_COLOR,
-                }}
-                transition={{ duration: 0.15, ease: 'easeOut', backgroundColor: { duration: 0 } }}
-              />
-            )}
             <button
               type="button"
               className={styles.rowButton}
@@ -364,7 +291,7 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
             </button>
           </motion.li>
         ))}
-        {hover === 'shared' && rect && (
+        {rect && (
           <motion.span
             className={styles.highlight}
             data-search-highlight
@@ -377,13 +304,8 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
               height: rect.height,
               backgroundColor: selected === null ? HOVER_COLOR : SELECTED_COLOR,
             }}
-            // Per the brief the highlight jumps: position changes instantly and
-            // only opacity eases, so skimming the list never shows it in transit.
-            transition={
-              highlightMotion === 'slide' && !reduced
-                ? { duration: highlightDuration, ease: [0.25, 1, 0.5, 1], opacity: { duration: 0.1 }, backgroundColor: { duration: 0 } }
-                : { duration: 0, opacity: { duration: 0.1 } }
-            }
+            // The highlight jumps; only its opacity eases.
+            transition={{ duration: 0, opacity: { duration: 0.1 } }}
             style={{ zIndex: -1 }}
           />
         )}
@@ -392,8 +314,6 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, hover
   );
 }
 
-// The matched letters are set heavier than the rest of the name, which is all
-// the explanation the ranking needs; a row with no hit shows a plain name.
 function Highlighted({ title, query }: { title: string; query: string }) {
   const range = matchRange(title, query);
   if (!range) return <>{title}</>;
