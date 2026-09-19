@@ -109,10 +109,17 @@ if (virtualTimers) {
     window.__step = (ms) => {
       step(ms);
       const now = performance.now();
-      for (const [t, timer] of [...timers]) {
-        if (timer.at <= now) {
-          timers.delete(t);
-          timer.cb(...timer.a);
+      // Loop until nothing due is left, so a timer scheduled from inside a
+      // callback with a delay of 0 fires this frame, not the next.
+      let fired = true;
+      while (fired) {
+        fired = false;
+        for (const [t, timer] of [...timers]) {
+          if (timer.at <= now) {
+            timers.delete(t);
+            timer.cb(...timer.a);
+            fired = true;
+          }
         }
       }
     };

@@ -210,7 +210,8 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduc
   };
   useEffect(() => () => window.clearTimeout(holdTimer.current), []);
 
-  const focusRow = (i: number) => listRef.current?.children[i]?.querySelector<HTMLButtonElement>('button')?.focus();
+  const rowAt = (i: number) => listRef.current?.querySelectorAll<HTMLLIElement>('li')[i];
+  const focusRow = (i: number) => rowAt(i)?.querySelector<HTMLButtonElement>('button')?.focus();
   const onListKeyDown = (e: KeyboardEvent<HTMLUListElement>) => {
     const last = results.length - 1;
     switch (e.key) {
@@ -241,7 +242,7 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduc
   const [rect, setRect] = useState<{ top: number; height: number } | null>(null);
   useLayoutEffect(() => {
     if (lit === null) return;
-    const row = listRef.current?.children[lit] as HTMLElement | undefined;
+    const row = rowAt(lit);
     if (row) setRect({ top: row.offsetTop, height: row.offsetHeight });
   }, [lit]);
 
