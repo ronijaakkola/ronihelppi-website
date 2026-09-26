@@ -4,6 +4,7 @@ import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';
 import { remarkObsidianImages } from './src/utils/remark-obsidian-images';
 import rehypeExternalLinks from 'rehype-external-links';
+import { rehypeExternalLinkPunctuation } from './src/utils/rehype-external-link-punctuation';
 import { rehypeCodeBlocks } from './src/utils/rehype-code-blocks';
 import { rehypeImageFigure } from './src/utils/rehype-image-figure';
 import { rehypeHeadingLinks } from './src/utils/rehype-heading-links';
@@ -62,6 +63,8 @@ export default defineConfig({
             children: [{ type: 'text', value: ' (opens in new tab)' }],
           },
         }],
+        // Must follow rehypeExternalLinks so it sees the final anchors.
+        rehypeExternalLinkPunctuation,
       ],
     }),
   },

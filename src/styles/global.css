@@ -216,7 +216,19 @@ body {
   color: var(--color-text-primary);
   background-color: var(--color-bg);
   min-height: 100vh;
+}
+
+/* Pretty wrapping is for reading text only. It is inherited, so it lives on
+   the paragraphs and prose list items themselves, not on body, where it would
+   also reach navigation, buttons, the table of contents and code blocks. */
+main p,
+.prose-content li:not(.toc-row) {
   text-wrap: pretty;
+}
+
+/* A code block nested in a list item would otherwise inherit `pretty`. */
+.prose-content pre {
+  text-wrap: wrap;
 }
 
 /* ==========================================================================
@@ -565,6 +577,18 @@ ol {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+
+/* rehype-external-link-punctuation wraps a link and the punctuation right after
+   it so they cannot split across lines. The anchor is atomic (inline-flex), so
+   `nowrap` here only removes the break opportunity between it and the
+   punctuation; the anchor resets to normal so its own text wraps as before. */
+.external-link-group {
+  white-space: nowrap;
+}
+
+.external-link-group > a {
+  white-space: normal;
 }
 
 :is(.prose-content a[href^="http"], .contact-external-link)::after {
