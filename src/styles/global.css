@@ -216,6 +216,7 @@ body {
   color: var(--color-text-primary);
   background-color: var(--color-bg);
   min-height: 100vh;
+  text-wrap: pretty;
 }
 
 /* ==========================================================================
@@ -224,6 +225,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
+  text-wrap: balance;
 }
 
 /* ==========================================================================
@@ -966,7 +968,6 @@ ol {
   letter-spacing: var(--tracking-hero);
   color: var(--color-text-primary);
   line-height: var(--leading-normal);
-  text-wrap: balance;
 }
 
 /* ==========================================================================
