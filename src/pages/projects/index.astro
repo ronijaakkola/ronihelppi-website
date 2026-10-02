@@ -475,6 +475,7 @@ const schemas = [
 
 <script>
   import { balanceTabletGrid } from '../../utils/balanceGrid';
+  import { onPage } from '../../utils/page-lifecycle';
 
   // Recompute tablet balancing over the currently visible cards, so a narrow
   // card never sits alone in a one-slot row (including after filtering). Reset
@@ -719,14 +720,6 @@ const schemas = [
     applyFilter(initialFilter, filterChips, gridItems);
 
     filterChips.forEach((chip) => {
-      // initFilters runs both directly and on `astro:page-load` (which fires on
-      // the initial load too), so guard against binding the click handler twice
-      // on the same element — a double-fire would corrupt the stateful FLIP
-      // pass. View-transition navigations swap in fresh chips without the flag,
-      // so they still get bound.
-      if (chip.dataset.filterBound) return;
-      chip.dataset.filterBound = 'true';
-
       chip.addEventListener('click', () => {
         const filter = chip.dataset.filter!;
         if (grid) {
@@ -752,6 +745,5 @@ const schemas = [
     });
   }
 
-  initFilters();
-  document.addEventListener('astro:page-load', initFilters);
+  onPage(initFilters);
 </script>

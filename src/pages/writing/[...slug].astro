@@ -371,6 +371,8 @@ const schemas = [
 </style>
 
 <script>
+  import { onPage } from '../../utils/page-lifecycle';
+
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   // Morph a button label through a brief blur instead of snapping the text.
@@ -408,24 +410,19 @@ const schemas = [
     });
   }
 
-  initCopyMarkdown();
-  document.addEventListener('astro:page-load', initCopyMarkdown);
+  onPage(initCopyMarkdown);
 
   function initCopyCode() {
     document.querySelectorAll<HTMLButtonElement>('.code-copy-btn').forEach((btn) => {
-      // Remove any previous listener by cloning
-      const fresh = btn.cloneNode(true) as HTMLButtonElement;
-      btn.replaceWith(fresh);
-
-      fresh.addEventListener('click', async () => {
-        const pre = fresh.closest('.code-block-wrapper')?.querySelector('pre');
+      btn.addEventListener('click', async () => {
+        const pre = btn.closest('.code-block-wrapper')?.querySelector('pre');
         if (!pre) return;
 
         try {
           await navigator.clipboard.writeText(pre.textContent ?? '');
-          swapLabel(fresh, 'Copied!');
+          swapLabel(btn, 'Copied!');
           setTimeout(() => {
-            swapLabel(fresh, 'Copy');
+            swapLabel(btn, 'Copy');
           }, 2000);
         } catch {
           // Clipboard API unavailable — silently ignore
@@ -434,8 +431,7 @@ const schemas = [
     });
   }
 
-  initCopyCode();
-  document.addEventListener('astro:page-load', initCopyCode);
+  onPage(initCopyCode);
 
   function placeCursor() {
     const cursor = document.querySelector('.writing-cursor');
@@ -467,20 +463,14 @@ const schemas = [
     cursor.classList.add('placed');
   }
 
-  placeCursor();
-  document.addEventListener('astro:page-load', placeCursor);
+  onPage(placeCursor);
 
   // Inline videos loop silently like an animated image. They ship WITHOUT the
   // `autoplay` attribute and sit on their poster until scrolled into view — so
   // they don't decode off-screen, and the reader always meets the clip at the
   // start of the loop rather than somewhere mid-animation. Playback pauses again
   // when the clip leaves the viewport, resuming where it left off on return.
-  let videoObserver: IntersectionObserver | null = null;
-
   function initInViewVideos() {
-    videoObserver?.disconnect();
-    videoObserver = null;
-
     const videos = document.querySelectorAll<HTMLVideoElement>(
       '.prose-content video[data-autoplay]',
     );
@@ -493,7 +483,7 @@ const schemas = [
       return;
     }
 
-    videoObserver = new IntersectionObserver(
+    const videoObserver = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           const video = entry.target as HTMLVideoElement;
@@ -513,9 +503,9 @@ const schemas = [
       { threshold: 0.4 },
     );
 
-    videos.forEach((video) => videoObserver!.observe(video));
+    videos.forEach((video) => videoObserver.observe(video));
+    return () => videoObserver.disconnect();
   }
 
-  initInViewVideos();
-  document.addEventListener('astro:page-load', initInViewVideos);
+  onPage(initInViewVideos);
 </script>

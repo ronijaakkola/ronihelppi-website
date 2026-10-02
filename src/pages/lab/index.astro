@@ -226,16 +226,14 @@ const schemas = [
 </style>
 
 <script>
+  import { onPage } from '../../utils/page-lifecycle';
+
   // Previews loop silently like animated images, playing only while on screen
   // so the visitor meets each clip at the start of its loop. Under reduced
   // motion they stay on their poster; the demo page itself still runs motion.
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let observer: IntersectionObserver | null = null;
 
   function initLabPreviews() {
-    observer?.disconnect();
-    observer = null;
-
     const videos = document.querySelectorAll<HTMLVideoElement>('.lab-video[data-autoplay]');
     if (!videos.length) return;
 
@@ -244,7 +242,7 @@ const schemas = [
       return;
     }
 
-    observer = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           const video = entry.target as HTMLVideoElement;
@@ -258,9 +256,9 @@ const schemas = [
       },
       { threshold: 0.4 },
     );
-    videos.forEach((video) => observer!.observe(video));
+    videos.forEach((video) => observer.observe(video));
+    return () => observer.disconnect();
   }
 
-  initLabPreviews();
-  document.addEventListener('astro:page-load', initLabPreviews);
+  onPage(initLabPreviews);
 </script>

@@ -263,6 +263,7 @@ const { headings } = Astro.props;
 
 <script>
   import { pickActiveHeadingId, type HeadingPosition } from '../utils/heading-rail';
+  import { onPage } from '../utils/page-lifecycle';
 
   // Roughly the reading focus line: a section becomes "current" once its heading
   // has scrolled to within this many pixels of the viewport top. The header is
@@ -275,17 +276,7 @@ const { headings } = Astro.props;
     link: HTMLAnchorElement;
   }
 
-  let cleanup: (() => void) | null = null;
-  const pageLoadHandlerKey = '__headingRailPageLoadHandler__';
-
   function initHeadingRail() {
-    // Tear down listeners from the previous page (the DOM is swapped on
-    // View Transitions navigation, so old element references are stale).
-    if (cleanup) {
-      cleanup();
-      cleanup = null;
-    }
-
     const rail = document.querySelector<HTMLElement>('[data-heading-rail]');
     if (!rail) return;
 
@@ -328,8 +319,7 @@ const { headings } = Astro.props;
     if (tracked.length === 0) {
       // Still tear down the click handler we just attached (blur behaviour needs
       // no tracked headings, but we must not leak the listener).
-      cleanup = () => rail.removeEventListener('click', onRailClick);
-      return;
+      return () => rail.removeEventListener('click', onRailClick);
     }
 
     let activeId: string | null = null;
@@ -444,7 +434,7 @@ const { headings } = Astro.props;
     window.addEventListener('keydown', onManualScroll);
     update();
 
-    cleanup = () => {
+    return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       window.removeEventListener('wheel', onManualScroll);
@@ -455,18 +445,5 @@ const { headings } = Astro.props;
     };
   }
 
-  initHeadingRail();
-
-  const previousPageLoadHandler = (window as typeof window & {
-    [pageLoadHandlerKey]?: () => void;
-  })[pageLoadHandlerKey];
-  if (previousPageLoadHandler) {
-    document.removeEventListener('astro:page-load', previousPageLoadHandler);
-  }
-
-  (window as typeof window & {
-    [pageLoadHandlerKey]?: () => void;
-  })[pageLoadHandlerKey] = initHeadingRail;
-
-  document.addEventListener('astro:page-load', initHeadingRail);
+  onPage(initHeadingRail);
 </script>

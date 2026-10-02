@@ -54,20 +54,33 @@ The Lighthouse CI assertion for 100% performance score failed on PR checks (93%)
 
 ---
 
-## Always register Astro View Transitions listeners for client-side scripts
+## Run page scripts through `onPage` — never `init(); addEventListener('astro:page-load', init)`
 
-This project uses Astro View Transitions (`<ViewTransitions />`). Scripts that run on page load will only execute once — subsequent client-side navigations swap the DOM without re-running `<script>` tags. Multiple components in the codebase already follow this pattern (BackLink, Header, Lightbox).
+This project uses Astro View Transitions (`<ClientRouter />`). A bundled `<script>` executes once per session; client-side navigations swap the DOM without re-running it, so per-page behaviour has to be re-run by hand. The old recipe here ("call `init()` now and on `astro:page-load`") was wrong: the router fires `astro:page-load` on the initial `window` load too (`addEventListener("load", onPageLoad)` in `astro/dist/transitions/router.js`), and also right after a script first executes during a navigation. Either way `init` ran twice for the first page, so the "Copy post" button got two click handlers (two clipboard writes per click). Each script then grew its own guard (`dataset.filterBound`, `cloneNode`, window-global handler keys) with different rules.
+
+**The rule now lives in `src/utils/page-lifecycle.ts`:**
+```ts
+import { onPage } from '../utils/page-lifecycle';
+
+onPage(() => {
+  const observer = new IntersectionObserver(/* ... */);
+  // bind to this page's elements ...
+  return () => observer.disconnect(); // optional: undo anything that outlives the page
+});
+```
+`setup` runs immediately, then on every `astro:after-swap` with the previous run's cleanup called first. `after-swap` fires only for navigations, after the new DOM is in place and scroll is restored, and before the view transition captures the new page, so client-only state (active nav link, breadcrumb, filters) is in the first frame. `astro:page-load` would also defer a hard load's setup until `window.load` (every eager image).
 
 **Steps to avoid this:**
-1. When adding any client-side `<script>` in an Astro component, wrap logic in a named function
-2. Call the function immediately for the initial load
-3. Also register it on `astro:page-load` for View Transitions navigations:
-   ```js
-   function init() { /* ... */ }
-   init();
-   document.addEventListener('astro:page-load', init);
-   ```
-4. If the function manipulates DOM elements, reset state at the start (e.g. remove classes, move elements back) since the DOM may be in a stale state from the previous page
+1. Put per-page client logic in a setup function and hand it to `onPage`; do not add your own guards or `astro:page-load`/`astro:after-swap` listeners for it.
+2. Listeners on elements inside the swapped page need no cleanup. Return a cleanup for anything bound to `document`/`window`, observers, and timers.
+3. Truly session-wide wiring (document-level delegation like the theme toggle, the `c` shortcut) is bound once at the top of the script, not through `onPage`.
+4. `is:inline` scripts cannot import modules. The BaseLayout theme script and `CascadeAnimation` stay inline on purpose (they must run before first paint) and keep their window flags.
+
+---
+
+## The Header is not persisted — `transition:persist` on an Astro component tag is a no-op
+
+`<Header transition:persist />` compiled to a `data-astro-transition-persist` *prop*, which only `client:*` islands copy onto the DOM (`astro/dist/runtime/server/hydration.js`). No built page carried the attribute, so the Header was swapped on every navigation and the comments claiming otherwise were wrong. The directive was removed; the built HTML is unchanged except that Astro's `astroFade*`/`astroSlide*` keyframes move from the site-wide stylesheet into an inline `<style>` on the lab pages, the only pages (via `transition:name`) that reference them. To persist an Astro component, put the directive on an element inside it.
 
 ---
 
