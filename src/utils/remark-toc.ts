@@ -1,7 +1,6 @@
 import { visit } from 'unist-util-visit';
-import type { Root, Paragraph, Heading, Html } from 'mdast';
-import { toString } from 'mdast-util-to-string';
-import { createHeadingSlugger } from './heading-slug';
+import type { Root, Paragraph, Html } from 'mdast';
+import { collectH2Headings } from './extract-headings';
 
 /**
  * Remark plugin that replaces a `[toc]` marker in markdown with a
@@ -9,18 +8,9 @@ import { createHeadingSlugger } from './heading-slug';
  */
 export function remarkToc() {
   return (tree: Root) => {
-    // Slug every heading in document order with the same github-slugger Astro
-    // uses for heading ids, so TOC links resolve to the real heading anchors
-    // (including github-slugger's de-duplication of repeated headings).
-    const slugger = createHeadingSlugger();
-    const headings: { text: string; slug: string }[] = [];
-    visit(tree, 'heading', (node: Heading) => {
-      const text = toString(node);
-      const slug = slugger.slug(text);
-      if (node.depth === 2) {
-        headings.push({ text, slug });
-      }
-    });
+    // Slugged exactly as Astro slugs heading ids, so TOC links resolve to the
+    // real heading anchors.
+    const headings = collectH2Headings(tree);
 
     // Find and replace [toc] marker
     visit(tree, 'paragraph', (node: Paragraph, index, parent) => {

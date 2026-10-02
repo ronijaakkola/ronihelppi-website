@@ -56,7 +56,7 @@ npm run check
 │   │   ├── readTime.test.ts                  # Read time calculation tests
 │   │   └── title.test.ts                     # Title extraction tests
 │   └── content/
-│       └── config.test.ts                    # Content schema tests
+│       └── authoring.test.ts                 # Content authoring checks (schemas are validated by the build)
 └── tests/
     ├── build/
     │   └── output.test.ts                    # Build validation tests
@@ -74,9 +74,9 @@ npm run check
 
 ## What's Tested
 
-### Unit Tests (76 tests)
+### Unit Tests (171 tests)
 - **Remark Plugin** (16 tests): Obsidian image syntax transformation
-- **Content Schemas** (31 tests): Zod schema validation for posts and projects collections
+- **Content Authoring** (1 test): post hero images use relative paths. The collection schemas themselves are validated by `astro build` / `astro check` against the real content
 - **Utility Functions** (29 tests): sortByDate, readTime, title extraction
 
 ### Build Validation Tests (16 tests)

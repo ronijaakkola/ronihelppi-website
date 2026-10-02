@@ -5,7 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import HeadingRail from '../../components/HeadingRail.astro';
-import { calculateReadTime, formatReadTime } from '../../utils/readTime';
+import { readTime } from '../../utils/readTime';
 import { getTitleFromEntry } from '../../utils/title';
 import { extractH2Headings } from '../../utils/extract-headings';
 
@@ -29,9 +29,6 @@ const formattedDate = post.data.date.toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric',
 });
-
-// Calculate read time
-const readTime = formatReadTime(calculateReadTime(post.body || ''));
 
 // Get related posts from frontmatter (properly typed)
 const relatedPostSlugs = post.data.relatedPosts || [];
@@ -107,7 +104,7 @@ const schemas = [
             <span class="post-meta-details">
               <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
               <span class="post-meta-separator" aria-hidden="true">·</span>
-              <span>{readTime}</span>
+              <span>{readTime(post.body || '')}</span>
             </span>
           </div>
           <button class="copy-markdown-btn" data-title={title} type="button">Copy post</button>

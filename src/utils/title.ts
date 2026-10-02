@@ -1,13 +1,6 @@
 /**
- * Derives a display title from a filename.
- * Preserves original filename casing by stripping the .md extension.
- */
-export function getTitle(id: string): string {
-  return id.replace(/\.md$/, '');
-}
-
-/**
- * Derives a display title from a content collection entry.
+ * Derives a display title from a content collection entry: the original
+ * filename without its `.md` extension.
  *
  * The Content Layer `glob` loader slugifies `entry.id` (lowercased, dashed),
  * so the original filename casing is only available via `entry.filePath`.
@@ -15,5 +8,5 @@ export function getTitle(id: string): string {
  */
 export function getTitleFromEntry(entry: { id: string; filePath?: string }): string {
   const filename = entry.filePath?.split('/').pop() ?? entry.id;
-  return getTitle(filename);
+  return filename.replace(/\.md$/, '');
 }

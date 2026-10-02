@@ -1,72 +1,48 @@
 import { describe, it, expect } from 'vitest';
-import { calculateReadTime, formatReadTime } from './readTime';
+import { readTime } from './readTime';
 
-describe('calculateReadTime', () => {
+const words = (n: number) => Array(n).fill('word').join(' ');
+
+describe('readTime', () => {
   it('returns 1 minute for very short content', () => {
-    expect(calculateReadTime('Hello world')).toBe(1);
+    expect(readTime('Hello world')).toBe('1 minute read');
   });
 
-  it('calculates correct time for longer content', () => {
-    // 200 words = 1 minute at default 200 wpm
-    const words = Array(200).fill('word').join(' ');
-    expect(calculateReadTime(words)).toBe(1);
+  it('reads 200 words in 1 minute', () => {
+    expect(readTime(words(200))).toBe('1 minute read');
   });
 
   it('rounds up to next minute', () => {
-    // 201 words should be 2 minutes (rounds up)
-    const words = Array(201).fill('word').join(' ');
-    expect(calculateReadTime(words)).toBe(2);
+    expect(readTime(words(201))).toBe('2 minute read');
   });
 
   it('handles 400 words as 2 minutes', () => {
-    const words = Array(400).fill('word').join(' ');
-    expect(calculateReadTime(words)).toBe(2);
+    expect(readTime(words(400))).toBe('2 minute read');
+  });
+
+  it('formats long reads', () => {
+    expect(readTime(words(6000))).toBe('30 minute read');
   });
 
   it('handles empty string', () => {
-    expect(calculateReadTime('')).toBe(1);
+    expect(readTime('')).toBe('1 minute read');
   });
 
   it('handles whitespace-only string', () => {
-    expect(calculateReadTime('   \n\t  ')).toBe(1);
+    expect(readTime('   \n\t  ')).toBe('1 minute read');
   });
 
   it('strips HTML tags before counting', () => {
-    const html = '<p>Hello <strong>world</strong> this is <a href="#">a test</a></p>';
-    // "Hello world this is a test" = 6 words
-    expect(calculateReadTime(html)).toBe(1);
+    // 200 words wrapped in tags: still 1 minute, so the tags were not counted
+    const html = `<p><strong>${words(100)}</strong> <a href="#">${words(100)}</a></p>`;
+    expect(readTime(html)).toBe('1 minute read');
   });
 
   it('handles content with multiple spaces between words', () => {
-    expect(calculateReadTime('word1    word2     word3')).toBe(1);
-  });
-
-  it('respects custom words per minute', () => {
-    // 100 words at 100 wpm = 1 minute
-    const words = Array(100).fill('word').join(' ');
-    expect(calculateReadTime(words, 100)).toBe(1);
-
-    // 150 words at 100 wpm = 2 minutes (rounds up from 1.5)
-    const moreWords = Array(150).fill('word').join(' ');
-    expect(calculateReadTime(moreWords, 100)).toBe(2);
+    expect(readTime('word1    word2     word3')).toBe('1 minute read');
   });
 
   it('handles newlines and tabs in content', () => {
-    const content = 'word1\nword2\tword3\r\nword4';
-    expect(calculateReadTime(content)).toBe(1);
-  });
-});
-
-describe('formatReadTime', () => {
-  it('formats 1 minute correctly', () => {
-    expect(formatReadTime(1)).toBe('1 minute read');
-  });
-
-  it('formats multiple minutes correctly', () => {
-    expect(formatReadTime(5)).toBe('5 minute read');
-  });
-
-  it('formats large numbers correctly', () => {
-    expect(formatReadTime(30)).toBe('30 minute read');
+    expect(readTime('word1\nword2\tword3\r\nword4')).toBe('1 minute read');
   });
 });
