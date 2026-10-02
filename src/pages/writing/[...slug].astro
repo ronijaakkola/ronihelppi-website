@@ -7,7 +7,6 @@ import SectionHeading from '../../components/SectionHeading.astro';
 import HeadingRail from '../../components/HeadingRail.astro';
 import { calculateReadTime, formatReadTime } from '../../utils/readTime';
 import { getTitleFromEntry } from '../../utils/title';
-import { generateDescription } from '../../utils/description';
 import { extractH2Headings } from '../../utils/extract-headings';
 
 export async function getStaticPaths() {
@@ -44,7 +43,7 @@ const relatedPosts: CollectionEntry<'posts'>[] = relatedPostSlugs
 const heroImage = post.data.heroImage;
 const heroImageUrl = heroImage?.src;
 
-const description = post.data.description || generateDescription(post.body || '');
+const description = post.data.description;
 
 const postURL = new URL(`/writing/${post.id}/`, Astro.site).href;
 
@@ -100,9 +99,7 @@ const schemas = [
       <header class="post-header">
         <div class="post-title-group">
           <h1 class="page-title">{title}</h1>
-          {post.data.description && (
-            <p class="post-ingress">{post.data.description}</p>
-          )}
+          <p class="post-ingress">{description}</p>
         </div>
         <div class="post-meta-row">
           <div class="post-meta">

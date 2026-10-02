@@ -2,7 +2,6 @@ import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { getTitleFromEntry } from '../utils/title';
 import { sortByDateDesc } from '../utils/sortByDate';
-import { generateDescription } from '../utils/description';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
@@ -15,7 +14,7 @@ export async function GET(context: APIContext) {
     items: sortedPosts.map((post) => ({
       title: getTitleFromEntry(post),
       pubDate: post.data.date,
-      description: post.data.description || generateDescription(post.body || ''),
+      description: post.data.description,
       link: `/writing/${post.id}/`,
     })),
   });
