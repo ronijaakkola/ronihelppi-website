@@ -128,7 +128,7 @@ Lighthouse CI now runs during PR validation instead of deploy-time verification:
 - **Best Practices**: 100/100
 - **SEO**: 100/100
 
-Configuration is in `lighthouserc.json`.
+Configuration is in `lighthouserc.json`. Assert category scores only; the `lighthouse:recommended` preset adds strict per-audit assertions that fail on CI variance.
 
 ## Pre-commit Hook
 
@@ -139,6 +139,16 @@ npm run check && npm test
 ```
 
 This ensures type errors and unit test failures are caught before commits.
+
+## Local Gotchas
+
+- **Preview server.** Astro 7's `astro preview` runs as a daemon and Playwright reuses it locally, so a stale or stray daemon serves old `dist/` or leaves nothing on 4321 (it may sit on 4322). After every build, run `npx astro preview stop` before `npx playwright test`; "webServer exited early" on a first run is the daemon starting, so re-run once. If your element is in `dist/*.html` but missing in the test DOM, the server is stale.
+- **Markdown plugin edits** need a clean build, because the content layer caches rendered entries: `rm -rf .astro dist node_modules/.astro && npm run build`. The plugin's unit tests turn green while the built page still lags.
+- **Reading results.** Judge a run by its exit code or by grepping `passed|failed|flaky`, and check that the count went up after adding a test. Chain a push after tests with `&&`, never `;`.
+- **Fresh worktrees** need a real `npm ci` (Astro will not build through a symlinked `node_modules`) and `npx playwright install chromium`. Run the install again after a pull bumps Playwright.
+- **Scratch scripts** that import repo dependencies (`@playwright/test`, `sharp`, `motion`) only resolve from inside the repo. Put them in `test-results/` (gitignored; the next Playwright run clears it).
+- **Measure motion in headless Playwright.** A background Chrome tab is hidden, so transitions finish instantly there.
+- **Vitest 5 `--reporter=json`** writes to `.vitest/json/output.json` instead of stdout; pass `--outputFile` to choose the path.
 
 ## When Tests Fail
 
