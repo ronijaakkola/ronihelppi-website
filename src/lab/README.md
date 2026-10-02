@@ -34,6 +34,12 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
    after a visual change without guessing the timings.
 3. Set `published: true`. Unpublished demos are excluded from every page.
 
+`npm test` (`completeness.test.ts`) fails when a `meta.ts` has no `index.tsx`, or
+a published demo is missing `preview.mp4` or `poster.webp`, naming the slug and
+the missing file. `npm run test:build` also fails when `post` names a writing
+entry that was not built. The preview paths come from `preview-assets.mjs`;
+the pages, scripts and tests all read them from there.
+
 Animations: CSS where possible, `motion/react` otherwise. Each demo is its own
 lazy chunk, so Motion is only downloaded by demos that import it.
 

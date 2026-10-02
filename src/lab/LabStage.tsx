@@ -7,12 +7,19 @@ import styles from './LabStage.module.css';
 // whatever it imports, e.g. Motion). The registry never touches these.
 const demoLoaders = import.meta.glob<{ default: ComponentType }>('./*/index.tsx');
 
+const loaderFor = (slug: string) => demoLoaders[`./${slug}/index.tsx`];
+
+/** Whether `slug` has a component to load; `completeness.test.ts` checks every meta against this. */
+export function hasDemo(slug: string): boolean {
+  return loaderFor(slug) !== undefined;
+}
+
 const demoComponents = new Map<string, ReturnType<typeof lazy>>();
 
 function demoFor(slug: string) {
   let component = demoComponents.get(slug);
   if (!component) {
-    const load = demoLoaders[`./${slug}/index.tsx`];
+    const load = loaderFor(slug);
     if (!load) throw new Error(`No lab demo found for slug "${slug}"`);
     component = lazy(load);
     demoComponents.set(slug, component);

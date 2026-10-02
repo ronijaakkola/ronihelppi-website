@@ -47,6 +47,7 @@ npm run check
 │   ├── lab/
 │   │   ├── schema.test.ts                    # Lab metadata schema tests
 │   │   ├── index.test.ts                     # Lab registry (slug, sort, published) tests
+│   │   ├── completeness.test.ts              # Every demo folder has its index.tsx; every published demo its preview.mp4 and poster.webp
 │   │   ├── expanding-search/machine.test.ts  # Search state machine (idle → expanding → loading → results)
 │   │   ├── expanding-search/mockSearch.test.ts # Fake result ranking
 │   │   └── dialkit-stub.test.ts              # Production DialKit stub tests
@@ -75,14 +76,15 @@ npm run check
 
 ## What's Tested
 
-### Unit Tests (171 tests)
+### Unit Tests (175 tests)
 - **Remark Plugin** (16 tests): Obsidian image syntax transformation
 - **Content Authoring** (1 test): post hero images use relative paths. The collection schemas themselves are validated by `astro build` / `astro check` against the real content
 - **Utility Functions** (29 tests): sortByDate, readTime, title extraction
+- **Lab completeness** (1 test per demo folder + 1 per published demo): each `meta.ts` has a component LabStage can load, and each published demo has its preview assets in `public/`
 
 ### Build Validation Tests (16 tests)
 - HTML structure and file generation
-- Dynamic route generation for posts and projects
+- Dynamic route generation for posts, projects and Lab demos (including that a demo's `post` names a built post)
 - Image path validation
 - DOCTYPE and tag closure validation
 

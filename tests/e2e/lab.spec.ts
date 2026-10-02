@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { STAGE, STAGE_READY, SHELL, CAPTURE_ATTRIBUTE } from '../../src/lab/stage-contract.mjs';
+import { labPreviewPaths } from '../../src/lab/preview-assets.mjs';
 
 test.describe('Lab', () => {
   test('nav links to the lab and marks it current', async ({ page }) => {
@@ -17,9 +18,10 @@ test.describe('Lab', () => {
     const items = page.locator('.lab-item');
     expect(await items.count()).toBeGreaterThan(0);
 
+    const slug = (await items.first().locator('.lab-card').getAttribute('href'))!.split('/').pop()!;
     const video = items.first().locator('video');
-    await expect(video).toHaveAttribute('poster', /\/lab\/[^/]+\/poster\.webp$/);
-    await expect(video).toHaveAttribute('src', /\/lab\/[^/]+\/preview\.mp4$/);
+    await expect(video).toHaveAttribute('poster', labPreviewPaths(slug).poster);
+    await expect(video).toHaveAttribute('src', labPreviewPaths(slug).video);
     await expect(video).toHaveAttribute('loop', '');
     await expect(video).toHaveAttribute('muted', '');
     await expect(video).not.toHaveAttribute('autoplay');
@@ -112,7 +114,7 @@ test.describe('Lab preview to demo handoff', () => {
       // Before any JavaScript runs, the demo page already reserves the stage box with the poster in it.
       const html = await (await page.request.get(href)).text();
       expect(html).toMatch(/<div[^>]*style="aspect-ratio: [^"]+"[^>]*data-lab-shell/);
-      expect(html).toContain(`src="/lab/${slug}/poster.webp"`);
+      expect(html).toContain(`src="${labPreviewPaths(slug).poster}"`);
 
       await card.click();
       await expect(page).toHaveURL(new RegExp(`${href}/?$`));
@@ -123,7 +125,7 @@ test.describe('Lab preview to demo handoff', () => {
       // one, and it fades out only once the stage reports the demo has mounted.
       await expect(page.locator('video')).toHaveCount(0);
       await expect(page.locator(STAGE_READY)).toHaveCount(1);
-      const poster = shell.locator(`img[src="/lab/${slug}/poster.webp"]`);
+      const poster = shell.locator(`img[src="${labPreviewPaths(slug).poster}"]`);
       await expect(poster).toHaveCount(1);
       await expect(poster).toBeHidden();
       // It comes after the stage in the shell (no z-index), so until then it paints over the demo.
