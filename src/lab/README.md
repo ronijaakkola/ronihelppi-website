@@ -10,7 +10,9 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
      `post`). See `schema.ts`. The folder name is the slug.
    - `index.tsx` — default-exports the demo component. It renders inside
      `LabStage`, a `position: absolute; inset: 0` box (clipped by its shell) with a reset font
-     and colour; position your content absolutely or fill it with a grid.
+     and colour; position your content absolutely or fill it with a grid. The stage marks
+     itself `data-ready="true"` once the demo has mounted (`stage-contract.mjs`); the
+     tests and the recorder wait on that, so a new demo needs no test changes to be detected.
    - `styles.module.css` — CSS Modules keep each demo's styles to itself.
    - `description.md` (optional) — a long-form write-up rendered under the
      stage, after the short `description` and the "Read the post" link. See

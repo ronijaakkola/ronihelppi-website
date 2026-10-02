@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { STAGE, STAGE_READY, SHELL, CAPTURE_ATTRIBUTE } from '../../src/lab/stage-contract.mjs';
 
 test.describe('Lab', () => {
   test('nav links to the lab and marks it current', async ({ page }) => {
@@ -47,10 +48,9 @@ test.describe('Lab', () => {
     await expect(page.locator('article h1')).not.toBeEmpty();
     await expect(page.locator('article time')).toHaveAttribute('datetime');
 
-    const stage = page.locator('[data-lab-stage]');
-    await expect(stage).toBeVisible();
-    // The demo hydrates client-only; wait for real content, not the poster.
-    await expect(stage.locator('button, [role="button"], canvas, svg, div').first()).toBeVisible();
+    await expect(page.locator(STAGE)).toBeVisible();
+    // The demo hydrates client-only; the stage says when it has committed, whatever the demo renders.
+    await expect(page.locator(STAGE_READY)).toBeVisible();
 
     const source = page.locator('a.meta-link', { hasText: 'Source' });
     await expect(source).toHaveAttribute('href', new RegExp(`github\\.com/.+/tree/master/src${href}$`));
@@ -84,7 +84,7 @@ test.describe('Lab', () => {
       if (res.request().resourceType() === 'script') scripts.push(await res.text().catch(() => ''));
     });
     await page.goto(href!);
-    await page.locator('[data-lab-stage]').waitFor();
+    await page.locator(STAGE).waitFor();
     await page.waitForTimeout(1000);
     expect(scripts.length).toBeGreaterThan(0);
     // DialKit's panel registers this storage key prefix and renders these class names.
@@ -116,27 +116,47 @@ test.describe('Lab preview to demo handoff', () => {
 
       await card.click();
       await expect(page).toHaveURL(new RegExp(`${href}/?$`));
-      const shell = page.locator('[data-lab-shell]');
+      const shell = page.locator(SHELL);
       await expect(shell).toHaveCSS('view-transition-name', `lab-${slug}`);
 
-      // The preview video is gone and the demo has taken over; the poster fades out only after the demo mounts.
+      // The preview video is gone and the demo has taken over. There is one poster, the server-rendered
+      // one, and it fades out only once the stage reports the demo has mounted.
       await expect(page.locator('video')).toHaveCount(0);
-      const poster = page.locator('[data-lab-stage] img[data-lab-poster]');
-      await expect(poster).toHaveAttribute('data-ready', 'true');
-      await expect(page.locator('[data-lab-stage] button, [data-lab-stage] input').first()).toBeVisible();
+      await expect(page.locator(STAGE_READY)).toHaveCount(1);
+      const poster = shell.locator(`img[src="/lab/${slug}/poster.webp"]`);
+      await expect(poster).toHaveCount(1);
+      await expect(poster).toBeHidden();
+      // It comes after the stage in the shell (no z-index), so until then it paints over the demo.
+      expect(
+        await poster.evaluate(
+          (img, stage) => !!(img.parentElement!.querySelector(stage)!.compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING),
+          STAGE,
+        ),
+      ).toBe(true);
 
       // The React stage fills exactly the box the server reserved (inside the shell's border),
       // so nothing jumps when it hydrates.
       const shellInner = await shell.evaluate((el) => ({ width: el.clientWidth, height: el.clientHeight }));
-      const stageBox = (await page.locator('[data-lab-stage]').boundingBox())!;
+      const stageBox = (await page.locator(STAGE).boundingBox())!;
       expect(Math.abs(shellInner.width - stageBox.width)).toBeLessThan(1);
       expect(Math.abs(shellInner.height - stageBox.height)).toBeLessThan(1);
     });
   }
+
+  test('capture mode drops the shell corners and hairline so a stage screenshot is a bare rectangle', async ({ page }) => {
+    await page.goto('/lab/sliding-tabs');
+    const shell = page.locator(SHELL);
+    await expect(shell).not.toHaveCSS('border-top-left-radius', '0px');
+    expect(await shell.evaluate((el) => getComputedStyle(el, '::after').display)).not.toBe('none');
+
+    await shell.evaluate((el, attribute) => el.setAttribute(attribute, ''), CAPTURE_ATTRIBUTE);
+    await expect(shell).toHaveCSS('border-top-left-radius', '0px');
+    expect(await shell.evaluate((el) => getComputedStyle(el, '::after').display)).toBe('none');
+  });
 });
 
 test.describe('Lab: expanding search', () => {
-  const stage = (page: import('@playwright/test').Page) => page.locator('[data-lab-stage]');
+  const stage = (page: import('@playwright/test').Page) => page.locator(STAGE);
   const card = (page: import('@playwright/test').Page) => page.locator('[data-search-card]');
 
   test('starts as a lone input and walks idle → expanding → loading → results on Enter', async ({ page }) => {
@@ -373,14 +393,14 @@ test.describe('Lab: expanding search', () => {
     await page.goto('/lab/expanding-search');
     await expect(card(page)).toHaveAttribute('data-state', 'idle');
     await page.waitForTimeout(700);
-    const idle = await new AxeBuilder({ page }).include('[data-lab-stage]').analyze();
+    const idle = await new AxeBuilder({ page }).include(STAGE).analyze();
     expect(idle.violations).toEqual([]);
 
     const input = stage(page).getByRole('searchbox');
     await input.fill('tabs');
     await input.press('Enter');
     await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
-    const results = await new AxeBuilder({ page }).include('[data-lab-stage]').analyze();
+    const results = await new AxeBuilder({ page }).include(STAGE).analyze();
     expect(results.violations).toEqual([]);
   });
 });

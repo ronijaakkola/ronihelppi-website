@@ -31,23 +31,22 @@ function Mounted({ onMount }: { onMount: () => void }) {
 
 interface Props {
   slug: string;
-  poster: string;
 }
 
-// Fills the server-rendered shell in `pages/lab/[slug].astro`, which shows the
-// same poster before this island hydrates. The poster here covers the demo until
-// it has mounted, then fades out; nothing is on a timer.
-export default function LabStage({ slug, poster }: Props) {
+// Fills the server-rendered shell in `pages/lab/[slug].astro`. The stage marks
+// itself `data-ready="true"` once the demo has committed (see stage-contract.mjs);
+// the shell fades its poster from that, and tests and the recorder wait on it.
+// Nothing is on a timer.
+export default function LabStage({ slug }: Props) {
   const Demo = demoFor(slug);
   const [ready, setReady] = useState(false);
   const markReady = useCallback(() => setReady(true), []);
   return (
-    <div className={styles.stage} data-lab-stage>
+    <div className={styles.stage} data-lab-stage data-ready={ready}>
       <Suspense fallback={null}>
         <Demo />
         <Mounted onMount={markReady} />
       </Suspense>
-      <img className={styles.poster} src={poster} alt="" data-lab-poster data-ready={ready} />
       <DialRoot />
     </div>
   );

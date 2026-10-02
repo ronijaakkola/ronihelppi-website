@@ -66,7 +66,7 @@ npm run check
         ├── writing.spec.ts                    # Writing pages E2E tests
         ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
         ├── projects.spec.ts                   # Project pages E2E tests
-        ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, DialKit absence, expanding search demo
+        ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, stage capture mode, DialKit absence, expanding search demo
         ├── 404.spec.ts                       # Error page tests
         ├── accessibility.spec.ts             # Accessibility tests (axe-core)
         └── mobile.spec.ts                    # Mobile/tablet viewport tests
