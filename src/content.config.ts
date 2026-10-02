@@ -7,7 +7,7 @@ const postsCollection = defineCollection({
   schema: ({ image }) => z.object({
     date: z.coerce.date(),
     dateModified: z.coerce.date().optional(),
-    description: z.string().optional(),
+    description: z.string().min(1),
     heroImage: image().optional(),
     heroImageAlt: z.string().optional(),
     tags: z.array(z.string()).optional(),
@@ -21,7 +21,7 @@ const projectsCollection = defineCollection({
     date: z.coerce.date(),
     order: z.number().int().optional(),
     span: z.union([z.literal(1), z.literal(2)]).default(1),
-    description: z.string().optional(),
+    description: z.string().min(1),
     tags: z.array(z.string()).optional(),
     coverImage: image().optional(),
     subtitle: z.string().optional(),

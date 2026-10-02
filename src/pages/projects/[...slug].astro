@@ -4,7 +4,6 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import { getTitleFromEntry } from '../../utils/title';
-import { generateDescription } from '../../utils/description';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -20,7 +19,7 @@ const { Content } = await render(item);
 // Derive title from the original filename (preserves casing)
 const title = getTitleFromEntry(item);
 
-const description = item.data.description || generateDescription(item.body || '');
+const description = item.data.description;
 const playLinks = item.data.links?.filter((l) => l.label === 'Play') ?? [];
 const otherLinks = item.data.links?.filter((l) => l.label !== 'Play') ?? [];
 
@@ -81,9 +80,7 @@ const schemas = [
       </header>
 
       <div class="prose">
-        {item.data.description && (
-          <p class="project-description">{item.data.description}</p>
-        )}
+        <p class="project-description">{description}</p>
 
         {item.data.meta && item.data.meta.length > 0 && (
           <div class="project-meta-card">

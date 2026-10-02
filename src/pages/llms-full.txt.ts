@@ -73,9 +73,7 @@ export async function GET(context: APIContext) {
     lines.push('');
     lines.push(`Date: ${date}`);
     lines.push(`URL: ${url}`);
-    if (post.data.description) {
-      lines.push(`Summary: ${post.data.description}`);
-    }
+    lines.push(`Summary: ${post.data.description}`);
     lines.push('');
     lines.push(stripMarkdownToPlainText(post.body || ''));
     lines.push('');
@@ -96,9 +94,7 @@ export async function GET(context: APIContext) {
     lines.push('');
     lines.push(`Date: ${date}`);
     lines.push(`URL: ${url}`);
-    if (project.data.description) {
-      lines.push(`Summary: ${project.data.description}`);
-    }
+    lines.push(`Summary: ${project.data.description}`);
     if (project.data.tags) {
       lines.push(`Tags: ${project.data.tags.join(', ')}`);
     }
