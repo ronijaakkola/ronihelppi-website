@@ -1,6 +1,6 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Element, RootContent } from 'hast';
-import { createHeadingSlugger } from './heading-slug';
+import GithubSlugger from 'github-slugger';
 
 const HEADING_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
 
@@ -75,7 +75,9 @@ function textContent(node: Root | RootContent): string {
  */
 export function rehypeHeadingLinks() {
   return (tree: Root) => {
-    const slugger = createHeadingSlugger();
+    // Same slugger and document order as Astro's rehypeHeadingIds and
+    // collectH2Headings (extract-headings.ts), so every link to a heading agrees.
+    const slugger = new GithubSlugger();
 
     visit(tree, 'element', (node: Element) => {
       if (!HEADING_TAGS.has(node.tagName)) return;
