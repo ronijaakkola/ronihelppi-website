@@ -335,7 +335,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     transition: filter 150ms, transform 150ms var(--ease-out);
   }
 
-  .contact-button:hover {
+  .contact-button:hover,
+  .contact-button:focus-visible {
     text-decoration: none;
     filter: brightness(0.85);
   }

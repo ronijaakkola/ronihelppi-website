@@ -53,6 +53,7 @@
 }
 
 .tab:focus-visible {
+  color: #d1d1d6;
   outline: 2px solid #f4f4f4;
   outline-offset: 2px;
 }
