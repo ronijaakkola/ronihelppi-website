@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { access, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { labEntries } from '../../src/lab';
+import { labPreviewPaths } from '../../src/lab/preview-assets.mjs';
 
 describe('Build Output Validation', () => {
   const distPath = join(process.cwd(), 'dist');
@@ -43,8 +45,9 @@ describe('Build Output Validation', () => {
         await expect(access(join(labPath, dir, 'index.html'))).resolves.not.toThrow();
         expect(index).toContain(`href="/lab/${dir}"`);
         // Every demo ships its preview assets under the same slug.
-        await expect(access(join(labPath, dir, 'preview.mp4'))).resolves.not.toThrow();
-        await expect(access(join(labPath, dir, 'poster.webp'))).resolves.not.toThrow();
+        for (const url of Object.values(labPreviewPaths(dir))) {
+          await expect(access(join(distPath, url))).resolves.not.toThrow();
+        }
       }
     });
 
@@ -59,6 +62,14 @@ describe('Build Output Validation', () => {
       expect(writeup).toMatch(/<p[^>]*>/);
       expect(writeup).toMatch(/<code[^>]*>/);
       expect(writeup).not.toContain('`');
+    });
+
+    it('links a demo to its related post only when that post was built', async () => {
+      // `meta.post` becomes `/writing/<post>` on the demo page; posts are slugged by Astro's loader.
+      for (const { slug, meta } of labEntries) {
+        if (!meta.post) continue;
+        await expect(access(join(distPath, 'writing', meta.post, 'index.html')), `${slug}: post "${meta.post}"`).resolves.not.toThrow();
+      }
     });
 
     it('does not bundle DialKit into production JS', async () => {

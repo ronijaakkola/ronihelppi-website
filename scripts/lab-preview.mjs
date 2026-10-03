@@ -10,8 +10,9 @@
 // thumbnail filter (frame 0 is often a fade-in), converted to webp with sharp.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import sharp from 'sharp';
+import { labPreviewFiles } from '../src/lab/preview-assets.mjs';
 
 const [slug, input] = process.argv.slice(2);
 if (!slug || !input) {
@@ -27,11 +28,9 @@ if (!existsSync(join('src', 'lab', slug, 'meta.ts'))) {
   process.exit(1);
 }
 
-const outDir = join('public', 'lab', slug);
-mkdirSync(outDir, { recursive: true });
-const video = join(outDir, 'preview.mp4');
-const posterPng = join(outDir, 'poster.png');
-const poster = join(outDir, 'poster.webp');
+const { video, poster } = labPreviewFiles(slug);
+mkdirSync(dirname(video), { recursive: true });
+const posterPng = poster.replace(/\.webp$/, '.png');
 
 execFileSync('ffmpeg', [
   '-y', '-i', input,

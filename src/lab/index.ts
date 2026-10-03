@@ -1,5 +1,7 @@
 import { labMetaSchema, type LabMeta, type LabMetaInput } from './schema';
 
+export { labPreviewPaths } from './preview-assets.mjs';
+
 export interface LabEntry {
   slug: string;
   meta: LabMeta;
@@ -32,18 +34,14 @@ export function loadLabEntries(modules: Record<string, { default: LabMetaInput }
     .sort((a, b) => b.meta.date.getTime() - a.meta.date.getTime());
 }
 
+/** Every demo folder, published or not. */
+export const labSlugs: string[] = Object.keys(metaModules).map(slugFromPath);
+
 /** Published demos, newest first. */
 export const labEntries: LabEntry[] = loadLabEntries();
 
 export function labSourceUrl(slug: string): string {
   return `${GITHUB_REPO_URL}/tree/master/src/lab/${slug}`;
-}
-
-export function labPreviewPaths(slug: string) {
-  return {
-    video: `/lab/${slug}/preview.mp4`,
-    poster: `/lab/${slug}/poster.webp`,
-  };
 }
 
 export function formatLabDate(date: Date): string {
