@@ -164,7 +164,7 @@ The Lab demos use DialKit for tuning. Rather than trusting its "hidden in produc
 **Steps to avoid this:**
 1. Wrap any `client:only` island in a server-rendered shell that already has the final size (`aspect-ratio`) and a static stand-in (the poster) — the island fills it with `position: absolute; inset: 0`.
 2. Give the list preview and the shell the same `transition:name` so the router morphs one box into the other instead of a root crossfade.
-3. Hide the stand-in from state, not a timer: a `Mounted` sibling inside the same `Suspense` boundary as the lazy demo runs its effect only once the demo has committed, then the poster fades (opacity + blur, 250ms, none under `prefers-reduced-motion`).
+3. Hide the stand-in from state, not a timer: a `Mounted` sibling inside the same `Suspense` boundary as the lazy demo runs its effect only once the demo has committed, the stage then sets `data-ready="true"`, and the shell fades its one poster with `.lab-shell:has([data-lab-stage][data-ready='true'])` (opacity + blur, 250ms, none under `prefers-reduced-motion`). The poster sits after the island in the shell so it paints over the stage until then.
 
 ---
 
@@ -189,13 +189,13 @@ The projects grid cards, Lab previews and the Lab demo stage had `border: 0.5px`
 
 `scripts/lab-record.mjs` drives Motion by mocking `requestAnimationFrame` and `performance.now`, then screenshots one frame per virtual tick. Anything not on that clock is captured wrong: a CSS `transition` finishes in a couple of frames because each screenshot takes ~50ms of real time, and a `setTimeout`-based fake fetch fires at the wrong virtual moment. The expanding-search demo therefore animates with `motion/react` rather than CSS transitions, and the recorder gained `--timers` (virtual `setTimeout`, installed after hydration so it cannot stall loading) plus `type:`/`hover:` steps for demos that need more than button clicks.
 
-**Also:** the recorder's "demo has mounted" check used to wait for the poster `<img>` to be removed; since the stage shell change (#121) the poster stays in the DOM with `data-ready`, so the old check timed out after 30s. It now waits for `[data-lab-poster][data-ready="true"]`. If `lab:record` hangs on `waitForFunction`, suspect a stale readiness check before suspecting the demo.
+**Also:** the recorder's "demo has mounted" check used to wait for the poster `<img>` to be removed; since the stage shell change (#121) the poster stays in the DOM with `data-ready`, so the old check timed out after 30s. Readiness now lives on the stage element itself: the recorder waits for `STAGE_READY` (`[data-lab-stage][data-ready="true"]`) imported from `src/lab/stage-contract.mjs`, the same constant the E2E specs use, so the check cannot drift from the component again. If `lab:record` hangs on `waitForFunction`, suspect the contract and `LabStage.tsx` disagreeing before suspecting the demo.
 
 ---
 
 ## Generic Lab E2E checks must not assume a demo renders a `<button>`
 
-`accessibility.spec.ts` and the preview→demo handoff test used "a `button` is visible inside the stage" as the proxy for "the demo has mounted". The expanding-search demo is input-only in its idle state, so those tests timed out on the newest demo. The selectors now also accept `input`; when adding a demo whose first paint is something else (canvas-only, an `<a>`, plain text), extend that selector list rather than adding a decoy button.
+`accessibility.spec.ts` and the preview→demo handoff test used "a `button` is visible inside the stage" as the proxy for "the demo has mounted". The expanding-search demo is input-only in its idle state, so those tests timed out on the newest demo. Growing per-demo element lists (`button, input, canvas, svg`…) kept breaking, so every generic check now waits on the stage's own signal, `STAGE_READY` from `src/lab/stage-contract.mjs`. A new demo needs no test edits for mount detection; do not reintroduce element-type guesses.
 
 ---
 
@@ -210,6 +210,6 @@ If a preview daemon is already running (even on a different port, e.g. 4322 beca
 After #123 moved the card border to a `.card-frame::after` overlay, `scripts/lab-record.mjs` (which screenshots the `[data-lab-stage]` box) started capturing the demo page's shell hairline and rounded corners inside every frame. The Lab list then drew its own `::after` border around that video, so each card showed a second line a pixel inside the first. The CSS was fine (hiding the `<video>` left exactly one border); the duplicate was baked into `preview.mp4` and `poster.webp`.
 
 **Steps to avoid this:**
-1. The recorder now injects `[data-lab-shell] { border-radius: 0 } [data-lab-shell]::after { display: none }` before the first screenshot, so clips are bare rectangles. Keep any new decoration on the shell out of the capture the same way.
+1. The shell owns a capture mode: the recorder sets `CAPTURE_ATTRIBUTE` (`data-lab-capture`, from `src/lab/stage-contract.mjs`) on `[data-lab-shell]`, and the shell's own CSS in `pages/lab/[slug].astro` drops its radius and `::after` hairline, so clips are bare rectangles. Any new decoration on the shell must be switched off under `[data-lab-capture]` in that same stylesheet; the recorder knows nothing about the shell's internals.
 2. When a card looks doubled, sample the asset's edge pixels first (`sharp(...).raw()` on the poster, or `ffmpeg -frames:v 1` on the clip): a light ring in the outer 1–2 device pixels means the frame is in the media, not the CSS.
 3. Re-recording requires the original step timings; they now live in `src/lab/README.md` under "Recording commands". Add the command there whenever a clip is (re)rendered.

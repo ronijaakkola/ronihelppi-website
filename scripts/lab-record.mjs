@@ -23,6 +23,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { STAGE, STAGE_READY, SHELL, CAPTURE_ATTRIBUTE } from '../src/lab/stage-contract.mjs';
 
 const args = process.argv.slice(2);
 const fail = (msg) => {
@@ -85,17 +86,16 @@ await page.addInitScript(() => {
 });
 
 await page.goto(`${base}/lab/${slug}`);
-const stage = page.locator('[data-lab-stage]');
+const stage = page.locator(STAGE);
 await stage.waitFor();
-// The shell around the stage draws the card hairline on `::after`, above the
-// stage, and rounds its corners. A screenshot of the stage's box captures
-// both, and the Lab list then draws its own frame around the clip: a second
-// border a pixel inside the first. Record the bare rectangle instead.
-await page.addStyleTag({ content: '[data-lab-shell] { border-radius: 0 !important; } [data-lab-shell]::after { display: none !important; }' });
+// The shell's hairline and rounded corners paint over the stage's box, and the
+// Lab list draws its own frame around the clip: a second border a pixel inside
+// the first. Capture mode makes the shell a bare rectangle.
+await page.locator(SHELL).evaluate((el, attribute) => el.setAttribute(attribute, ''), CAPTURE_ATTRIBUTE);
 // Let the lazy demo chunk and fonts arrive (real time, unaffected by the clock).
 // Poll on a timer: Playwright's default rAF polling would never fire here.
 await page.waitForFunction(() => document.fonts.status === 'loaded', null, { polling: 100 });
-await page.waitForFunction(() => document.querySelector('[data-lab-stage] [data-lab-poster]')?.getAttribute('data-ready') === 'true', null, { polling: 100 });
+await page.waitForFunction((ready) => document.querySelector(ready) !== null, STAGE_READY, { polling: 100 });
 await page.waitForTimeout(300);
 await stage.scrollIntoViewIfNeeded();
 

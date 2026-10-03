@@ -85,10 +85,11 @@ const schemas = [
             on a page with no stage, the box would pop in on hydration and then the poster
             would snap to the demo. The shell reserves the exact box up front, with the
             poster in it, and shares a transition name with the preview on the list page
-            so the router morphs one into the other. */}
+            so the router morphs one into the other. The poster comes after the stage so
+            it paints over the demo until the stage reports `data-ready="true"`. */}
         <div class="lab-shell card-frame" style={`aspect-ratio: ${meta.aspectRatio}`} transition:name={`lab-${slug}`} data-lab-shell>
+          <LabStage client:only="react" slug={slug} />
           <img class="lab-shell-poster" src={preview.poster} alt="" />
-          <LabStage client:only="react" slug={slug} poster={preview.poster} />
         </div>
 
         {(meta.description || meta.post || Writeup) && (
@@ -175,12 +176,36 @@ const schemas = [
     background: #111;
   }
 
+  /* Capture mode (stage-contract.mjs): the recorder screenshots the stage's box,
+     and the Lab list draws its own frame around the clip, so drop ours. */
+  .lab-shell[data-lab-capture] {
+    border-radius: 0;
+  }
+  .lab-shell[data-lab-capture]::after {
+    display: none;
+  }
+
+  /* Covers the stage until the demo has mounted, then dissolves into it. */
   .lab-shell-poster {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
+    transition: opacity 250ms ease-out, filter 250ms ease-out, visibility 0s 250ms;
+  }
+
+  .lab-shell:has([data-lab-stage][data-ready='true']) .lab-shell-poster {
+    opacity: 0;
+    filter: blur(6px);
+    visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lab-shell-poster {
+      transition: none;
+    }
   }
 
   .lab-body {
