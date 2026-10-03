@@ -40,13 +40,17 @@ the missing file. `npm run test:build` also fails when `post` names a writing
 entry that was not built. The preview paths come from `preview-assets.mjs`;
 the pages, scripts and tests all read them from there.
 
-Animations: CSS where possible, `motion/react` otherwise. Each demo is its own
-lazy chunk, so Motion is only downloaded by demos that import it.
+Animations: `motion/react` for anything `lab:record` captures. The recorder
+only steps `requestAnimationFrame`, so CSS transitions run on the wall clock and
+finish in a couple of frames of the clip. Each demo is its own lazy chunk, so
+Motion is only downloaded by demos that import it.
 
 ## Recording commands
 
 The clips in `public/lab/` were rendered with these commands (production build,
-preview server running):
+preview server running). If a Lab card shows a doubled border, check the clip
+before the CSS: sample the poster's outer pixels with `sharp(...).raw()`. A
+light ring there means the frame was baked into the media.
 
 - `npm run lab:record -- sliding-tabs "Albums@0.4,Places@1.2,Photos@2.0,People@2.8,Albums@3.6,Places@4.4,Photos@5.2" --duration 6.6`
 - `npm run lab:record -- expanding-search "type:berry@0.5,key:ArrowDown@2.0,key:ArrowDown@2.4,key:ArrowDown@2.8,key:ArrowDown@3.1,key:ArrowUp@3.7,key:ArrowUp@4.1,key:Enter@4.6" --duration 5.4 --timers`

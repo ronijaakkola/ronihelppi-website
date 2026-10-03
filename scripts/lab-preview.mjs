@@ -4,7 +4,7 @@
 //
 //   npm run lab:preview -- <slug> <recording.(mov|mp4|webm)>
 //
-// Encoding follows LEARNINGS.md: downscale to 1600px (2x the 750px content
+// Encoding: downscale to 1600px (2x the 750px content
 // width), crf 22 / preset slow, faststart so playback begins before the whole
 // file arrives. The poster is a representative frame chosen by ffmpeg's
 // thumbnail filter (frame 0 is often a fade-in), converted to webp with sharp.
