@@ -392,6 +392,34 @@ test.describe('Lab: expanding search', () => {
     await expect(input).toBeFocused();
   });
 
+  test('keeps its full motion under reduced motion: the card grows over frames and the skeleton shimmers', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/lab/expanding-search');
+    await expect(card(page)).toHaveAttribute('data-state', 'idle');
+
+    // Sample the body height every frame inside the page; a snap shows one jump, a grow many steps.
+    await stage(page).locator('[data-search-body]').evaluate((el) => {
+      const heights: number[] = [];
+      (window as unknown as { __heights: number[] }).__heights = heights;
+      const sample = () => {
+        heights.push(Math.round(el.getBoundingClientRect().height));
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+    const input = stage(page).getByRole('searchbox');
+    await input.fill('tabs');
+    await input.press('Enter');
+    await expect(card(page)).toHaveAttribute('data-state', 'loading', { timeout: 5000 });
+    const bone = stage(page).locator('[data-search-skeleton] span').first();
+    expect(await bone.evaluate((el) => getComputedStyle(el, '::before').animationName)).not.toBe('none');
+    await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+
+    const heights = await page.evaluate(() => (window as unknown as { __heights: number[] }).__heights);
+    const steps = new Set(heights.filter((h) => h > 0));
+    expect(steps.size, `distinct body heights while growing: ${[...steps].join(', ')}`).toBeGreaterThan(2);
+  });
+
   test('reaches results under reduced motion and passes axe in every state', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/lab/expanding-search');
@@ -404,6 +432,8 @@ test.describe('Lab: expanding search', () => {
     await input.fill('tabs');
     await input.press('Enter');
     await expect(card(page)).toHaveAttribute('data-state', 'results', { timeout: 5000 });
+    // Rows keep their full entrance; check contrast once the last one has landed.
+    await expect(stage(page).locator('[data-search-results] li').last()).toHaveCSS('opacity', '1');
     const results = await new AxeBuilder({ page }).include(STAGE).analyze();
     expect(results.violations).toEqual([]);
   });

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type FormEvent, type KeyboardEvent, type RefObject } from 'react';
-import { AnimatePresence, motion, useReducedMotion, type Transition } from 'motion/react';
+import { AnimatePresence, motion, type Transition } from 'motion/react';
 import { initialState, reduce, type SearchResult } from './machine';
 import { matchRange, rankResults } from './mockSearch';
 import styles from './ExpandingSearch.module.css';
@@ -28,7 +28,6 @@ const RISE: Transition['ease'] = [0.19, 1, 0.22, 1];
  * input itself never moves.
  */
 export default function ExpandingSearch({ expandDuration, loadDelay, resultDuration, stagger, selectHold }: ExpandingSearchProps) {
-  const reduced = useReducedMotion() ?? false;
   const [state, dispatch] = useReducer(reduce, initialState);
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,7 +81,7 @@ export default function ExpandingSearch({ expandDuration, loadDelay, resultDurat
     }
   };
 
-  const grow: Transition = reduced ? { duration: 0 } : { duration: open ? expandDuration : expandDuration * 0.75, ease: SHEET };
+  const grow: Transition = { duration: open ? expandDuration : expandDuration * 0.75, ease: SHEET };
 
   return (
     <div className={styles.search}>
@@ -147,7 +146,6 @@ export default function ExpandingSearch({ expandDuration, loadDelay, resultDurat
                   onLeaveUp={() => inputRef.current?.focus()}
                   results={state.results}
                   query={state.query}
-                  reduced={reduced}
                   duration={resultDuration}
                   stagger={stagger}
                   selectHold={selectHold}
@@ -187,13 +185,12 @@ interface ResultsProps {
   onLeaveUp: () => void;
   results: SearchResult[];
   query: string;
-  reduced: boolean;
   duration: number;
   stagger: number;
   selectHold: number;
 }
 
-function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduced, duration, stagger, selectHold }: ResultsProps) {
+function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, duration, stagger, selectHold }: ResultsProps) {
   const [active, setActive] = useState<number | null>(null);
   // Only the last focused row is in the tab order, so Tab leaves the list.
   const [tabStop, setTabStop] = useState(0);
@@ -246,8 +243,7 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduc
     if (row) setRect({ top: row.offsetTop, height: row.offsetHeight });
   }, [lit]);
 
-  const rowTransition = (i: number): Transition =>
-    reduced ? { duration: 0.15, ease: 'linear' } : { duration, ease: RISE, delay: i * stagger };
+  const rowTransition = (i: number): Transition => ({ duration, ease: RISE, delay: i * stagger });
 
   return (
     <motion.div exit={{ opacity: 0, transition: { duration: 0.1 } }}>
@@ -270,7 +266,7 @@ function Results({ listRef, onEscape, onSelect, onLeaveUp, results, query, reduc
           <motion.li
             key={r.id}
             className={styles.row}
-            initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={rowTransition(i)}
           >
