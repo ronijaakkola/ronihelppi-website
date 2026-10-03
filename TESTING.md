@@ -46,7 +46,7 @@ npm run check
 ├── src/
 │   ├── lab/
 │   │   ├── schema.test.ts                    # Lab metadata schema tests
-│   │   ├── index.test.ts                     # Lab registry (slug, sort, published) tests
+│   │   ├── index.test.ts                     # Lab registry (slug, sort, published, neighbours) tests
 │   │   ├── completeness.test.ts              # Every demo folder has its index.tsx; every published demo its preview.mp4 and poster.webp
 │   │   ├── expanding-search/machine.test.ts  # Search state machine (idle → expanding → loading → results)
 │   │   ├── expanding-search/mockSearch.test.ts # Fake result ranking

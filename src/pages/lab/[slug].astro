@@ -2,18 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Divider from '../../components/Divider.astro';
 import LabStage from '../../lab/LabStage';
-import { labEntries, labPreviewPaths, labSourceUrl, formatLabDate, type LabEntry } from '../../lab';
+import { labEntries, labNeighbours, labPreviewPaths, labSourceUrl, formatLabDate, type LabEntry } from '../../lab';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 
 export function getStaticPaths() {
   return labEntries.map((entry, index) => ({
     params: { slug: entry.slug },
-    props: {
-      entry,
-      // Entries are newest first. "Previous" links to the older entry (index + 1), "Next" to the newer one.
-      newer: labEntries[index - 1] ?? null,
-      older: labEntries[index + 1] ?? null,
-    },
+    props: { entry, ...labNeighbours(labEntries, index) },
   }));
 }
 
