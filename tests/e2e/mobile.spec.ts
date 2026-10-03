@@ -126,6 +126,19 @@ test.describe('Mobile Menu Accessibility', () => {
     }
   });
 
+  test('menu links hug their label so the focus ring wraps the text', async ({ page }) => {
+    await page.goto('/');
+    await page.click('#menu-button');
+    await expect(page.locator('#mobile-menu')).toHaveClass(/open/);
+
+    const navWidth = (await page.locator('.mobile-menu-nav').boundingBox())!.width;
+    const links = page.locator('.mobile-menu-link');
+    for (let i = 0; i < (await links.count()); i++) {
+      const linkWidth = (await links.nth(i).boundingBox())!.width;
+      expect(linkWidth, `${await links.nth(i).textContent()} width`).toBeLessThan(navWidth);
+    }
+  });
+
   test('menu has correct aria-hidden state', async ({ page }) => {
     await page.goto('/');
     const menu = page.locator('#mobile-menu');

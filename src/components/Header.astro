@@ -62,12 +62,12 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 <!-- Mobile Menu Overlay -->
 <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
   <nav class="mobile-menu-nav" aria-label="Mobile navigation">
-    <a href="/" class="mobile-menu-link">Home</a>
-    <a href="/about" class="mobile-menu-link">About</a>
-    <a href="/projects" class="mobile-menu-link">Projects</a>
-    <a href="/writing" class="mobile-menu-link">Writing</a>
-    <a href="/lab" class="mobile-menu-link">Lab</a>
-    <a href="/contact" class="mobile-menu-link">Contact</a>
+    <a href="/" class="mobile-menu-link" style="--i: 0">Home</a>
+    <a href="/about" class="mobile-menu-link" style="--i: 1">About</a>
+    <a href="/projects" class="mobile-menu-link" style="--i: 2">Projects</a>
+    <a href="/writing" class="mobile-menu-link" style="--i: 3">Writing</a>
+    <a href="/lab" class="mobile-menu-link" style="--i: 4">Lab</a>
+    <a href="/contact" class="mobile-menu-link" style="--i: 5">Contact</a>
   </nav>
   <div class="mobile-menu-footer">
     <a href="/rss.xml" class="mobile-menu-rss">RSS</a>
@@ -430,6 +430,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     letter-spacing: -1.6px;
     color: var(--color-text-secondary);
     text-decoration: none;
+    width: fit-content;
     opacity: 0;
     transform: translateY(-8px);
     /* Destination state when closing — links exit faster than they enter */
@@ -450,31 +451,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     opacity: 1;
     transform: translateY(0);
     transition: opacity 0.25s var(--ease-out), transform 0.25s var(--ease-out), color 0.2s ease;
-  }
-
-  /* Cascading animation delays */
-  .mobile-menu.open .mobile-menu-link:nth-child(1) {
-    transition-delay: 0ms;
-  }
-
-  .mobile-menu.open .mobile-menu-link:nth-child(2) {
-    transition-delay: 35ms;
-  }
-
-  .mobile-menu.open .mobile-menu-link:nth-child(3) {
-    transition-delay: 70ms;
-  }
-
-  .mobile-menu.open .mobile-menu-link:nth-child(4) {
-    transition-delay: 105ms;
-  }
-
-  .mobile-menu.open .mobile-menu-link:nth-child(5) {
-    transition-delay: 140ms;
-  }
-
-  .mobile-menu.open .mobile-menu-link:nth-child(6) {
-    transition-delay: 175ms;
+    /* Each link carries its position (--i), so links added later join the cascade. */
+    transition-delay: calc(var(--i) * 35ms);
   }
 
   /* Reset delays when closing */

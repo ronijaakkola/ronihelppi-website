@@ -88,6 +88,20 @@ test.describe('Home Page', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
+  test('every section below the hero joins the entrance cascade in order', async ({ page }) => {
+    await page.goto('/');
+    const items = page.locator('.cascade-animate .cascade-item');
+    const count = await items.count();
+    expect(count).toBeGreaterThan(1);
+
+    const delays = await items.evaluateAll((els) =>
+      els.map((el) => parseFloat(getComputedStyle(el).animationDelay))
+    );
+    for (let i = 1; i < count; i++) {
+      expect(delays[i], `item ${i} delay`).toBeGreaterThan(delays[i - 1]);
+    }
+  });
+
   test('should have favicon', async ({ page }) => {
     await page.goto('/');
 

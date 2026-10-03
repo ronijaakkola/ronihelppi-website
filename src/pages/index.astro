@@ -47,7 +47,7 @@ const schemas = [
           <Divider class="cascade-item" />
 
           <!-- Projects Section -->
-          <section class="section cascade-item">
+          <section class="section cascade-item" style="--i: 1">
             <SectionHeading title="Recent projects" />
             <div class="projects-list">
               {projects.slice(0, 3).map((item) => (
@@ -69,7 +69,7 @@ const schemas = [
           </section>
 
           <!-- Writing Section -->
-          <section class="section cascade-item">
+          <section class="section cascade-item" style="--i: 2">
             <SectionHeading title="Latest writing" />
             <div class="posts-list">
               {posts.slice(0, 3).map((post) => (
@@ -91,7 +91,7 @@ const schemas = [
           </section>
 
           <!-- Elsewhere Section -->
-          <section class="section cascade-item">
+          <section class="section cascade-item" style="--i: 3">
             <SectionHeading title="Elsewhere" />
             <div class="elsewhere-links">
               <p>
@@ -255,15 +255,12 @@ const schemas = [
     }
   }
 
+  /* Each item carries its position (--i; the leading Divider defaults to 0). */
   .cascade-animate :global(.cascade-item) {
     opacity: 0;
     animation: cascade-in 0.4s var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
   }
-
-  .cascade-animate :global(.cascade-item:nth-child(2)) { animation-delay: 0ms; }
-  .cascade-animate :global(.cascade-item:nth-child(3)) { animation-delay: 60ms; }
-  .cascade-animate :global(.cascade-item:nth-child(4)) { animation-delay: 120ms; }
-  .cascade-animate :global(.cascade-item:nth-child(5)) { animation-delay: 180ms; }
 
   @media (prefers-reduced-motion: reduce) {
     .cascade-animate :global(.cascade-item) {
