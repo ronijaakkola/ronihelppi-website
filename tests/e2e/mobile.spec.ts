@@ -201,16 +201,9 @@ test.describe('Mobile Layout', () => {
     const gridItems = page.locator('.grid-item');
     await expect(gridItems.first()).toBeVisible();
 
-    // On mobile, grid should be single column
-    // Verify by checking that grid items stack vertically
-    const firstItem = await gridItems.first().boundingBox();
-    const count = await gridItems.count();
-
-    if (count > 1) {
-      const secondItem = await gridItems.nth(1).boundingBox();
-      // Items should be below each other (not side by side)
-      expect(secondItem!.y).toBeGreaterThan(firstItem!.y);
-    }
+    // On mobile, the grid has a single column track, however many projects exist
+    const columns = await page.locator('.bento-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns);
+    expect(columns.trim().split(/\s+/)).toHaveLength(1);
   });
 
   test('contact page renders correctly on mobile', async ({ page }) => {
@@ -238,11 +231,10 @@ test.describe('Mobile Layout', () => {
 
     // Content should not overflow
     const content = page.locator('.prose-content');
-    if ((await content.count()) > 0) {
-      const contentBox = await content.boundingBox();
-      // Content width should not exceed viewport
-      expect(contentBox!.width).toBeLessThanOrEqual(375);
-    }
+    await expect(content).toBeVisible();
+    const contentBox = await content.boundingBox();
+    // Content width should not exceed viewport
+    expect(contentBox!.width).toBeLessThanOrEqual(375);
   });
 
   test('filter chips are usable on mobile', async ({ page }) => {
@@ -252,12 +244,10 @@ test.describe('Mobile Layout', () => {
     const filterChips = page.locator('.filter-chip');
     await expect(filterChips.first()).toBeVisible();
 
-    // Click a filter chip
+    // Click a tag chip (the first chip is All)
     const secondChip = filterChips.nth(1);
-    if ((await secondChip.count()) > 0) {
-      await secondChip.click();
-      await expect(secondChip).toHaveAttribute('aria-pressed', 'true');
-    }
+    await secondChip.click();
+    await expect(secondChip).toHaveAttribute('aria-pressed', 'true');
   });
 });
 

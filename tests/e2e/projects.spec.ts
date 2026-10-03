@@ -66,16 +66,13 @@ test.describe('Project Pages', () => {
   });
 
   test('should display meta card if meta entries are present', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('a[href^="/projects/"]').first().click();
-
     // The RESOKILL project has meta entries (Team, Duration, etc.)
+    await page.goto('/projects/resokill');
+
     const metaCard = page.locator('.project-meta-card');
-    if (await metaCard.count() > 0) {
-      await expect(metaCard).toBeVisible();
-      const rows = metaCard.locator('.meta-row');
-      expect(await rows.count()).toBeGreaterThan(0);
-    }
+    await expect(metaCard).toBeVisible();
+    const rows = metaCard.locator('.meta-row');
+    expect(await rows.count()).toBeGreaterThan(0);
   });
 
   test('should display tags if present', async ({ page }) => {
@@ -101,21 +98,17 @@ test.describe('Project Pages', () => {
   });
 
   test('should transform Obsidian images to Astro-optimized img tags', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('a[href^="/projects/"]').first().click();
+    // RESOKILL embeds screenshots with Obsidian `![[…]]` syntax.
+    await page.goto('/projects/resokill');
 
     const images = page.locator('article .prose img');
-    const imageCount = await images.count();
+    await expect(images.first()).toBeVisible();
 
-    if (imageCount > 0) {
-      await expect(images.first()).toBeVisible();
+    const src = await images.first().getAttribute('src');
+    expect(src).toMatch(/^\/_astro\/.+/);
 
-      const src = await images.first().getAttribute('src');
-      expect(src).toMatch(/^\/_astro\/.+/);
-
-      const alt = await images.first().getAttribute('alt');
-      expect(alt).toBeTruthy();
-    }
+    const alt = await images.first().getAttribute('alt');
+    expect(alt).toBeTruthy();
   });
 
   test('should format date correctly', async ({ page }) => {
