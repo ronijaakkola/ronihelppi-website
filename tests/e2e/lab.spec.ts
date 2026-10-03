@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { STAGE, STAGE_READY, SHELL, CAPTURE_ATTRIBUTE } from '../../src/lab/stage-contract.mjs';
+import { STAGE, STAGE_READY, SHELL, SHELL_READY, CAPTURE_ATTRIBUTE } from '../../src/lab/stage-contract.mjs';
 import { labPreviewPaths } from '../../src/lab/preview-assets.mjs';
 
 test.describe('Lab', () => {
@@ -125,6 +125,8 @@ test.describe('Lab preview to demo handoff', () => {
       // one, and it fades out only once the stage reports the demo has mounted.
       await expect(page.locator('video')).toHaveCount(0);
       await expect(page.locator(STAGE_READY)).toHaveCount(1);
+      // The stage marks the shell itself, so the poster's fade does not depend on `:has()`.
+      await expect(page.locator(SHELL_READY)).toHaveCount(1);
       const poster = shell.locator(`img[src="${labPreviewPaths(slug).poster}"]`);
       await expect(poster).toHaveCount(1);
       await expect(poster).toBeHidden();

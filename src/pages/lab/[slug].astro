@@ -86,7 +86,7 @@ const schemas = [
             would snap to the demo. The shell reserves the exact box up front, with the
             poster in it, and shares a transition name with the preview on the list page
             so the router morphs one into the other. The poster comes after the stage so
-            it paints over the demo until the stage reports `data-ready="true"`. */}
+            it paints over the demo until the stage marks the shell `data-ready="true"`. */}
         <div class="lab-shell card-frame" style={`aspect-ratio: ${meta.aspectRatio}`} transition:name={`lab-${slug}`} data-lab-shell>
           <LabStage client:only="react" slug={slug} />
           <img class="lab-shell-poster" src={preview.poster} alt="" />
@@ -196,7 +196,7 @@ const schemas = [
     transition: opacity 250ms ease-out, filter 250ms ease-out, visibility 0s 250ms;
   }
 
-  .lab-shell:has([data-lab-stage][data-ready='true']) .lab-shell-poster {
+  .lab-shell[data-ready='true'] .lab-shell-poster {
     opacity: 0;
     filter: blur(6px);
     visibility: hidden;
