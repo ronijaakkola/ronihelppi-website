@@ -109,16 +109,15 @@ describe('Build Output Validation', () => {
       const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Check the first post
-      if (postDirs.length > 0) {
-        const firstPostPath = join(postsPath, postDirs[0], 'index.html');
-        const content = await readFile(firstPostPath, 'utf-8');
+      expect(postDirs.length).toBeGreaterThan(0);
+      const firstPostPath = join(postsPath, postDirs[0], 'index.html');
+      const content = await readFile(firstPostPath, 'utf-8');
 
-        expect(content).toContain('<!DOCTYPE html>');
-        expect(content).toContain('<html');
-        expect(content).toContain('</html>');
-        expect(content).toMatch(/<h1[^>]*>/);
-        expect(content).toMatch(/<time|class="post-meta"/);
-      }
+      expect(content).toContain('<!DOCTYPE html>');
+      expect(content).toContain('<html');
+      expect(content).toContain('</html>');
+      expect(content).toMatch(/<h1[^>]*>/);
+      expect(content).toMatch(/<time|class="post-meta"/);
     });
   });
 
@@ -149,16 +148,15 @@ describe('Build Output Validation', () => {
       const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
       // Check the first project
-      if (projectDirs.length > 0) {
-        const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
-        const content = await readFile(firstProjectPath, 'utf-8');
+      expect(projectDirs.length).toBeGreaterThan(0);
+      const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
+      const content = await readFile(firstProjectPath, 'utf-8');
 
-        expect(content).toContain('<!DOCTYPE html>');
-        expect(content).toContain('<html');
-        expect(content).toContain('</html>');
-        expect(content).toMatch(/<h1[^>]*>/);
-        expect(content).toMatch(/<time|class=".*meta"/);
-      }
+      expect(content).toContain('<!DOCTYPE html>');
+      expect(content).toContain('<html');
+      expect(content).toContain('</html>');
+      expect(content).toMatch(/<h1[^>]*>/);
+      expect(content).toMatch(/<time|class=".*meta"/);
     });
 
     it('projects index prioritizes above-the-fold cover images correctly', async () => {
@@ -285,13 +283,12 @@ describe('Build Output Validation', () => {
       const entries = await readdir(postsPath, { withFileTypes: true });
       const postDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      if (postDirs.length > 0) {
-        const firstPostPath = join(postsPath, postDirs[0], 'index.html');
-        const content = await readFile(firstPostPath, 'utf-8');
+      expect(postDirs.length).toBeGreaterThan(0);
+      const firstPostPath = join(postsPath, postDirs[0], 'index.html');
+      const content = await readFile(firstPostPath, 'utf-8');
 
-        // Should have a back link
-        expect(content).toMatch(/href=["']\//);
-      }
+      // Should have a back link
+      expect(content).toMatch(/href=["']\//);
     });
 
     it('project pages link back to home', async () => {
@@ -299,13 +296,12 @@ describe('Build Output Validation', () => {
       const entries = await readdir(projectsPath, { withFileTypes: true });
       const projectDirs = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-      if (projectDirs.length > 0) {
-        const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
-        const content = await readFile(firstProjectPath, 'utf-8');
+      expect(projectDirs.length).toBeGreaterThan(0);
+      const firstProjectPath = join(projectsPath, projectDirs[0], 'index.html');
+      const content = await readFile(firstProjectPath, 'utf-8');
 
-        // Should have a back link
-        expect(content).toMatch(/href=["']\//);
-      }
+      // Should have a back link
+      expect(content).toMatch(/href=["']\//);
     });
   });
 
