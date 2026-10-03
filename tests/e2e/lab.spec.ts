@@ -42,8 +42,8 @@ test.describe('Lab', () => {
 
   test('demo page mounts the React demo and shows source and neighbours', async ({ page }) => {
     await page.goto('/lab');
-    const demoCount = await page.locator('.lab-card').count();
-    const href = await page.locator('.lab-card').first().getAttribute('href');
+    const hrefs = await page.locator('.lab-card').evaluateAll((cards) => cards.map((c) => c.getAttribute('href')));
+    const href = hrefs[0];
     expect(href).toMatch(/^\/lab\/.+/);
     await page.goto(href!);
 
@@ -58,14 +58,12 @@ test.describe('Lab', () => {
     await expect(source).toHaveAttribute('href', new RegExp(`github\\.com/.+/tree/master/src${href}$`));
     await expect(source).toHaveAttribute('target', '_blank');
 
-    // Neighbour navigation only exists once there is something to navigate to.
-    const nav = page.locator('nav[aria-label="Neighbouring demos"]');
-    if (demoCount > 1) {
-      await expect(nav).toBeVisible();
-      expect(await nav.locator('a[rel="prev"], a[rel="next"]').count()).toBeGreaterThan(0);
-    } else {
-      await expect(nav).toHaveCount(0);
-    }
+    // The list is newest first, so the first demo's "Previous" is the second card and it has no "Next".
+    // Holds for any number of demos; labNeighbours' unit tests cover the cases in between.
+    const linked = (rel: string) =>
+      page.locator(`nav[aria-label="Neighbouring demos"] a[rel="${rel}"]`).evaluateAll((links) => links.map((a) => a.getAttribute('href')));
+    expect(await linked('prev')).toEqual(hrefs.slice(1, 2));
+    expect(await linked('next')).toEqual([]);
   });
 
   test('demo page renders the markdown write-up as prose', async ({ page }) => {

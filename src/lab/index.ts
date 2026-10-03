@@ -40,6 +40,11 @@ export const labSlugs: string[] = Object.keys(metaModules).map(slugFromPath);
 /** Published demos, newest first. */
 export const labEntries: LabEntry[] = loadLabEntries();
 
+/** Entries are newest first: "Next" is the newer entry (index - 1), "Previous" the older one (index + 1). */
+export function labNeighbours(entries: LabEntry[], index: number): { newer: LabEntry | null; older: LabEntry | null } {
+  return { newer: entries[index - 1] ?? null, older: entries[index + 1] ?? null };
+}
+
 export function labSourceUrl(slug: string): string {
   return `${GITHUB_REPO_URL}/tree/master/src/lab/${slug}`;
 }
