@@ -194,13 +194,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .bone::before {
-    animation: none;
-    background: #2c2c2e;
-  }
-}
-
 .visuallyHidden {
   position: absolute;
   width: 1px;
