@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { animate, motion, useMotionTemplate, useMotionValue, useTransform, type SpringOptions } from 'motion/react';
 import styles from './SlidingTabs.module.css';
 
-export const TABS = ['Photos', 'Albums', 'People', 'Places'];
+const TABS = ['Photos', 'Albums', 'People', 'Places'];
 
 interface Props {
   spring: SpringOptions;

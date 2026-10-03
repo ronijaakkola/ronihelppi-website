@@ -1,19 +1,9 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ComponentType } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { DialRoot } from 'dialkit';
 import 'dialkit/styles.css';
 import styles from './LabStage.module.css';
 import { SHELL } from './stage-contract.mjs';
-
-// One chunk per demo: the page for `/lab/<slug>` only downloads that demo (and
-// whatever it imports, e.g. Motion). The registry never touches these.
-const demoLoaders = import.meta.glob<{ default: ComponentType }>('./*/index.tsx');
-
-const loaderFor = (slug: string) => demoLoaders[`./${slug}/index.tsx`];
-
-/** Whether `slug` has a component to load; `completeness.test.ts` checks every meta against this. */
-export function hasDemo(slug: string): boolean {
-  return loaderFor(slug) !== undefined;
-}
+import { loaderFor } from './demo-loaders';
 
 const demoComponents = new Map<string, ReturnType<typeof lazy>>();
 

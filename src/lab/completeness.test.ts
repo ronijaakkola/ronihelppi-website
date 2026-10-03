@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync } from 'node:fs';
 import { labSlugs, labEntries } from './index';
-import { hasDemo } from './LabStage';
+import { hasDemo } from './demo-loaders';
 import { labPreviewFiles } from './preview-assets.mjs';
 
 // A demo is spread over files that only agree by convention (meta.ts, index.tsx,
