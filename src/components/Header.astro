@@ -95,10 +95,10 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
   }
 
   /* During a theme toggle (html.theme-transition) drop the named snapshots for
-     the persisted header and breadcrumb so the whole viewport is captured as a
+     the header and breadcrumb so the whole viewport is captured as a
      single `root` snapshot and the circular reveal wipes across it uniformly.
-     Page navigation never sets this class, so header persistence and the
-     breadcrumb fade-out below stay exactly as before. */
+     Page navigation never sets this class, so the header's static snapshot and
+     the breadcrumb fade-out below stay exactly as before. */
   :global(html.theme-transition) .header,
   :global(html.theme-transition) .breadcrumb-separator,
   :global(html.theme-transition) .breadcrumb {
@@ -545,6 +545,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
 </style>
 
 <script>
+  import { onPage } from '../utils/page-lifecycle';
+
   // Update active navigation state based on current URL
   function updateActiveNavLinks() {
     const pathname = window.location.pathname;
@@ -590,28 +592,21 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     setAriaCurrentForLinks(mobileLinks);
   }
 
-  // Initialize active nav state
-  updateActiveNavLinks();
-
-  // Update on view transitions
-  document.addEventListener('astro:after-swap', updateActiveNavLinks);
-  document.addEventListener('astro:page-load', updateActiveNavLinks);
+  onPage(updateActiveNavLinks);
 
   // Mobile menu toggle functionality
-  let mobileMenuAbortController: AbortController | null = null;
-
   function initMobileMenu() {
-    // Abort previous document/window listeners to prevent accumulation
-    mobileMenuAbortController?.abort();
-    mobileMenuAbortController = new AbortController();
-    const { signal } = mobileMenuAbortController;
-
     const menuButton = document.getElementById('menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     const header = document.querySelector('.header');
     const menuLinks = mobileMenu?.querySelectorAll('.mobile-menu-link');
 
     if (!menuButton || !mobileMenu || !header) return;
+
+    // The menu's own elements are replaced on every navigation; only the
+    // document/window listeners below outlive the page and need removing.
+    const controller = new AbortController();
+    const { signal } = controller;
 
     // Store references to avoid TypeScript null warnings in nested functions
     const menu = mobileMenu;
@@ -670,7 +665,7 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       link.addEventListener('click', closeMenu);
     });
 
-    // Close on Escape key (uses signal to prevent listener accumulation)
+    // Close on Escape key (signal removes it when the page is torn down)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && menu.classList.contains('open')) {
         closeMenu();
@@ -678,24 +673,23 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
       }
     }, { signal });
 
-    // Close menu on resize to desktop (uses signal to prevent listener accumulation)
+    // Close menu on resize to desktop (signal removes it when the page is torn down)
     window.addEventListener('resize', () => {
       if (window.innerWidth > 600 && menu.classList.contains('open')) {
         closeMenu();
       }
     }, { signal });
+
+    return () => controller.abort();
   }
 
-  // Initialize on page load
-  initMobileMenu();
-
-  // Re-initialize after Astro view transitions
-  document.addEventListener('astro:after-swap', initMobileMenu);
+  onPage(initMobileMenu);
 
   // Theme toggle: the palette itself is applied by the inline script in
   // BaseLayout (which owns localStorage + View Transition reapplication).
-  // Here we only wire the controls and keep their labels in sync. The Header
-  // is transition:persist, so this runs once and the buttons/listeners persist.
+  // Here we only wire the controls and keep their labels in sync. This script
+  // runs once per session, so the delegated listeners below are bound once and
+  // the per-page label sync goes through onPage.
   interface ThemeWindow extends Window {
     __getTheme?: () => 'light' | 'dark';
     __setTheme?: (theme: 'light' | 'dark') => void;
@@ -714,8 +708,8 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
         .forEach((btn) => btn.setAttribute('aria-label', labelFor(theme)));
     };
 
-    // Event delegation on document survives both transition:persist and full
-    // DOM swaps, so the control keeps working after any navigation.
+    // Event delegation on document survives the Header being swapped on every
+    // navigation, so the control keeps working without rebinding.
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
       const toggle = target?.closest('.theme-toggle') as HTMLElement | null;
@@ -745,13 +739,11 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     });
 
     // Re-sync labels: on explicit toggle + after each View Transition swap
-    // (inline script fires 'themechange'), and on every page load as a backstop.
+    // (inline script fires 'themechange'), and on every page as a backstop.
     window.addEventListener('themechange', (e) => {
       sync((e as CustomEvent<{ theme: 'light' | 'dark' }>).detail.theme);
     });
-    document.addEventListener('astro:page-load', () => sync(getTheme()));
-
-    sync(getTheme());
+    onPage(() => sync(getTheme()));
   }
 
   initThemeToggle();
@@ -891,10 +883,5 @@ import KeyboardShortcut from './KeyboardShortcut.astro';
     }
   }
 
-  // Update on initial load
-  updateBreadcrumb();
-
-  // Update on view transitions (for Astro's view transitions)
-  document.addEventListener('astro:after-swap', updateBreadcrumb);
-  document.addEventListener('astro:page-load', updateBreadcrumb);
+  onPage(updateBreadcrumb);
 </script>

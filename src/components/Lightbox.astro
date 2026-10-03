@@ -280,6 +280,8 @@
 </style>
 
 <script>
+  import { onPage } from '../utils/page-lifecycle';
+
   interface LightboxImage {
     src: string;
     alt: string;
@@ -505,9 +507,5 @@
     setupImageClicks();
   }
 
-  // Initialize on page load
-  initLightbox();
-
-  // Re-initialize after Astro view transitions
-  document.addEventListener('astro:after-swap', initLightbox);
+  onPage(initLightbox);
 </script>

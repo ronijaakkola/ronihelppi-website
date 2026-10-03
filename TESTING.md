@@ -54,7 +54,8 @@ npm run check
 │   │   ├── remark-obsidian-images.test.ts    # Remark plugin tests
 │   │   ├── sortByDate.test.ts                # Date sorting tests
 │   │   ├── readTime.test.ts                  # Read time calculation tests
-│   │   └── title.test.ts                     # Title extraction tests
+│   │   ├── title.test.ts                     # Title extraction tests
+│   │   └── page-lifecycle.test.ts            # onPage: once per page, teardown before next
 │   └── content/
 │       └── authoring.test.ts                 # Content authoring checks (schemas are validated by the build)
 └── tests/
@@ -63,7 +64,7 @@ npm run check
     └── e2e/
         ├── home.spec.ts                      # Home page E2E tests
         ├── about.spec.ts                     # About page E2E tests
-        ├── writing.spec.ts                    # Writing pages E2E tests
+        ├── writing.spec.ts                    # Writing pages E2E tests (incl. Copy post binds once per page)
         ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
         ├── projects.spec.ts                   # Project pages E2E tests
         ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, DialKit absence, expanding search demo

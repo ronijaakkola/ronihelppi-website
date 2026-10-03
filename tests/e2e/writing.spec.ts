@@ -117,6 +117,64 @@ test.describe('Post Pages', () => {
   });
 });
 
+test.describe('Copy post button', () => {
+  // Page scripts must bind exactly once per page. A double-bound click handler
+  // shows up as two clipboard writes for one click.
+  type Counters = { __clipboardWrites: number; __pageLoads: number };
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as Counters;
+      w.__clipboardWrites = 0;
+      w.__pageLoads = 0;
+      navigator.clipboard.writeText = () => {
+        w.__clipboardWrites++;
+        return Promise.resolve();
+      };
+      // Astro fires astro:page-load on the initial load and after every
+      // navigation; waiting for it means every listener has had its chance.
+      document.addEventListener('astro:page-load', () => w.__pageLoads++);
+    });
+  });
+
+  const pageLoads = (page: import('@playwright/test').Page) =>
+    page.evaluate(() => (window as unknown as Counters).__pageLoads);
+
+  async function copyPostWrites(page: import('@playwright/test').Page) {
+    const before = await page.evaluate(() => (window as unknown as Counters).__clipboardWrites);
+    await page.locator('.copy-markdown-btn').click();
+    const after = await page.evaluate(() => (window as unknown as Counters).__clipboardWrites);
+    return after - before;
+  }
+
+  test('writes to the clipboard once per click on a hard load', async ({ page }) => {
+    await page.goto('/writing/every-monday-my-agent-ships-me-a-magazine/');
+    await expect.poll(() => pageLoads(page)).toBe(1);
+
+    expect(await copyPostWrites(page)).toBe(1);
+  });
+
+  test('writes to the clipboard once per click after client-side navigation', async ({ page }) => {
+    // Home → post: the post script first executes during the navigation.
+    await page.goto('/');
+    await expect.poll(() => pageLoads(page)).toBe(1);
+    await page.locator('a[href="/writing/every-monday-my-agent-ships-me-a-magazine"]').first().click();
+    await expect.poll(() => pageLoads(page)).toBe(2);
+    await expect(page).toHaveURL(/every-monday/);
+
+    expect(await copyPostWrites(page)).toBe(1);
+
+    // Post → post: the already-loaded script runs again for the new page.
+    await page
+      .locator('.related-posts a[href="/writing/a-practical-guide-to-writing-your-own-obsidian-skills"]')
+      .click();
+    await expect.poll(() => pageLoads(page)).toBe(3);
+    await expect(page).toHaveURL(/a-practical-guide/);
+
+    expect(await copyPostWrites(page)).toBe(1);
+  });
+});
+
 test.describe('Inline video embeds', () => {
   const POST = '/writing/every-monday-my-agent-ships-me-a-magazine/';
   // In document order.
