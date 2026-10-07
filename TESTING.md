@@ -40,63 +40,17 @@ npm run check
 
 **Note:** Build validation tests are excluded from the main `npm test` command because they require the project to be built first. Run them separately after building with `npm run test:build`.
 
-## Test Structure
+## Test types
 
-```
-├── src/
-│   ├── lab/
-│   │   ├── schema.test.ts                    # Lab metadata schema tests
-│   │   ├── index.test.ts                     # Lab registry (slug, sort, published, neighbours) tests
-│   │   ├── completeness.test.ts              # Every demo folder has its index.tsx; every published demo its preview.mp4 and poster.webp
-│   │   ├── expanding-search/machine.test.ts  # Search state machine (idle → expanding → loading → results)
-│   │   ├── expanding-search/mockSearch.test.ts # Fake result ranking
-│   │   └── dialkit-stub.test.ts              # Production DialKit stub tests
-│   ├── utils/
-│   │   ├── remark-obsidian-images.test.ts    # Remark plugin tests
-│   │   ├── sortByDate.test.ts                # Date sorting tests
-│   │   ├── readTime.test.ts                  # Read time calculation tests
-│   │   ├── title.test.ts                     # Title extraction tests
-│   │   └── page-lifecycle.test.ts            # onPage: once per page, teardown before next
-│   └── content/
-│       └── authoring.test.ts                 # Content authoring checks (schemas are validated by the build)
-└── tests/
-    ├── build/
-    │   └── output.test.ts                    # Build validation tests
-    └── e2e/
-        ├── home.spec.ts                      # Home page E2E tests
-        ├── about.spec.ts                     # About page E2E tests
-        ├── writing.spec.ts                    # Writing pages E2E tests (incl. Copy post binds once per page)
-        ├── writing-breadcrumb.spec.ts        # Breadcrumb navigation tests
-        ├── projects.spec.ts                   # Project pages E2E tests
-        ├── lab.spec.ts                       # Lab list, demo pages, markdown write-up, preview video, preview→demo handoff, stage capture mode, DialKit absence, expanding search demo
-        ├── 404.spec.ts                       # Error page tests
-        ├── accessibility.spec.ts             # Accessibility tests (axe-core)
-        └── mobile.spec.ts                    # Mobile/tablet viewport tests
-```
+| Type | Where | Needs |
+|------|-------|-------|
+| Unit (Vitest) | `*.test.ts` beside the code under `src/` | nothing |
+| Build validation (Vitest) | `tests/build/` | `npm run build` first; reads `dist/` |
+| E2E (Playwright), incl. axe-core accessibility | `tests/e2e/*.spec.ts` | `npm run build`; Playwright starts the preview server itself (`playwright.config.ts`) |
 
-## What's Tested
+Counts and file lists are not kept here: `git ls-files '*.test.ts' '*.spec.ts'`, `npx vitest list` and `npx playwright test --list` give the current ones.
 
-### Unit Tests (175 tests)
-- **Remark Plugin** (16 tests): Obsidian image syntax transformation
-- **Content Authoring** (1 test): post hero images use relative paths. The collection schemas themselves are validated by `astro build` / `astro check` against the real content
-- **Utility Functions** (29 tests): sortByDate, readTime, title extraction
-- **Lab completeness** (1 test per demo folder + 1 per published demo): each `meta.ts` has a component LabStage can load, and each published demo has its preview assets in `public/`
-
-### Build Validation Tests (16 tests)
-- HTML structure and file generation
-- Dynamic route generation for posts, projects and Lab demos (including that a demo's `post` names a built post)
-- Image path validation
-- DOCTYPE and tag closure validation
-
-### E2E Tests (76 tests)
-- **Home Page** (11 tests): Navigation, content display, breadcrumb behavior
-- **About Page** (12 tests): Content sections, responsive table layout
-- **Post Pages** (11 tests): Post rendering, dates, markdown, back navigation
-- **Project Pages** (15 tests): Project rendering, images, tags, team info
-- **404 Page** (9 tests): Error page display and navigation
-- **Breadcrumb** (3 tests): Navigation state across pages
-- **Accessibility** (8 tests): WCAG compliance via axe-core on all pages
-- **Mobile/Tablet** (11 tests): Responsive layout validation at 375px and 768px viewports, card border frame (single `::after` border, integer geometry)
+Collection schemas (`src/content.config.ts`) have no unit tests; `astro build` and `astro check` validate them against the real content. Lab demos are covered by tests that discover every demo (`src/lab/README.md`).
 
 ## Testing Flow
 
@@ -207,13 +161,3 @@ test('should have no accessibility violations', async ({ page }) => {
   expect(results.violations).toEqual([]);
 });
 ```
-
-## Notes
-
-- E2E tests require the project to be built first (`npm run build`)
-- Playwright tests run against the preview server (`npm run preview`)
-- Vitest excludes the `tests/e2e/` directory to avoid conflicts with Playwright
-- Accessibility tests wait 700ms for cascade animations to complete
-- Mobile tests use viewport sizes: 375x667 (phone), 768x1024 (tablet)
-- All tests run in CI before deployment
-- CI only runs on pushes to master (pre-commit hook handles local validation)

@@ -8,12 +8,22 @@ Small React prototypes shown at `/lab`. Each demo is one folder here.
    - `meta.ts` — default-exports the metadata (`title`, `date`, `published`,
      optional `description` (shown under the demo), `tags`, `aspectRatio` like `"16 / 9"`, `requiresPointer`,
      `post`). See `schema.ts`. The folder name is the slug.
-   - `index.tsx` — default-exports the demo component. It renders inside
-     `LabStage`, a `position: absolute; inset: 0` box (clipped by its shell) with a reset font
-     and colour; position your content absolutely or fill it with a grid. The stage marks
-     itself `data-ready="true"` once the demo has mounted (`stage-contract.mjs`); the
-     tests and the recorder wait on that, so a new demo needs no test changes to be detected.
-   - `styles.module.css` — CSS Modules keep each demo's styles to itself.
+   - `index.tsx` — the entry LabStage loads. It default-exports a thin wrapper
+     that calls `useDialKit` with the demo's tunable values (see "Tuning with
+     DialKit") and renders `<Name>` with them as props inside
+     `<div className={styles.root}>`. The stage marks itself `data-ready="true"`
+     once the demo has mounted (`stage-contract.mjs`); the tests and the
+     recorder wait on that, so a new demo needs no test changes to be detected.
+   - `<Name>.tsx` (`SlidingTabs.tsx`, `ExpandingSearch.tsx`) — the demo
+     component itself; the tunables arrive as props. It exports only the
+     component; helpers live in a sibling `.ts` (`machine.ts`, `mockSearch.ts`).
+   - `<Name>.module.css` — the component's own styles. CSS Modules keep each
+     demo's styles to itself.
+   - `styles.module.css` — only `.root`, the box `index.tsx` renders into. The
+     stage is a `position: absolute; inset: 0` box (clipped by its shell) with a
+     reset font and colour, so `.root` is `position: absolute; inset: 0` plus
+     the layout (`display: grid; place-items: center`, or `container-type` for
+     container queries).
    - `description.md` (optional) — a long-form write-up rendered under the
      stage, after the short `description` and the "Read the post" link. See
      "Writing a description" below.
@@ -44,6 +54,18 @@ Animations: `motion/react` for anything `lab:record` captures. The recorder
 only steps `requestAnimationFrame`, so CSS transitions run on the wall clock and
 finish in a couple of frames of the clip. Each demo is its own lazy chunk, so
 Motion is only downloaded by demos that import it.
+
+## Lab files outside `src/lab/`
+
+- `src/pages/lab/index.astro` — the `/lab` list: one `.card-frame` preview video per published demo.
+- `src/pages/lab/[slug].astro` — one page per demo: the server-rendered shell (`[data-lab-shell]`, `.card-frame`, poster, capture-mode rules), the `description.md` write-up, prev/next links.
+- `src/styles/global.css` — `.card-frame`, the clipping box with a `::after` hairline that Lab cards and the shell share with project cards.
+- `scripts/lab-record.mjs` — `npm run lab:record`: renders a demo to a clip on a virtual clock, then calls `lab-preview.mjs`.
+- `scripts/lab-preview.mjs` — `npm run lab:preview`: encodes a recording into `public/lab/<slug>/preview.mp4` and `poster.webp`.
+- `public/lab/<slug>/` — those two files, per demo.
+- `astro.config.mjs` — aliases `dialkit` to `dialkit-stub.ts` and `dialkit-empty.css` in `astro build`.
+- `tests/e2e/lab.spec.ts` — Lab list, demo pages, preview-to-demo handoff, capture mode, the expanding search demo; `tests/e2e/accessibility.spec.ts` (axe on the list and a demo page) and `tests/e2e/mobile.spec.ts` (the card border) also cover Lab pages.
+- `tests/build/output.test.ts` — the "Dynamic Routes - Lab" block checks the built Lab pages.
 
 ## Recording commands
 
