@@ -14,6 +14,8 @@ Interview skills (grill-me, grilling, motion-brief) are answered by the user. Wh
 ## Docs
 - Lab demos (adding, recording, DialKit): `src/lab/README.md`
 - Images and video in posts: `docs/post-media.md`
+- Content layout: `content/` is an Obsidian vault; `src/content/{posts,projects,images}` and `public/images` are symlinks into it; collection schemas are in `src/content.config.ts`
+- Domain terms: `GLOSSARY.md`, for naming things in code, commit messages and PR bodies
 
 ## Testing
 Testing procedure and guidelines has been defined in the @TESTING.md file. Read it before running tests or modifying test code.
