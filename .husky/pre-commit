@@ -1,2 +1,2 @@
-# Run type check and unit tests before commit
-npm run check && npm test
+# Run lint, type check and unit tests before commit
+npm run lint && npm run check && npm test
