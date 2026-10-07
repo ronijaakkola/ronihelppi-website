@@ -19,9 +19,15 @@ export default defineConfig({
     },
   ],
 
+  // Astro 7 moves `astro preview` to the background when it detects an AI agent,
+  // so the command exits at once and Playwright reports "exited early". The env
+  // var keeps it in the foreground, owned by Playwright. A server Playwright did
+  // not start may be serving an old dist/ (or another worktree's), so it is
+  // never reused: a busy port fails the run instead.
   webServer: {
     command: 'npm run preview',
     url: 'http://localhost:4321',
-    reuseExistingServer: !process.env.CI,
+    env: { ASTRO_PREVIEW_BACKGROUND: '1' },
+    reuseExistingServer: false,
   },
 });

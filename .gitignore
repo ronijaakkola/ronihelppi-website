@@ -33,3 +33,6 @@ pnpm-debug.log*
 # Playwright artifacts
 playwright-report/
 test-results/
+
+# throwaway probe scripts (see TESTING.md)
+scratch/
