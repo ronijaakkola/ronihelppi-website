@@ -142,12 +142,13 @@ This ensures type errors and unit test failures are caught before commits.
 
 ## Local Gotchas
 
-- **Preview server.** Astro 7's `astro preview` runs as a daemon and Playwright reuses it locally, so a stale or stray daemon serves old `dist/` or leaves nothing on 4321 (it may sit on 4322). After every build, run `npx astro preview stop` before `npx playwright test`; "webServer exited early" on a first run is the daemon starting, so re-run once. If your element is in `dist/*.html` but missing in the test DOM, the server is stale.
+- **Preview server.** `npx playwright test` starts its own preview server on 4321 and stops it afterwards, so every run serves the current `dist/`. "http://localhost:4321 is already used" means another server holds the port (a daemon you started with `npm run preview`, or one from another worktree): run `npx astro preview stop` and re-run. A manual `npm run preview` goes to the background in agent shells; stop it when you are done.
 - **Markdown plugin edits** need a clean build, because the content layer caches rendered entries: `rm -rf .astro dist node_modules/.astro && npm run build`. The plugin's unit tests turn green while the built page still lags.
 - **Reading results.** Judge a run by its exit code or by grepping `passed|failed|flaky`, and check that the count went up after adding a test. Chain a push after tests with `&&`, never `;`.
 - **Fresh worktrees** need a real `npm ci` (Astro will not build through a symlinked `node_modules`) and `npx playwright install chromium`. Run the install again after a pull bumps Playwright.
-- **Scratch scripts** that import repo dependencies (`@playwright/test`, `sharp`, `motion`) only resolve from inside the repo. Put them in `test-results/` (gitignored; the next Playwright run clears it).
+- **Scratch scripts** that import repo dependencies (`@playwright/test`, `sharp`, `motion`) only resolve from inside the repo. Put them in `scratch/` (gitignored, skipped by Vitest) and run them with `node`, using `chromium` from `@playwright/test` for browser probes. `test-results/` is wiped by every Playwright run, and `npx playwright test` only runs specs under `tests/e2e/`.
 - **Measure motion in headless Playwright.** A background Chrome tab is hidden, so transitions finish instantly there.
+- **Quote globs in shell flags.** zsh aborts `grep -rn foo src --include=*.ts` with "no matches found"; write `--include='*.ts'`, or use the Grep tool.
 - **Vitest 5 `--reporter=json`** writes to `.vitest/json/output.json` instead of stdout; pass `--outputFile` to choose the path.
 
 ## When Tests Fail
