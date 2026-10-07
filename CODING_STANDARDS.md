@@ -8,10 +8,6 @@ Only judgement calls belong here. A mistake a tool can catch deterministically (
 
 ## Interaction and accessibility
 
-### `:focus-visible` gets the same feedback as `:hover`
-Every `:hover` rule that changes colour, underline or background lists `:focus-visible` beside it. Outline and radius stay in their own focus-visible rule.
-**Why:** keyboard users got no feedback on links that changed on hover.
-
 ### Focusable items in a flex column hug their content
 A link or button in a flex column gets `width: fit-content`, so its focus outline wraps the text, not the column.
 **Why:** focus rings stretched across the whole container.
@@ -41,10 +37,6 @@ When a diff fixes a CSS pattern (clipping, borders, stagger delays), `src/` is s
 ### Media cards draw their border with `.card-frame`
 An element that clips media (`overflow: hidden` + `border-radius` over an image or video) has no `border` of its own. It takes the `card-frame` class, whose `::after` paints the hairline above the media.
 **Why:** on WebKit at DPR 3 a 0.5px border on the clipping box thinned at the corners and doubled on fractional edges (#123).
-
-### Staggered items take their delay from an index
-Each item carries its position (`style="--i: 3"`) and the delay is computed from it, so items added later join the cascade.
-**Why:** hard-coded `:nth-child(1..5)` delays silently dropped Contact from the mobile menu once Lab was added (#119).
 
 ### Skeletons match the content box
 A loading placeholder reuses the real row's padding, gap and line height, so the container keeps its height when content arrives.
@@ -76,10 +68,6 @@ On an Astro component tag it compiles to a prop the component ignores. Check for
 The shell has the final size (`aspect-ratio`) and a static stand-in such as the poster; the island fills it with `position: absolute; inset: 0`. The stand-in hides from mount state, not a timer. A list preview that morphs into it shares its `transition:name`.
 **Why:** the Lab stage popped in after hydration with three separate snaps and a layout shift (#121).
 
-### Component modules export only components
-A `.tsx` file that exports a React component exports nothing else; helpers live in a sibling `.ts`.
-**Why:** exporting `hasDemo` from `LabStage.tsx` turned Fast Refresh into full reloads (#134 review).
-
 ## Lab demos
 
 ### Recorded demos animate on the frame loop
@@ -108,9 +96,9 @@ A test never re-declares the schema or function it checks.
 For each new assertion, ask whether it would still pass with the bug present; red-check it by breaking the implementation once.
 **Why:** the read-time "strips HTML" test passed whether or not tags were counted (#130).
 
-### Assertions hold regardless of how much content exists
-No `if (count > 1)` guards around assertions, and no assertions on authored prose. Cover the missing case with a fixture.
-**Why:** Lab prev/next nav has been untested since its check was wrapped in `demoCount > 1` (#117); `description.md` tests broke when the user rewrote their note (#122).
+### Assertions hold regardless of what the content says
+No assertions on authored prose. A case the current content lacks gets a fixture. (ESLint rejects `expect` inside conditionals.)
+**Why:** `description.md` tests broke when the user rewrote their note (#122).
 
 ### Generic Lab checks wait on the stage's readiness signal
 Mount detection in shared Lab specs and `lab:record` waits on `STAGE_READY` from `src/lab/stage-contract.mjs`, never on which elements a demo renders.

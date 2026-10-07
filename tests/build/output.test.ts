@@ -522,44 +522,23 @@ describe('Build Output Validation', () => {
   });
 
   describe('HTML Validation', () => {
+    const htmlFiles = async () =>
+      (await readdir(distPath, { recursive: true })).filter((file) => file.endsWith('.html'));
+
     it('all HTML files have proper DOCTYPE', async () => {
-      const checkHTMLFiles = async (dir: string) => {
-        const entries = await readdir(dir, { withFileTypes: true });
-
-        for (const entry of entries) {
-          const fullPath = join(dir, entry.name);
-
-          if (entry.isDirectory()) {
-            await checkHTMLFiles(fullPath);
-          } else if (entry.name.endsWith('.html')) {
-            const content = await readFile(fullPath, 'utf-8');
-            expect(content).toContain('<!DOCTYPE html>');
-          }
-        }
-      };
-
-      await checkHTMLFiles(distPath);
+      for (const file of await htmlFiles()) {
+        const content = await readFile(join(distPath, file), 'utf-8');
+        expect(content).toContain('<!DOCTYPE html>');
+      }
     });
 
     it('all HTML files have closing tags', async () => {
-      const checkHTMLFiles = async (dir: string) => {
-        const entries = await readdir(dir, { withFileTypes: true });
-
-        for (const entry of entries) {
-          const fullPath = join(dir, entry.name);
-
-          if (entry.isDirectory()) {
-            await checkHTMLFiles(fullPath);
-          } else if (entry.name.endsWith('.html')) {
-            const content = await readFile(fullPath, 'utf-8');
-            expect(content).toContain('</html>');
-            expect(content).toContain('</head>');
-            expect(content).toContain('</body>');
-          }
-        }
-      };
-
-      await checkHTMLFiles(distPath);
+      for (const file of await htmlFiles()) {
+        const content = await readFile(join(distPath, file), 'utf-8');
+        expect(content).toContain('</html>');
+        expect(content).toContain('</head>');
+        expect(content).toContain('</body>');
+      }
     });
   });
 });

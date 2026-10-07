@@ -144,17 +144,9 @@ test.describe('Project Pages', () => {
   });
 
   test('should display tags without hash prefix', async ({ page }) => {
-    await page.goto('/projects/resokill/');
-
-    // Check if tags are displayed
-    const bodyText = await page.locator('body').textContent();
-
-    // Tags in frontmatter have # prefix, but they should be displayed without it
-    // or the display logic should handle them appropriately
-    if (bodyText?.includes('personal') || bodyText?.includes('games')) {
-      // Tags are being displayed - this is good
-      expect(bodyText).toBeTruthy();
-    }
+    // Tags in frontmatter have a # prefix; the filter chips built from them drop it.
+    await page.goto('/projects');
+    await expect(page.locator('.filter-chip', { hasText: '#' })).toHaveCount(0);
   });
 });
 

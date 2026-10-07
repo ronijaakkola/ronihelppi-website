@@ -36,6 +36,9 @@ npx playwright test --ui
 
 # Run type checking
 npm run check
+
+# Run ESLint and Stylelint
+npm run lint
 ```
 
 **Note:** Build validation tests are excluded from the main `npm test` command because they require the project to be built first. Run them separately after building with `npm run test:build`.
@@ -102,7 +105,7 @@ npm run check
 
 | Stage | What Runs | Purpose |
 |-------|-----------|---------|
-| **Commit** | Type check + Unit tests | Fast feedback, catch obvious errors |
+| **Commit** | Lint + Type check + Unit tests | Fast feedback, catch obvious errors |
 | **Pull request to master** | Type check, unit, build, build validation, E2E | Required CI gate before merge |
 | **Pull request to master (optional)** | Lighthouse CI | Early signal for performance/accessibility/SEO regressions without blocking merge on flaky runs |
 | **Push to master** | Type check, unit, build, build validation, E2E, deploy | Final verification before GitHub Pages deployment |
@@ -135,10 +138,10 @@ Configuration is in `lighthouserc.json`. Assert category scores only; the `light
 The pre-commit hook (via Husky) runs before every commit:
 
 ```bash
-npm run check && npm test
+npm run lint && npm run check && npm test
 ```
 
-This ensures type errors and unit test failures are caught before commits.
+This ensures lint errors, type errors and unit test failures are caught before commits. The lint configs (`eslint.config.js`, `stylelint.config.js`) enable only rules that enforce `CODING_STANDARDS.md` patterns; the custom Stylelint rule lives in `lint/`.
 
 ## Local Gotchas
 

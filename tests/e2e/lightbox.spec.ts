@@ -118,9 +118,7 @@ test.describe('Lightbox', () => {
 
     // Caption should show the alt text
     const caption = page.locator('.lightbox-caption');
-    if (altText) {
-      await expect(caption).toHaveText(altText);
-    }
+    await expect(caption).toHaveText(altText ?? '');
   });
 });
 
